@@ -20,14 +20,14 @@ class FeatureTypeRequestService {
     def index() {
 		def featureCount = 0
 		def indexRun = new IndexRun()
-		def queuedDocuments = QueuedDocument.findAllByIndexRunIsNull()
-		queuedDocuments.each { document ->
-			def featureTypeRequestImpl = getFeatureTypeRequestImplementation(document.featureTypeName)
+		def metadataRecords = GeonetworkMetadata.findAllByIndexRunIsNull()
+		metadataRecords.each { metadata ->
+			def featureTypeRequestImpl = getFeatureTypeRequestImplementation(metadata.featureTypeName)
 			
 			try {
-				def features = new ArrayList(featureTypeRequestImpl.requestFeatureType(document))
+				def features = new ArrayList(featureTypeRequestImpl.requestFeatureType(metadata))
 				if (!features.isEmpty()) {
-					saveFeatures(document, features)
+					saveFeatures(metadata, features)
 					featureCount += features.size()
 				}
 			}
@@ -35,7 +35,7 @@ class FeatureTypeRequestService {
 				log.error('', e)
 				indexRun.failures++
 			}
-			indexRun.addToQueuedDocuments(document)
+			indexRun.addToGeonetworkMetadataDocs(metadata)
 			
 			/*
 			 * This looks stupid and inefficient but if save is not called on
@@ -48,7 +48,7 @@ class FeatureTypeRequestService {
 		return featureCount
     }
 	
-	def saveFeatures(document, features) {
+	def saveFeatures(metadata, features) {
 		def featureCount = features.size()
 		def index = 0
 		def sliceSize = getSliceSize()
@@ -56,16 +56,16 @@ class FeatureTypeRequestService {
 			def sliceEnd = index + (index + sliceSize < featureCount ? sliceSize : featureCount - index)
 			log.debug("Slicing from $index to " + sliceEnd)
 			def slice = features.subList(index, sliceEnd)
-			_saveFeatures(document, slice)
+			_saveFeatures(metadata, slice)
 			index = sliceEnd
 		}
 	}
 	
-	def _saveFeatures(document, features) {
+	def _saveFeatures(metadata, features) {
 		def uuids = features.collect { feature -> feature.geonetworkUuid }.unique()
 		def featureTypeIds = features.collect { feature -> feature.featureTypeId }.unique()
 		
-		def persistedFeatures = fetchFeatureTypes(document.featureTypeName, uuids, featureTypeIds)
+		def persistedFeatures = fetchFeatureTypes(metadata.featureTypeName, uuids, featureTypeIds)
 		def persistedFeaturesMap = mapFeatureByFeatureTypeId(persistedFeatures)
 		features.each() { feature ->
 			def featureToPersist = persistedFeaturesMap[feature.featureTypeId]

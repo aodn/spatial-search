@@ -6,7 +6,7 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
-class QueuedDocument {
+class GeonetworkMetadata {
 
 	String geonetworkUuid
 	Timestamp added
@@ -33,7 +33,7 @@ class QueuedDocument {
 		if (is(o)) {
 			return true;
 		}
-		if (!(o instanceof QueuedDocument)) {
+		if (!(o instanceof GeonetworkMetadata)) {
 			return false;
 		}
 		

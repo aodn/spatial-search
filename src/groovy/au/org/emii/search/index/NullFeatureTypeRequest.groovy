@@ -7,13 +7,13 @@ class NullFeatureTypeRequest extends FeatureTypeRequest {
 
 	static final Logger log = LoggerFactory.getLogger(NullFeatureTypeRequest.class)
 	
-	def handleResponse(queuedDocument, xml) {
-		log.info("No response expected when using NullFeatureTypeRequest for " + queuedDocument.featureTypeName)
+	def handleResponse(metadata, xml) {
+		log.info("No response expected when using NullFeatureTypeRequest for " + metadata.featureTypeName)
 		return [] as Set
 	}
 
-	def requestFeatureType(queuedDocument) {
-		log.info("No request sent when using NullFeatureTypeRequest for " + queuedDocument.featureTypeName)
-		return handleResponse(queuedDocument, null)
+	def requestFeatureType(metadata) {
+		log.info("No request sent when using NullFeatureTypeRequest for " + metadata.featureTypeName)
+		return handleResponse(metadata, null)
 	}
 }

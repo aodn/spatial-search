@@ -9,16 +9,30 @@ class IndexController {
 	def featureTypeRequestService
 	
     def queue = {
-		def message = "Queueing started at ${new Date()}<br>"
-		def documents = geoNetworkRequestService.queue(params)
-		message += "${documents.size()} documents queued finishing at ${new Date()}<br>"
-		render message
+		render _queue(params)
 	}
 	
 	def index = {
+		render _index(params)
+	}
+	
+	def harvest = {
+		def message = _queue(params)
+		message += _index(params)
+		render message
+	}
+	
+	def _queue(params) {
+		def message = "Queueing started at ${new Date()}<br>"
+		def metadata = geoNetworkRequestService.queue(params)
+		message += "${metadata.size()} metadata documents queued finishing at ${new Date()}<br>"
+		return message
+	}
+	
+	def _index(params) {
 		def message = "Indexing started at ${new Date()}<br>"
 		def featureCount = featureTypeRequestService.index()
 		message += "${featureCount} features indexed finishing at ${new Date()}<br>"
-		render message
+		return message
 	}
 }

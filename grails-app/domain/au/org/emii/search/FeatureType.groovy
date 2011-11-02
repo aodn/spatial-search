@@ -25,10 +25,10 @@ class FeatureType {
 		super()
 	}
 	
-	FeatureType(queuedDocument) {
+	FeatureType(metadata) {
 		this()
-		geonetworkUuid = queuedDocument.geonetworkUuid
-		featureTypeName = queuedDocument.featureTypeName
+		geonetworkUuid = metadata.geonetworkUuid
+		featureTypeName = metadata.featureTypeName
 	}
 	
 	@Override

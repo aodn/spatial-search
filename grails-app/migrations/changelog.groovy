@@ -71,9 +71,9 @@ databaseChangeLog = {
 	}
 
 	changeSet(author: "tfotak", id: "1318893850589-4") {
-		createTable(tableName: "queued_document") {
+		createTable(tableName: "geonetwork_metadata") {
 			column(name: "id", type: "int8") {
-				constraints(nullable: "false", primaryKey: "true", primaryKeyName: "queued_documePK")
+				constraints(nullable: "false", primaryKey: "true", primaryKeyName: "geonetwork_metPK")
 			}
 
 			column(name: "version", type: "int8") {
@@ -99,7 +99,7 @@ databaseChangeLog = {
 	}
 
 	changeSet(author: "tfotak", id: "1318893850589-5") {
-		addForeignKeyConstraint(baseColumnNames: "index_run_id", baseTableName: "queued_document", constraintName: "FKE5C5EA6741AAA315", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "id", referencedTableName: "index_run", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "index_run_id", baseTableName: "geonetwork_metadata", constraintName: "FKE5C5EA6741AAA315", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "id", referencedTableName: "index_run", referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "tfotak", id: "1318893850589-6") {
@@ -132,12 +132,12 @@ databaseChangeLog = {
 	}
 	
 	changeSet(author: "tfotak", id: "1319695385000-1") {
-		createIndex(tableName: "queued_document", indexName: "idx_qd_feature_type") {
+		createIndex(tableName: "geonetwork_metadata", indexName: "idx_qd_feature_type") {
 			column(name: "feature_type_name")
 			column(name: "geonetwork_uuid")
 		}
 		
-		createIndex(tableName: "queued_document", indexName: "idx_qd_index_run_id") {
+		createIndex(tableName: "geonetwork_metadata", indexName: "idx_qd_index_run_id") {
 			column(name: "index_run_id")
 		}
 		

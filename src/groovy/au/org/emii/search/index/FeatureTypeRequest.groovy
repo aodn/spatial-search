@@ -26,6 +26,7 @@ class FeatureTypeRequest {
 	def geometryHelper
 	
 	FeatureTypeRequest() {
+		super()
 		geometryHelper = new GeometryHelper();
 	}
 	
@@ -34,6 +35,7 @@ class FeatureTypeRequest {
 	}
 	
 	FeatureTypeRequest(String featureTypeElementName, String featureTypeIdElementName, String featureTypeGeometryElementName) {
+		this()
 		this.featureTypeElementName = featureTypeElementName
 		this.featureTypeIdElementName = featureTypeIdElementName
 		this.featureTypeGeometryElementName = featureTypeGeometryElementName
@@ -41,12 +43,12 @@ class FeatureTypeRequest {
 		properties << this.featureTypeGeometryElementName
 	}
 	
-	String toGetUrl(QueuedDocument queuedDocument) {
-		def url = "${queuedDocument.geoserverEndPoint}/wfs?service=wfs&version=1.1.0&request=GetFeature&typeName=${queuedDocument.featureTypeName}&propertyName=${properties.join(',')}"
+	String toGetUrl(GeonetworkMetadata metadata) {
+		def url = "${metadata.geoserverEndPoint}/wfs?service=wfs&version=1.1.0&request=GetFeature&typeName=${metadata.featureTypeName}&propertyName=${properties.join(',')}"
 		return url
 	}
 	
-	def handleResponse(queuedDocument, xml) {
+	def handleResponse(metadata, xml) {
 		def features = [] as Set
 		
 		if (!xml) {
@@ -55,7 +57,7 @@ class FeatureTypeRequest {
 		
 		def tree = new XmlSlurper().parseText(xml)
 		tree.featureMembers[0]."${featureTypeElementName}".each { featureTree ->
-			def feature = new FeatureType(queuedDocument)
+			def feature = new FeatureType(metadata)
 			feature.featureTypeId = getFeatureId(featureTree)
 			try { 
 				feature.geometry = _toGeometry(featureTree."${featureTypeGeometryElementName}")
@@ -115,40 +117,10 @@ class FeatureTypeRequest {
 		return geometryHelper.toGeometry(geometryType, text)
 	}
 	
-//	def _toWkt(geometryElement) {
-//		def geometryType = geometryElement.children()[0].name()
-//		def text = _getCoordinateText(geometryType, geometryElement)
-//		try {
-//			return geometryHelper."to$geometryType"(text)
-//		}
-//		catch (MissingMethodException mme) {
-//			log.error("Could not create geometry object likely due to unsupported shape: ${geometryType}: ${mme.getMessage()}")
-//		}
-//		catch (Exception e) {
-//			log.error("", e)
-//		}
-//	}
-	
 	def _getCoordinateText(geometryType, geometryElement) {
 		if ('curve' == geometryType.toLowerCase()) {
 			return geometryElement.Curve.segments.LineStringSegment.join(', ')
 		}
 		return geometryElement.text()
 	}
-	
-//	def toCurve(geometryElement) {
-//		log.debug("Building CURVE")
-//		def builder = new StringBuilder(5000)
-//		builder.append('LINESTRING (')
-//		geometryElement.Curve.segments.LineStringSegment.each { segment ->
-//			def coOrds = splitCoOrdsText(segment.text())
-//			for (def i = 1; i < coOrds.size(); i += 2) {
-//				appendLongLatPair(builder, coOrds[i], coOrds[i - 1], ' ')
-//				appendPairDelimiter(builder)
-//			}
-//		}
-//		removePairDelimiter(builder)
-//		builder.append(')')
-//		return builder.toString()
-//	}
 }

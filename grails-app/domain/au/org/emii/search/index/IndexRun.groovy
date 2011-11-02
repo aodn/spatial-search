@@ -14,7 +14,7 @@ class IndexRun {
     }
 	
 	static hasMany = [
-		queuedDocuments: QueuedDocument	
+		geonetworkMetadataDocs: GeonetworkMetadata	
 	]
 	
 	IndexRun() {

@@ -8,7 +8,7 @@ import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
 
 import au.org.emii.search.index.IndexRun
-import au.org.emii.search.index.QueuedDocument
+import au.org.emii.search.index.GeonetworkMetadata
 import au.org.emii.search.geometry.GeometryHelper
 
 class GeoNetworkRequestService implements ApplicationContextAware {
@@ -32,9 +32,9 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 		def url = grailsApplication.config.geonetwork.serverURL
 		def xml = geoNetworkRequest.request(url, params)
 		
-		def documents = parseXmlToQueuedDocuments(xml)
-		saveQueuedDocuments(documents)
-		return documents
+		def metadataCollection = parseXmlToGeonetworkMetadataObjects(xml)
+		saveGeonetworkMetadata(metadataCollection)
+		return metadataCollection
 	}
 	
 	def search(params) {
@@ -66,13 +66,13 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 		return features ? features : []
 	}
 
-	def saveQueuedDocuments(documents) {
-		def queuedDocuments = QueuedDocument.findAllByIndexRunIsNull()
+	def saveGeonetworkMetadata(metadataCollection) {
+		def metadataRecords = GeonetworkMetadata.findAllByIndexRunIsNull()
 		def added = new Timestamp(new Date().time)
-		documents.removeAll(queuedDocuments)
-		documents.each { document ->
-			document.added = added
-			document.save(failOnError: true)
+		metadataCollection.removeAll(metadataRecords)
+		metadataCollection.each { metadata ->
+			metadata.added = added
+			metadata.save(failOnError: true)
 		}
 	}
 	
@@ -90,7 +90,7 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 		return lastRun
 	}
 	
-	def parseXmlToQueuedDocuments(xml) {
+	def parseXmlToGeonetworkMetadataObjects(xml) {
 		def tree = new XmlSlurper().parseText(xml)
 		def allRecords = tree.metadata
 		log.debug("${allRecords.size()} metadata records returned")
@@ -118,7 +118,7 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 		def protocol = grailsApplication.config.geonetwork.protocol
 		def regexPattern = grailsApplication.config.geonetwork.feature.type.indentifier.regex
 		if (link.@protocol.text() =~ protocol && link.@name.text() =~ /$regexPattern/) {
-			document = new QueuedDocument()
+			document = new GeonetworkMetadata()
 			document.featureTypeName = link.@name.text()
 			document.geoserverEndPoint = serverEndPointFrom(link.@href.text())
 		}

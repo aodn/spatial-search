@@ -29,7 +29,7 @@ class DiskCachingFeatureTypeRequest extends FeatureTypeRequest implements Respon
 		super(featureTypeElementName, featureTypeIdElementName)
 	}
 	
-	def handleResponse(queuedDocument, filePath) {
+	def handleResponse(metadata, filePath) {
 		def features = [] as Set
 		if (filePath) {
 			def line
@@ -43,7 +43,7 @@ class DiskCachingFeatureTypeRequest extends FeatureTypeRequest implements Respon
 				while ((line = reader.readLine()) != null) {
 					cachedXml.append(line)
 				}
-				features = super.handleResponse(queuedDocument, cachedXml.toString())
+				features = super.handleResponse(metadata, cachedXml.toString())
 				delete = true
 			}
 			catch (IOException ioe) {
