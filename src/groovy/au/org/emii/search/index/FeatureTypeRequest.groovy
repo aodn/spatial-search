@@ -7,6 +7,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import au.org.emii.search.FeatureType;
+import au.org.emii.search.geometry.GeometryHelper;
 
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.PrecisionModel;
@@ -16,18 +17,16 @@ class FeatureTypeRequest {
 
 	static Logger log = LoggerFactory.getLogger(FeatureTypeRequest.class)
 	
-	static final int SRID = 4326
-	static final PrecisionModel PRECISION_MODEL = new PrecisionModel(PrecisionModel.FLOATING)
-	
 	def properties = []
 	def featureTypeElementName
 	def featureTypeIdElementName
 	def featureTypeGeometryElementName
 	def geometry
 	def grailsApplication
+	def geometryHelper
 	
 	FeatureTypeRequest() {
-		
+		geometryHelper = new GeometryHelper();
 	}
 	
 	FeatureTypeRequest(String featureTypeElementName, String featureTypeIdElementName) {
@@ -59,7 +58,7 @@ class FeatureTypeRequest {
 			def feature = new FeatureType(queuedDocument)
 			feature.featureTypeId = getFeatureId(featureTree)
 			try { 
-				feature.geometry = toGeometry(featureTree."${featureTypeGeometryElementName}")
+				feature.geometry = _toGeometry(featureTree."${featureTypeGeometryElementName}")
 				features << feature
 			}
 			catch (Exception e) {
@@ -110,89 +109,46 @@ class FeatureTypeRequest {
 		return httpGet
 	}
 	
-	def toGeometry(geometryElement) {
-		def wkt = toWkt(geometryElement)
-		def geom = new WKTReader(new GeometryFactory(PRECISION_MODEL, SRID)).read(wkt)
-		return geom
-	}
-	
-	def toWkt(geometryElement) {
+	def _toGeometry(geometryElement) {
 		def geometryType = geometryElement.children()[0].name()
-		try {
-			return this."to$geometryType"(geometryElement)
+		def text = _getCoordinateText(geometryType, geometryElement)
+		return geometryHelper.toGeometry(geometryType, text)
+	}
+	
+//	def _toWkt(geometryElement) {
+//		def geometryType = geometryElement.children()[0].name()
+//		def text = _getCoordinateText(geometryType, geometryElement)
+//		try {
+//			return geometryHelper."to$geometryType"(text)
+//		}
+//		catch (MissingMethodException mme) {
+//			log.error("Could not create geometry object likely due to unsupported shape: ${geometryType}: ${mme.getMessage()}")
+//		}
+//		catch (Exception e) {
+//			log.error("", e)
+//		}
+//	}
+	
+	def _getCoordinateText(geometryType, geometryElement) {
+		if ('curve' == geometryType.toLowerCase()) {
+			return geometryElement.Curve.segments.LineStringSegment.join(', ')
 		}
-		catch (MissingMethodException mme) {
-			log.error("Could not create geometry object likely due to unsupported shape: ${geometryType}: ${mme.getMessage()}")
-		}
-		catch (Exception e) {
-			log.error("", e)
-		}
+		return geometryElement.text()
 	}
 	
-	def toLineString(geometryElement) {
-		log.debug("Building LINESTRING")
-		def coOrds = splitCoOrdsText(geometryElement.text())
-		def builder = new StringBuilder(5000)
-		builder.append('LINESTRING (')
-		for (def i = 1; i < coOrds.size(); i += 2) {
-			appendLongLatPair(builder, coOrds[i], coOrds[i - 1], ' ')
-			appendPairDelimiter(builder)
-		}
-		removePairDelimiter(builder)
-		builder.append(')')
-		return builder.toString()
-	}
-	
-	def toPoint(geometryElement) {
-		log.debug("Building POINT")
-		def coOrds = splitCoOrdsText(geometryElement.text())
-		def builder = new StringBuilder(100)
-		builder.append('POINT (')
-		appendLongLatPair(builder, coOrds[1], coOrds[0], ' ')
-		builder.append(')')
-		return builder.toString()
-	}
-	
-	/**
-	 * This doesn't actually produce a Curve geometry, it concatenates all the
-	 * segments into a single LineString.  After discussion in a meeting today
-	 * (2011-10-24) it was deemed that curves weren't actually represented on 
-	 * maps from geoserver
-	 * 
-	 * @param geometryElement
-	 * @return
-	 */
-	def toCurve(geometryElement) {
-		log.debug("Building CURVE")
-		def builder = new StringBuilder(5000)
-		builder.append('LINESTRING (')
-		geometryElement.Curve.segments.LineStringSegment.each { segment ->
-			def coOrds = splitCoOrdsText(segment.text())
-			for (def i = 1; i < coOrds.size(); i += 2) {
-				appendLongLatPair(builder, coOrds[i], coOrds[i - 1], ' ')
-				appendPairDelimiter(builder)
-			}
-		}
-		removePairDelimiter(builder)
-		builder.append(')')
-		return builder.toString()
-	}
-	
-	def appendLongLatPair(builder, longitude, latitude, delimeter) {
-		builder.append(longitude)
-		builder.append(delimeter)
-		builder.append(latitude)
-	}
-	
-	def appendPairDelimiter(builder) {
-		builder.append(', ')
-	}
-	
-	def removePairDelimiter(builder) {
-		builder.setLength(builder.length() - 2)
-	}
-	
-	def splitCoOrdsText(coOrdsText) {
-		return coOrdsText.split(' ')
-	}
+//	def toCurve(geometryElement) {
+//		log.debug("Building CURVE")
+//		def builder = new StringBuilder(5000)
+//		builder.append('LINESTRING (')
+//		geometryElement.Curve.segments.LineStringSegment.each { segment ->
+//			def coOrds = splitCoOrdsText(segment.text())
+//			for (def i = 1; i < coOrds.size(); i += 2) {
+//				appendLongLatPair(builder, coOrds[i], coOrds[i - 1], ' ')
+//				appendPairDelimiter(builder)
+//			}
+//		}
+//		removePairDelimiter(builder)
+//		builder.append(')')
+//		return builder.toString()
+//	}
 }

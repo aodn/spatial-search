@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <request>
-  <fast>false</fast>
-  <protocol>OGC:WMS-1.1.1-http-get-map</protocol>
+  <#if fast?has_content>
+  <fast>${fast}</fast>
+  </#if>
+  <#if protocol?has_content>
+  <protocol>${protocol}</protocol>
+  </#if>
   <#if hitsperpage?has_content>
   <hitsperpage>${hitsperpage}</hitsperpage>
   </#if>

@@ -61,7 +61,7 @@ environments {
         grails.serverURL = "http://localhost:${grails.server.port.http}/${appName}"
 		geonetwork.serverURL = "http://localhost:9090/geonetwork/srv/en/xml.search"
 		geonetwork.request.template.file = "geonetworkRequestTemplate.ftl"
-		geoserver.response.cache.dir = "/Users/tfotak/Documents/workspace/imosg2gs/cache"
+		geoserver.response.cache.dir = "/Users/tfotak/Documents/workspace/${appName}/cache"
 		feature.collection.slice.size = 100
     }
     test {

@@ -10,7 +10,7 @@ class IndexController {
 	
     def queue = {
 		def message = "Queueing started at ${new Date()}<br>"
-		def documents = geoNetworkRequestService.service(params)
+		def documents = geoNetworkRequestService.queue(params)
 		message += "${documents.size()} documents queued finishing at ${new Date()}<br>"
 		render message
 	}
