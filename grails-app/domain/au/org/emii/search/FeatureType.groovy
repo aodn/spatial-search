@@ -36,7 +36,7 @@ class FeatureType {
 		return new ToStringBuilder(this)
 			.append("geonetworkUuid", geonetworkUuid)
 			.append("featureTypeName", featureTypeName)
-			.append("geoserverEndPoint", featureTypeId)
+			.append("featureTypeId", featureTypeId)
 			.append("geometry", geometry?.geometryType)
 			.toString()
 	}

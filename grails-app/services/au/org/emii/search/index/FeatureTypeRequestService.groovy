@@ -27,7 +27,7 @@ class FeatureTypeRequestService {
 			try {
 				def features = new ArrayList(featureTypeRequestImpl.requestFeatureType(metadata))
 				if (!features.isEmpty()) {
-					saveFeatures(metadata, features)
+					_saveFeatures(metadata, features)
 					featureCount += features.size()
 				}
 			}
@@ -43,30 +43,30 @@ class FeatureTypeRequestService {
 			 * thrown
 			 */
 			indexRun.documents++
-			save(indexRun)
+			_save(indexRun)
 		}
 		return featureCount
     }
 	
-	def saveFeatures(metadata, features) {
+	def _saveFeatures(metadata, features) {
 		def featureCount = features.size()
 		def index = 0
-		def sliceSize = getSliceSize()
+		def sliceSize = _getSliceSize()
 		while (index < featureCount) {
 			def sliceEnd = index + (index + sliceSize < featureCount ? sliceSize : featureCount - index)
 			log.debug("Slicing from $index to " + sliceEnd)
 			def slice = features.subList(index, sliceEnd)
-			_saveFeatures(metadata, slice)
+			_saveFoo(metadata, slice)
 			index = sliceEnd
 		}
 	}
 	
-	def _saveFeatures(metadata, features) {
+	def _saveFoo(metadata, features) {
 		def uuids = features.collect { feature -> feature.geonetworkUuid }.unique()
 		def featureTypeIds = features.collect { feature -> feature.featureTypeId }.unique()
 		
 		def persistedFeatures = fetchFeatureTypes(metadata.featureTypeName, uuids, featureTypeIds)
-		def persistedFeaturesMap = mapFeatureByFeatureTypeId(persistedFeatures)
+		def persistedFeaturesMap = _mapFeatureByFeatureTypeId(persistedFeatures)
 		features.each() { feature ->
 			def featureToPersist = persistedFeaturesMap[feature.featureTypeId]
 			if (featureToPersist) {
@@ -75,11 +75,11 @@ class FeatureTypeRequestService {
 			else {
 				featureToPersist = feature
 			}
-			save(featureToPersist)
+			_save(featureToPersist)
 		}
 	}
 	
-	def save(domain) {
+	def _save(domain) {
 		try {
 			domain.save(failOnError: true)
 		}
@@ -105,7 +105,7 @@ class FeatureTypeRequestService {
 		return impl
 	}
 	
-	def mapFeatureByFeatureTypeId(featureCollection) {
+	def _mapFeatureByFeatureTypeId(featureCollection) {
 		def map = [:]
 		featureCollection.each { feature ->
 			map[feature.featureTypeId] = feature	
@@ -130,7 +130,7 @@ class FeatureTypeRequestService {
 		return features
 	}
 	
-	def getSliceSize() {
+	def _getSliceSize() {
 		// Default to 100 when no setting found
 		def sliceSize = 100
 		try {

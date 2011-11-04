@@ -14,6 +14,11 @@ class GeometryHelper {
 	static final int SRID = 4326
 	static final PrecisionModel PRECISION_MODEL = new PrecisionModel(PrecisionModel.FLOATING)
 
+	
+	/*
+	 * Text may be a coordinate string or a list of lists of coordinate strings
+	 * in the case of creating a multipolygon
+	 */
 	def toGeometry(geometryType, text) {
 		def wkt = _toWkt(geometryType, text)
 		def geom = new WKTReader(new GeometryFactory(PRECISION_MODEL, SRID)).read(wkt)
@@ -32,28 +37,28 @@ class GeometryHelper {
 		}
 	}
 	
+	def _buildGeometry(prefix, text) {
+		return _buildGeometry(prefix, text, null)
+	}
+	
+	def _buildGeometry(prefix, text, suffix) {
+		def builder = new StringBuilder(5000)
+		builder.append(prefix)
+		_toCoordinateSequence(builder, text)
+		if (suffix) {
+			builder.append(suffix)
+		}
+		return builder.toString()
+	}
+	
 	def _toLineString(text) {
 		log.debug("Building LINESTRING")
-		def coOrds = _splitCoOrdsText(text)
-		def builder = new StringBuilder(5000)
-		builder.append('LINESTRING (')
-		for (def i = 1; i < coOrds.size(); i += 2) {
-			_appendLongLatPair(builder, coOrds[i], coOrds[i - 1], ' ')
-			_appendPairDelimiter(builder)
-		}
-		_removePairDelimiter(builder)
-		builder.append(')')
-		return builder.toString()
+		return _buildGeometry('LINESTRING', text)
 	}
 	
 	def _toPoint(text) {
 		log.debug("Building POINT")
-		def coOrds = _splitCoOrdsText(text)
-		def builder = new StringBuilder(100)
-		builder.append('POINT (')
-		_appendLongLatPair(builder, coOrds[1], coOrds[0], ' ')
-		builder.append(')')
-		return builder.toString()
+		return _buildGeometry('POINT ', text)
 	}
 	
 	/**
@@ -71,16 +76,38 @@ class GeometryHelper {
 	
 	def _toPolygon(text) {
 		log.debug("Building POLYGON")
-		def coOrds = _splitCoOrdsText(text)
-		def builder = new StringBuilder(100)
-		builder.append('POLYGON ((')
-		for (def i = 1; i < coOrds.size(); i += 2) {
-			_appendLongLatPair(builder, coOrds[i], coOrds[i - 1], ' ')
+		return _buildGeometry('POLYGON (', text, ')')
+	}
+	
+	def _toMultiPolygon(sequences) {
+		log.debug("Building MULTIPOLYGON")
+		def builder = new StringBuilder(5000)
+		
+		builder.append('MULTIPOLYGON (')
+		sequences.each { sequence ->
+			builder.append('(')
+			sequence.each { coords ->
+				_toCoordinateSequence(builder, coords)
+				_appendPairDelimiter(builder)
+			}
+			_removePairDelimiter(builder)
+			builder.append(')')
 			_appendPairDelimiter(builder)
 		}
 		_removePairDelimiter(builder)
-		builder.append('))')
+		builder.append(')')
 		return builder.toString()
+	}
+	
+	def _toCoordinateSequence(builder, text) {
+		def coords = _splitCoordsText(text)
+		builder.append('(')
+		for (def i = 1; i < coords.size(); i += 2) {
+			_appendLongLatPair(builder, coords[i], coords[i - 1], ' ')
+			_appendPairDelimiter(builder)
+		}
+		_removePairDelimiter(builder)
+		builder.append(')')
 	}
 	
 	def _appendLongLatPair(builder, longitude, latitude, delimeter) {
@@ -97,7 +124,7 @@ class GeometryHelper {
 		builder.setLength(builder.length() - 2)
 	}
 	
-	def _splitCoOrdsText(coOrdsText) {
-		return coOrdsText.split(' ')
+	def _splitCoordsText(coordsText) {
+		return coordsText.split(' ')
 	}
 }

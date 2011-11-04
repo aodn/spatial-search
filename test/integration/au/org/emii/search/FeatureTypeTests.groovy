@@ -34,10 +34,11 @@ class FeatureTypeTests extends GroovyTestCase {
 	void testAntiMeridian() {
 		// -38.069000244140625 -179.06300354003906
 		def geomHelper = new GeometryHelper()
-		def p = geomHelper.toGeometry('Polygon', '-38 -178 -38 178 -40 178 -40 -178 -38 -178')
+		def p = geomHelper.toGeometry('MultiPolygon', [['-38 178 -38 180 -40 180 -40 178 -38 178', '-40 -180 -40 -178 -38 -178 -38 -180 -40 -180']])
 		def c = FeatureType.createCriteria()
 		def l = c.list {
 			add(SpatialRestrictions.intersects('geometry', p))
+			//eq('featureTypeName', 'topp:argo_float')
 		}
 		l.each { f ->
 			System.out.println("${f} => ${f.geometry.toText()}")
