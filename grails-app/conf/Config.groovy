@@ -99,7 +99,7 @@ log4j = {
 }
 
 // Custom configuration settings
-geonetwork.protocol = "OGC:WMS-1.1.1-http-get-map"
+geonetwork.protocol = "OGC:WMS-1.1.1-http-get-map or OGC:WMS-1.3.0-http-get-map"
 geonetwork.feature.type.indentifier.regex = 'topp:'
 
 grails.gorm.default.mapping = {

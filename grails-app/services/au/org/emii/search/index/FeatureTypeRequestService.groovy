@@ -27,7 +27,7 @@ class FeatureTypeRequestService {
 			try {
 				def features = new ArrayList(featureTypeRequestImpl.requestFeatureType(metadata))
 				if (!features.isEmpty()) {
-					_saveFeatures(metadata, features)
+					_saveMetadataFeatures(metadata, features)
 					featureCount += features.size()
 				}
 			}
@@ -48,7 +48,7 @@ class FeatureTypeRequestService {
 		return featureCount
     }
 	
-	def _saveFeatures(metadata, features) {
+	def _saveMetadataFeatures(metadata, features) {
 		def featureCount = features.size()
 		def index = 0
 		def sliceSize = _getSliceSize()
@@ -56,12 +56,12 @@ class FeatureTypeRequestService {
 			def sliceEnd = index + (index + sliceSize < featureCount ? sliceSize : featureCount - index)
 			log.debug("Slicing from $index to " + sliceEnd)
 			def slice = features.subList(index, sliceEnd)
-			_saveFoo(metadata, slice)
+			_saveFeatures(metadata, slice)
 			index = sliceEnd
 		}
 	}
 	
-	def _saveFoo(metadata, features) {
+	def _saveFeatures(metadata, features) {
 		def uuids = features.collect { feature -> feature.geonetworkUuid }.unique()
 		def featureTypeIds = features.collect { feature -> feature.featureTypeId }.unique()
 		
