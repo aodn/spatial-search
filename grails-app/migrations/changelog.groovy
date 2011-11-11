@@ -153,4 +153,9 @@ databaseChangeLog = {
 		// The below might need to be run separately, it can't be run as part of a transaction apparently
 		//sql("vacuum analyze feature_type")
 	}
+	
+	changeSet(author: "tfotak", id: "1320790055000-1") {
+		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:soop_sst', 'au.org.emii.search.index.FeatureTypeRequest', 'soop_sst,id,geometry'")
+		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:soop_asf_recent', 'au.org.emii.search.index.FeatureTypeRequest', 'soop_asf_recent,id,geometry'")
+	}
 }

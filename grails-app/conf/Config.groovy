@@ -55,18 +55,21 @@ grails.exceptionresolver.params.exclude = ['password']
 environments {
     production {
         grails.serverURL = "http://www.changeme.com"
-		feature.collection.slice.size = 200
+		geonetwork.index.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/en/xml.search"
+		geonetwork.search.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/en/imos.xml.search"
+		geoserver.response.cache.dir = "/tmp"
     }
     development {
         grails.serverURL = "http://localhost:${grails.server.port.http}/${appName}"
-		geonetwork.serverURL = "http://localhost:9090/geonetwork/srv/en/xml.search"
-		geonetwork.request.template.file = "geonetworkRequestTemplate.ftl"
-		geoserver.response.cache.dir = "/Users/tfotak/Documents/workspace/${appName}/cache"
-		feature.collection.slice.size = 100
+		geonetwork.index.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/en/xml.search"
+		geonetwork.search.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/en/imos.xml.search"
+		geoserver.response.cache.dir = "/tmp"
     }
     test {
         grails.serverURL = "http://localhost:${grails.server.port.http}/${appName}"
-		feature.collection.slice.size = 100
+		geonetwork.index.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/en/xml.search"
+		geonetwork.search.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/en/imos.xml.search"
+		geoserver.response.cache.dir = "/tmp"
     }
 
 }
@@ -99,8 +102,11 @@ log4j = {
 }
 
 // Custom configuration settings
-geonetwork.protocol = "OGC:WMS-1.1.1-http-get-map or OGC:WMS-1.3.0-http-get-map"
+geonetwork.request.template.file = "geonetworkRequestTemplate.ftl"
+geonetwork.request.protocol = "OGC:WMS-1.1.1-http-get-map or OGC:WMS-1.3.0-http-get-map"
+geonetwork.link.protocol.regex = 'OGC:WMS-1\\.(1\\.1|3\\.0)-http-get-map'
 geonetwork.feature.type.indentifier.regex = 'topp:'
+feature.collection.slice.size = 100
 
 grails.gorm.default.mapping = {
    'user-type'(type:org.hibernatespatial.GeometryUserType, class:com.vividsolutions.jts.geom.Geometry)

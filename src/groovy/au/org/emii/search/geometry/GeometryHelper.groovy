@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory
 
 import com.vividsolutions.jts.geom.GeometryFactory
 import com.vividsolutions.jts.geom.PrecisionModel
+import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader
 
 class GeometryHelper {
@@ -13,7 +14,6 @@ class GeometryHelper {
 	
 	static final int SRID = 4326
 	static final PrecisionModel PRECISION_MODEL = new PrecisionModel(PrecisionModel.FLOATING)
-
 	
 	/*
 	 * Text may be a coordinate string or a list of lists of coordinate strings
@@ -22,6 +22,20 @@ class GeometryHelper {
 	def toGeometry(geometryType, text) {
 		def wkt = _toWkt(geometryType, text)
 		def geom = new WKTReader(new GeometryFactory(PRECISION_MODEL, SRID)).read(wkt)
+		return geom
+	}
+	
+	def toBoundingBox(north, east, south, west) {
+		def dNorth = _parseToDouble(north)
+		def dEast = _parseToDouble(east)
+		def dSouth = _parseToDouble(south)
+		def dWest = _parseToDouble(west)
+		
+		if (!(dNorth && dEast && dSouth && dWest)) {
+			throw new ParseException("Invalid bounding box parameters one of ${north} ${east} ${south} ${west} cannot be parsed to a java.lang.Double")
+		}
+		
+		def geom = (east < west) ? _toMultiPolygonBoundingBox(north, east, south, west) : _toPolygonBoundingBox(north, east, south, west)
 		return geom
 	}
 	
@@ -126,5 +140,27 @@ class GeometryHelper {
 	
 	def _splitCoordsText(coordsText) {
 		return coordsText.split(' ')
+	}
+	
+	def _parseToDouble(s) {
+		try {
+			return Double.valueOf(s)
+		}
+		catch (NumberFormatException nfe) {
+			log.error("Error parsing bounding box point to Double", nfe)
+		}
+		return null
+	}
+	
+	def _toPolygonBoundingBox(north, east, south, west) {
+		return toGeometry('Polygon', "${north} ${west} ${north} ${east} ${south} ${east} ${south} ${west} ${north} ${west}")
+	}
+	
+	def _toMultiPolygonBoundingBox(north, east, south, west) {
+		// We are likely doing a search near the anti-meridian so we need a multipolygon
+		def eastSide = ["${north} -180 ${north} ${east} ${south} ${east} ${south} -180 ${north} -180"]
+		def westSide = ["${north} ${west} ${north} 180 ${south} 180 ${south} ${west} ${north} ${west}"]
+		def multiPolygonSequence = [eastSide, westSide]
+		return toGeometry('MultiPolygon', multiPolygonSequence)
 	}
 }
