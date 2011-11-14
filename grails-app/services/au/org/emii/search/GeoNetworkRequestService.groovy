@@ -47,7 +47,7 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 		// Guard code, if there is no protocol specified by the sender (portal)
 		// in this case then they're not doing a spatial search and we just
 		// return geonetwork results
-		if (!params['protocol']) {
+		if (!(params['protocol'] && _isBoundingBoxSubmitted(params))) {
 			return _geoNetworkSearch(params)
 		}
 		return _spatialSearch(params)
@@ -149,5 +149,9 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 			log.error("Cannot parse 'from' or 'to' parameter for pagination", nfe)
 		}
 		return moved
+	}
+	
+	def _isBoundingBoxSubmitted(params) {
+		return params['northBL'] && params['eastBL'] && params['southBL'] && params['westBL']
 	}
 }
