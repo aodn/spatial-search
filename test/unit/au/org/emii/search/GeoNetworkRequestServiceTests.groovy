@@ -1,8 +1,8 @@
 package au.org.emii.search
 
-import org.codehaus.groovy.grails.commons.GrailsApplication;
-
 import grails.test.*
+
+import org.codehaus.groovy.grails.commons.GrailsApplication
 
 class GeoNetworkRequestServiceTests extends GrailsUnitTestCase {
 	
@@ -38,5 +38,16 @@ class GeoNetworkRequestServiceTests extends GrailsUnitTestCase {
 		assertFalse service._pageForward(params, geoNetworkResponse)
 		assertEquals '41', params['from']
 		assertEquals '50', params['to']
+	}
+	
+	def testIsBoundingBoxSubmitted() {
+		def service = new GeoNetworkRequestService()
+		def params = [:]
+		assertFalse service._isBoundingBoxSubmitted(params)
+		params['northBL'] = '20'
+		params['eastBL'] = '20'
+		params['southBL'] = '10'
+		params['westBL'] = '10'
+		assertTrue service._isBoundingBoxSubmitted(params)
 	}
 }
