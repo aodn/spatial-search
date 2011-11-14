@@ -69,7 +69,7 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 		def metadataCollection = geoNetworkResponse.getGeonetworkMetadataObjects()
 		
 		def features = _searchForFeatures(params, geoNetworkResponse.uuids)
-		xml = geoNetworkResponse.getSpatialResponse(features)
+		xml = geoNetworkResponse.getSpatialResponse(metadataCollection, features)
 		
 		if (!features && _pageForward(params, geoNetworkResponse)) {
 			xml = _spatialSearch(params)

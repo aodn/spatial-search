@@ -1,49 +1,40 @@
 package au.org.emii.search
 
-import au.org.emii.search.index.GeonetworkMetadata;
 import grails.test.*
+import au.org.emii.search.index.GeonetworkMetadata
 
-class GeoNetworkRequestServiceTests extends GroovyTestCase {
+class GeoNetworkRequestServiceTests extends SpatialSearchingTest {
     
-	def geoNetworkRequestService
-	def featureTypeRequestService
-	def grailsApplication
-	def _queuedMetadata
-	def _indexed = false
-	
 	protected void setUp() {
         super.setUp()
 		_queue(false)
-		_index(false, ['topp:anfog_glider'])
+		_index(false, ['topp:argo_float'])
     }
 
     protected void tearDown() {
         super.tearDown()
     }
 
-    void testQueue() {
-		def metadata = _queue()
-		assertTrue !metadata.isEmpty()
-    }
+//    void testQueue() {
+//		def metadata = _queue(true)
+//		assertTrue !metadata.isEmpty()
+//    }
 	
-	void testFullIndex() {
-		def metadata = _queue()
-		_index(null)
-	}
+	/*
+	 * This method can be time and resource intensive
+	 */
+//	void testFullIndex() {
+//		def metadata = _queue(true)
+//		_index(true, null)
+//	}
 	
 	void testNonSpatialSearch() {
 		def params = _getSearchParams()
 		_addPagingParams(params)
 		
 		assertTrue params.containsKey('to')
-		assertTrue params.containsKey('westBL')
-		
+
 		def results = _search(params)
-		
-//		def geoNetworkResponse = new GeoNetworkResponse(grailsApplication, results)
-//		def metadata = geoNetworkResponse.getGeonetworkMetadataObjects()
-//		assertTrue metadata.size() > 0
-		
 		def xml = new XmlSlurper().parseText(results)
 		assertTrue xml.summary.@count.toInteger() > 0
 	}
@@ -51,14 +42,19 @@ class GeoNetworkRequestServiceTests extends GroovyTestCase {
 	void testEmptyGeonetworkResponseSpatialSearch() {
 		def params = ['themekey' : 'foo']
 		_addPagingParams(params)
-		def results = _spatialSearch(params, [])
+		def results = _spatialSearch(params, _getAustraliaBounds())
 		
 		def xml = new XmlSlurper().parseText(results)
 		assertEquals 0, xml.summary.@count.toInteger()
 	}
 	
 	void testEmptyPaginatedResponseSpatialSearch() {
-		def params = ['themekey' : 'Fluorometers']
+		def params = [:]
+		_addPagingParams(params)
+		def result = _spatialSearch(params, _getExclusiveBounds())
+		def xml = new XmlSlurper().parseText(result)
+		assertEquals 0, xml.summary.@count.toInteger()
+		assertTrue 15 < params['to'].toInteger()
 	}
 	
 	void testEmptyResponseSearch() {
@@ -74,6 +70,7 @@ class GeoNetworkRequestServiceTests extends GroovyTestCase {
 	}
 	
 	def _addSpatialSearchParams(params, bounds) {
+		params['protocol'] = grailsApplication.config.geonetwork.request.protocol
 		params.putAll(['northBL' : bounds[0], 'eastBL' : bounds[1], 'southBL' : bounds[2], 'westBL' : bounds[3]])
 		return params
 	}
@@ -83,15 +80,15 @@ class GeoNetworkRequestServiceTests extends GroovyTestCase {
 	}
 	
 	def _getAustraliaBounds() {
-		
+		return ['-39.203659', '158.978485', '-54.640301', '144.607330']
 	}
 	
 	def _getAntiMeridianBounds() {
-		
+		return ['-39.203659', '-158.978485', '-54.640301', '158.978485']
 	}
 	
 	def _getExclusiveBounds() {
-		
+		return ['10', '0', '-10', '10']
 	}
 	
 	def _spatialSearch(params, bounds) {
@@ -101,28 +98,5 @@ class GeoNetworkRequestServiceTests extends GroovyTestCase {
 	
 	def _search(params) {
 		return geoNetworkRequestService.search(params)
-	}
-	
-	def _queue(refresh) {
-		if (!_queuedMetadata || refresh) {
-			_queuedMetadata = geoNetworkRequestService.queue([:])
-		}
-		return _queuedMetadata
-	}
-	
-	def _index(refresh, featureTypeNames) {
-		// Only index a subset of features when specified
-		if (featureTypeNames) {
-			def criteria = GeonetworkMetadata.createCriteria()
-			def l = criteria.list {
-				not {
-					'in'('featureTypeName', featureTypeNames)
-				}
-			}
-			l*.delete()
-		}
-		if (!_indexed || refresh || featureTypeNames) {
-			featureTypeRequestService.index()
-		}
 	}
 }
