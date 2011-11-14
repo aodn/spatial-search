@@ -4,8 +4,8 @@ class SearchController {
 
 	def geoNetworkRequestService
 	
-    def search = {
-		def features = geoNetworkRequestService.search(params)
-		render "Found ${features.size()} features"
+    def index = {
+		def xml = geoNetworkRequestService.search(params)
+		render(text: xml, contentType: "text/xml", encoding:"UTF-8")
 	}
 }
