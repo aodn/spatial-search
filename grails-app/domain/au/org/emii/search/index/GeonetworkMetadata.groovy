@@ -14,8 +14,6 @@ class GeonetworkMetadata implements Comparable<GeonetworkMetadata> {
 	String featureTypeName
 	String geoserverEndPoint
 	
-	def keywordCounts = [:]
-
 	static mapping = {
 		featureTypeName index: 'idx_qd_feature_type'
 		geonetworkUuid index: 'idx_qd_feature_type'
@@ -31,21 +29,6 @@ class GeonetworkMetadata implements Comparable<GeonetworkMetadata> {
 		indexRun: IndexRun
 	]
 	
-	def addKeyword(keyword) {
-		def keywordCount = keywordCounts[keyword]
-		if (!keywordCount) {
-			keywordCount = 0
-		}
-		keywordCounts[keyword] = keywordCount + 1
-	}
-	
-	def subtractKeyword(keyword) {
-		def keywordCount = keywordCounts[keyword]
-		if (keywordCount) {
-			keywordCounts[keyword] = keywordCount - 1
-		}
-	}
-		
 	@Override
 	boolean equals(o) {
 		if (is(o)) {

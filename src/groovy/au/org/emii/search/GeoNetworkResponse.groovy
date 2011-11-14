@@ -35,6 +35,7 @@ class GeoNetworkResponse {
 		
 		def validating = false
 		def namespaceAware = true
+		// TODO extract namespace to config?
 		nsGeonet = new Namespace('http://www.fao.org/geonetwork', 'geonet')
 		tree = new XmlParser(validating, namespaceAware).parseText(xml)
 		
@@ -59,7 +60,6 @@ class GeoNetworkResponse {
 		
 		def featureUuids = features.collect { feature -> feature.geonetworkUuid }
 		_strip(featureUuids)
-		_updateSummaryCounts(featureUuids.size())
 		_updateKeywordCounts()
 		return _buildResponseXml()
 	}
@@ -77,9 +77,6 @@ class GeoNetworkResponse {
 		tree.metadata.each { metadataNode ->
 			def uuid = _parseUuid(metadataNode)
 			def metadata = _parseLinkElements(metadataNode, uuid)
-			if (metadata) {
-				_parseKeywordElements(metadataNode, metadata)
-			}
 			if (metadataElementClosure) {
 				metadataElementClosure(metadataNode)
 			}
@@ -125,12 +122,6 @@ class GeoNetworkResponse {
 		return true && text =~ /$regexPattern/
 	}
 	
-	def _parseKeywordElements(metadataNode, metadata) {
-		metadataNode.keyword.each { keyword ->
-			metadata.addKeyword(keyword)
-		}
-	}
-	
 	def _serverEndPointFrom(url) {
 		return url.substring(0, url.lastIndexOf("/"))
 	}
@@ -141,7 +132,7 @@ class GeoNetworkResponse {
 	
 	def _addKeywordCounts(metadataNode) {
 		metadataNode.keyword.each { keyword ->
-			_addKeyword(keyword)
+			_addKeyword(keyword.text())
 		}
 	}
 	
@@ -162,17 +153,25 @@ class GeoNetworkResponse {
 	def _strip(featureUuids) {
 		tree.metadata.each { metadataNode ->
 			def uuid = _parseUuid(metadataNode)
-			def metadata = _parseLinkElements(metadataNode, uuid)
-			if (metadata && !featureUuids.contains(uuid)) {
-				_subtractKeywordCounts(metadata)
+			if (!featureUuids.contains(uuid)) {
+				_decrementSummaryCounts()
+				_subtractKeywordCounts(metadataNode)
 				metadataNode.replaceNode {}
 			}
 		}
 	}
 	
-	def _updateSummaryCounts(count) {
-		tree.summary[0].@count = count
-		tree.summary[0].@hitsusedforsummary = count
+	def _decrementSummaryCounts() {
+		_updateSummaryCount(tree.summary[0].@count.toInteger() - 1)
+		_updateHitsUsedForSummaryCount(tree.summary[0].@hitsusedforsummary.toInteger() - 1)
+	}
+	
+	def _updateSummaryCount(count) {
+		tree.summary[0].@count = count.toString()
+	}
+	
+	def _updateHitsUsedForSummaryCount(count) {
+		tree.summary[0].@hitsusedforsummary = count.toString()
 	}
 	
 	def _updateKeywordCounts() {
@@ -187,12 +186,11 @@ class GeoNetworkResponse {
 		}
 	}
 	
-	def _subtractKeywordCounts(metadata) {
-		def metadataToSubtract = _findMetadataInList(metadata)
-		metadataToSubtract.keywordCounts.each { keyword, count ->
-			def lCount = keywordCounts[keyword]
+	def _subtractKeywordCounts(metadataNode) {
+		metadataNode.keyword.each { keyword ->
+			def lCount = keywordCounts[keyword.text()]
 			if (lCount && lCount > 0) {
-				keywordCounts[keyword] = lCount - count
+				keywordCounts[keyword] = lCount - 1
 			}
 		}
 	}
@@ -205,16 +203,5 @@ class GeoNetworkResponse {
 			<organizationNames/>
 		</summary>
 </response>"""
-	}
-	
-	def _findMetadataInList(metadata) {
-		def sorted = metadataList.sort()
-		def index = Collections.binarySearch(sorted, metadata)
-		
-		def ret
-		if (index >= 0) {
-			ret = sorted[index]
-		}
-		return ret
 	}
 }

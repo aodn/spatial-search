@@ -62,7 +62,7 @@ environments {
     development {
         grails.serverURL = "http://localhost:${grails.server.port.http}/${appName}"
 		geonetwork.index.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/en/xml.search"
-		geonetwork.search.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/en/imos.xml.search"
+		geonetwork.search.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/en/xml.search"
 		geoserver.response.cache.dir = "/tmp"
     }
     test {

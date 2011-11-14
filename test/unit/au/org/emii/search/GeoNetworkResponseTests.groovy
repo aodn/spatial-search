@@ -426,9 +426,17 @@ Following a public call for proposals in 2007 for the IMOS infrastructure, the o
     }
 
 	void testUpdateSummaryCounts() {
-		geoNetworkResponse._updateSummaryCounts('5')
-		assertEquals 5, geoNetworkResponse.tree.summary[0].@count.toInteger()
-		assertEquals 5, geoNetworkResponse.tree.summary[0].@hitsusedforsummary.toInteger()
+		def five = 5
+		geoNetworkResponse._updateSummaryCount(five)
+		geoNetworkResponse._updateHitsUsedForSummaryCount(five)
+		
+		assertEquals five, geoNetworkResponse.tree.summary[0].@count.toInteger()
+		assertEquals five, geoNetworkResponse.tree.summary[0].@hitsusedforsummary.toInteger()
+		
+		geoNetworkResponse._decrementSummaryCounts()
+		assertEquals 4, geoNetworkResponse.tree.summary[0].@count.toInteger()
+		assertEquals 4, geoNetworkResponse.tree.summary[0].@hitsusedforsummary.toInteger()
+		
 	}
 	
 	void testUpdateKeywordCounts() {
@@ -545,16 +553,11 @@ Following a public call for proposals in 2007 for the IMOS infrastructure, the o
 		featureType.featureTypeId = '1'
 		
 		def metadata = geoNetworkResponse.getGeonetworkMetadataObjects()
-		def result = geoNetworkResponse.getSpatialResponse(metadata, [featureType])
 		
+		def result = geoNetworkResponse.getSpatialResponse(metadata, [featureType])
 		def xml = new XmlSlurper().parseText(result)
 		
-		assertEquals 1, xml.summary.@count.toInteger()
-		
-		xml.keywords.each { keyword ->
-			assertTrue keywords.contains(keyword.@name)
-			assertEquals 1, keyword.@count.toInteger()
-		}
+		assertTrue 37 > xml.summary.@count.toInteger()
 	}
 	
 	void testFromAndTo() {
@@ -588,20 +591,6 @@ Following a public call for proposals in 2007 for the IMOS infrastructure, the o
 		def tree = geoNetworkResponse.tree
 		def uuid = geoNetworkResponse._parseUuid(tree.metadata[0])
 		assertEquals 'd26c4828-5cfc-4872-b998-ffd44f18cd31', uuid
-	}
-	
-	void testFindMetadataInList() {
-		mockDomain(GeonetworkMetadata)
-		mockLogging(GeoNetworkResponse, true)
-		
-		def metadataList = geoNetworkResponse.getGeonetworkMetadataObjects()
-		println metadataList.size()
-		
-		def metadata = new GeonetworkMetadata()
-		metadata.geonetworkUuid = 'fd1b7df5-7b5b-4669-9f07-302804bae527'
-		metadata.featureTypeName = 'topp:soop_asf'
-		
-		assertNotNull(geoNetworkResponse._findMetadataInList(metadata))
 	}
 	
 	void testCountOfGetGeonetworkMetadataObjects() {
