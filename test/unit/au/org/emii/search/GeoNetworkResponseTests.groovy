@@ -558,6 +558,11 @@ Following a public call for proposals in 2007 for the IMOS infrastructure, the o
 		def xml = new XmlSlurper().parseText(result)
 		
 		assertTrue 37 > xml.summary.@count.toInteger()
+		
+		xml.summary.keywords.keyword.each { keyword ->
+			// This assert makes sure that a node hasn't been written as a string
+			assertFalse keyword.@name.toString().contains("keyword[attributes")
+		}
 	}
 	
 	void testFromAndTo() {
