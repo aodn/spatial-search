@@ -146,7 +146,10 @@ class GeoNetworkResponse {
 	
 	def _buildResponseXml() {
 		def writer = new StringWriter()
-		new XmlNodePrinter(new PrintWriter(writer)).print(tree)
+		
+		def indentPrinter = new IndentPrinter(writer, '', false)
+		indentPrinter.indentLevel = 0
+		new XmlNodePrinter(indentPrinter).print(tree)
 		return writer.toString()
 	}
 	
@@ -190,7 +193,7 @@ class GeoNetworkResponse {
 		metadataNode.keyword.each { keyword ->
 			def lCount = keywordCounts[keyword.text()]
 			if (lCount && lCount > 0) {
-				keywordCounts[keyword] = lCount - 1
+				keywordCounts[keyword.text()] = lCount - 1
 			}
 		}
 	}

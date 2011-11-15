@@ -597,4 +597,9 @@ Following a public call for proposals in 2007 for the IMOS infrastructure, the o
 		def metadataList = geoNetworkResponse.getGeonetworkMetadataObjects()
 		assertEquals 11, metadataList.size()
 	}
+	
+	void testResponseWhitespaceRemoval() {
+		def result = geoNetworkResponse._buildResponseXml()
+		assertFalse true && result =~ />\s/
+	}
 }
