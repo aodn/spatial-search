@@ -55,20 +55,20 @@ grails.exceptionresolver.params.exclude = ['password']
 environments {
     production {
         grails.serverURL = "http://www.changeme.com"
-		geonetwork.index.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/en/xml.search"
 		geonetwork.search.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/en/xml.search"
+		geonetwork.index.serverURL = "${geonetwork.search.serverURL}"
 		geoserver.response.cache.dir = "/tmp"
     }
     development {
         grails.serverURL = "http://localhost:${grails.server.port.http}/${appName}"
-		geonetwork.index.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/en/xml.search"
-		geonetwork.search.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/en/xml.search"
+		geonetwork.search.serverURL = "http://localhost:9090/geonetwork/srv/en/xml.search"
+		geonetwork.index.serverURL = "${geonetwork.search.serverURL}"
 		geoserver.response.cache.dir = "/tmp"
     }
     test {
         grails.serverURL = "http://localhost:${grails.server.port.http}/${appName}"
-		geonetwork.index.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/en/xml.search"
 		geonetwork.search.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/en/xml.search"
+		geonetwork.index.serverURL = "${geonetwork.search.serverURL}"
 		geoserver.response.cache.dir = "/tmp"
     }
 
