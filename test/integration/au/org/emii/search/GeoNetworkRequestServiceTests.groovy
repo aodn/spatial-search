@@ -54,7 +54,7 @@ class GeoNetworkRequestServiceTests extends SpatialSearchingTest {
 		def result = _spatialSearch(params, _getExclusiveBounds())
 		def xml = new XmlSlurper().parseText(result)
 		assertEquals 0, xml.summary.@count.toInteger()
-		assertTrue 15 < params['to'].toInteger()
+		assertTrue 15 < params.to.toInteger()
 	}
 	
 	void testEmptyResponseSearch() {
@@ -78,7 +78,7 @@ class GeoNetworkRequestServiceTests extends SpatialSearchingTest {
 	}
 	
 	def _addSpatialSearchParams(params, bounds) {
-		params['protocol'] = grailsApplication.config.geonetwork.request.protocol
+		params.protocol = grailsApplication.config.geonetwork.request.protocol
 		params.putAll(['northBL' : bounds[0], 'eastBL' : bounds[1], 'southBL' : bounds[2], 'westBL' : bounds[3]])
 		return params
 	}

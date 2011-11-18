@@ -29,20 +29,20 @@ class FeatureTypeRequestService {
 				if (!features.isEmpty()) {
 					_saveMetadataFeatures(metadata, features)
 					featureCount += features.size()
+					indexRun.addToGeonetworkMetadataDocs(metadata)
+					indexRun.documents++
 				}
 			}
 			catch (Exception e) {
 				log.error('', e)
 				indexRun.failures++
 			}
-			indexRun.addToGeonetworkMetadataDocs(metadata)
 			
 			/*
 			 * This looks stupid and inefficient but if save is not called on
 			 * IndexRun here an exception relating to a transient object is 
 			 * thrown
 			 */
-			indexRun.documents++
 			_save(indexRun)
 		}
 		return featureCount

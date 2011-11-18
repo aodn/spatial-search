@@ -36,18 +36,18 @@ class GeoNetworkRequestServiceTests extends GrailsUnitTestCase {
 			assertTrue service._pageForward(params, geoNetworkResponse)
 		}
 		assertFalse service._pageForward(params, geoNetworkResponse)
-		assertEquals '41', params['from']
-		assertEquals '50', params['to']
+		assertEquals '41', params.from
+		assertEquals '50', params.to
 	}
 	
 	def testIsBoundingBoxSubmitted() {
 		def service = new GeoNetworkRequestService()
 		def params = [:]
 		assertFalse service._isBoundingBoxSubmitted(params)
-		params['northBL'] = '20'
-		params['eastBL'] = '20'
-		params['southBL'] = '10'
-		params['westBL'] = '10'
+		params.northBL = '20'
+		params.eastBL = '20'
+		params.southBL = '10'
+		params.westBL = '10'
 		assertTrue service._isBoundingBoxSubmitted(params)
 	}
 	
