@@ -160,6 +160,10 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 	}
 	
 	def _isForced(params) {
-		return params.force && params.force.booleanValue()
+		def force = false
+		if (params.force) {
+			force = new Boolean(params.force)
+		}
+		return force.booleanValue()
 	}
 }

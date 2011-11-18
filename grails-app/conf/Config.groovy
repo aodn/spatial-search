@@ -1,3 +1,6 @@
+import org.apache.log4j.rolling.RollingFileAppender
+import org.apache.log4j.rolling.TimeBasedRollingPolicy
+
 // locations to search for config files that get merged into the main config
 // config files can either be Java properties files or ConfigSlurper scripts
 
@@ -83,6 +86,16 @@ log4j = {
     //    console name:'stdout', layout:pattern(conversionPattern: '%c{2} %m%n')
     //}
 
+	def rollingFile = new RollingFileAppender(name: 'file', layout: pattern(conversionPattern: '%-5p [%t]:%c: %m%n'))
+	def rollingPolicy = new TimeBasedRollingPolicy(fileNamePattern: '/var/log/spatialsearch/spatialsearch.%d{yyyy-ww}.gz', activeFileName: '/var/log/spatialsearch/spatialsearch.log')
+	
+	rollingPolicy.activateOptions()
+	rollingFile.setRollingPolicy(rollingPolicy)
+	
+	appenders {
+		appender rollingFile
+	}
+	
     error  'org.codehaus.groovy.grails.web.servlet',  //  controllers
            'org.codehaus.groovy.grails.web.pages', //  GSP
            'org.codehaus.groovy.grails.web.sitemesh', //  layouts
@@ -97,8 +110,29 @@ log4j = {
 
     warn   'org.mortbay.log'
 	
-	debug  'grails.app'
-	debug  'au.org.emii'
+	environments {
+		development {
+			root {
+				error 'file', 'stdout'
+			}
+			debug 'grails.app', 'file'
+			debug 'au.org.emii', 'file'
+		}
+		test {
+			root {
+				error 'file', 'stdout'
+			}
+			debug 'grails.app', 'file'
+			debug 'au.org.emii', 'file'
+		}
+		production {
+			root {
+				error 'file', 'stdout'
+			}
+			error 'grails.app', 'file'
+			error 'au.org.emii', 'file'
+		}
+	}
 }
 
 // Custom configuration settings

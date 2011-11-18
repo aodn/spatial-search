@@ -60,7 +60,13 @@ class GeoNetworkRequestServiceTests extends GrailsUnitTestCase {
 		params.force = false
 		assertFalse service._isForced(params)
 		
+		params.force = 'false'
+		assertFalse service._isForced(params)
+		
 		params.force = true
+		assertTrue service._isForced(params)
+		
+		params.force = 'true'
 		assertTrue service._isForced(params)
 	}
 }
