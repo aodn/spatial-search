@@ -7,8 +7,8 @@ class SpatialSearchingTest extends GroovyTestCase {
 	def geoNetworkRequestService
 	def featureTypeRequestService
 	def grailsApplication
-	def _queuedMetadata
-	def _indexed = false
+	def static _queuedMetadata
+	def static _indexed = false
 	
 	def testNothing() {}
 	

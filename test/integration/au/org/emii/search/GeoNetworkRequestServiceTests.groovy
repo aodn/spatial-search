@@ -64,6 +64,14 @@ class GeoNetworkRequestServiceTests extends SpatialSearchingTest {
 		assertEquals 0, xml.summary.@count.toInteger()
 	}
 	
+	def testForceQueue() {
+		geoNetworkRequestService.queue([:])
+		// Index just gliders for now
+		_index(true, ['topp:anfog_glider'])
+		def metadata = geoNetworkRequestService.queue(['force' : true])
+		assertTrue metadata.size() > 0
+	}
+	
 	def _addPagingParams(params) {
 		params.putAll(['from' : '1', 'to' : '15'])
 		return params

@@ -10,8 +10,9 @@ class FeatureTypeTests extends SpatialSearchingTest {
     
 	protected void setUp() {
         //super.setUp()
-		_queue(false)
-		_index(false, ['topp:soop_sst_without_1min_vw', 'topp:argo_float'])
+		def refresh = true
+		_queue(refresh)
+		_index(refresh, ['topp:soop_sst_without_1min_vw', 'topp:argo_float'])
     }
 
     protected void tearDown() {

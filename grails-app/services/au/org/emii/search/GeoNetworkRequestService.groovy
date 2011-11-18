@@ -28,7 +28,7 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 	def queue(params) {
 		// Add the date params so we only fetch metadata records that have been
 		// modified since last run
-		def lastRun = _getLastRun()
+		def lastRun = _isForced(params) ? _initialiseLastRun() : _getLastRun()
 		params['dateFrom'] = lastRun
 		params['dateTo'] = new Date()
 		params['fast'] = 'false'
@@ -113,10 +113,14 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 			}
 		}
 		if (lastRun == null) {
-			lastRun = new Timestamp(new Date(0).time)
+			lastRun = _initialiseLastRun()
 		}
 		log.debug(lastRun)
 		return lastRun
+	}
+	
+	def _initialiseLastRun() {
+		return new Timestamp(new Date(0).time)
 	}
 	
 	def _getGeometry(params) {
@@ -153,5 +157,9 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 	
 	def _isBoundingBoxSubmitted(params) {
 		return params['northBL'] && params['eastBL'] && params['southBL'] && params['westBL']
+	}
+	
+	def _isForced(params) {
+		return params.force && params.force.booleanValue()
 	}
 }

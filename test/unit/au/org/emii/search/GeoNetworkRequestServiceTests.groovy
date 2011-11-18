@@ -50,4 +50,17 @@ class GeoNetworkRequestServiceTests extends GrailsUnitTestCase {
 		params['westBL'] = '10'
 		assertTrue service._isBoundingBoxSubmitted(params)
 	}
+	
+	def testIsForced() {
+		def service = new GeoNetworkRequestService()
+		
+		def params = [:]
+		assertFalse service._isForced(params)
+		
+		params.force = false
+		assertFalse service._isForced(params)
+		
+		params.force = true
+		assertTrue service._isForced(params)
+	}
 }
