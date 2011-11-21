@@ -4,7 +4,6 @@ import java.sql.Timestamp
 
 class IndexController {
 
-	def grailsApplication
 	def geoNetworkRequestService
 	def featureTypeRequestService
 	
