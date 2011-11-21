@@ -501,6 +501,7 @@ Following a public call for proposals in 2007 for the IMOS infrastructure, the o
 	
 	void testCollectKeywordCounts() {
 		def col = geoNetworkResponse.getGeonetworkMetadataObjects()
+		def xml = geoNetworkResponse.getSpatialResponse(col, [_getGliderFeature()])
 		assertTrue geoNetworkResponse.keywordCounts.size() > 0
 	}
 	
@@ -546,14 +547,8 @@ Following a public call for proposals in 2007 for the IMOS infrastructure, the o
 			'Marine Features (Australia) | Great Australian Bight, SA/WA'
 		]
 		
-		mockDomain(FeatureType)
-		def featureType = new FeatureType()
-		featureType.geonetworkUuid = '02640f4e-08d0-4f3a-956b-7f9b58966ccc'
-		featureType.featureTypeName = 'topp:anfog_glider'
-		featureType.featureTypeId = '1'
-		
+		def featureType = _getGliderFeature()
 		def metadata = geoNetworkResponse.getGeonetworkMetadataObjects()
-		
 		def result = geoNetworkResponse.getSpatialResponse(metadata, [featureType])
 		def xml = new XmlSlurper().parseText(result)
 		
@@ -606,5 +601,26 @@ Following a public call for proposals in 2007 for the IMOS infrastructure, the o
 	void testResponseWhitespaceRemoval() {
 		def result = geoNetworkResponse._buildResponseXml()
 		assertFalse true && result =~ />\s/
+	}
+	
+	void testXmlResponseTo() {
+//		mockDomain(FeatureType)
+//		def featureType = new FeatureType()
+//		featureType.geonetworkUuid = '02640f4e-08d0-4f3a-956b-7f9b58966ccc'
+//		featureType.featureTypeName = 'topp:anfog_glider'
+//		
+//		def metadata = geoNetworkResponse.getGeonetworkMetadataObjects()
+//		def result = geoNetworkResponse.getSpatialResponse(metadata, [featureType])
+//		def xml = new XmlSlurper().parseText(result)
+//		
+//		assertEquals 15, xml.@to.toInteger()
+	}
+	
+	def _getGliderFeature() {
+		mockDomain(FeatureType)
+		def featureType = new FeatureType()
+		featureType.geonetworkUuid = '02640f4e-08d0-4f3a-956b-7f9b58966ccc'
+		featureType.featureTypeName = 'topp:anfog_glider'
+		return featureType
 	}
 }

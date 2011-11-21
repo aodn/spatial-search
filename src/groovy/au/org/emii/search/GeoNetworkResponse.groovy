@@ -49,7 +49,6 @@ class GeoNetworkResponse {
 	def getGeonetworkMetadataObjects() {
 		return _parseXmlToGeonetworkMetadataObjects() { metadataNode ->
 			_collectUuid(metadataNode)
-			_addKeywordCounts(metadataNode)
 		}
 	}
 	
@@ -130,20 +129,6 @@ class GeoNetworkResponse {
 		uuids << _parseUuid(metadataNode)
 	}
 	
-	def _addKeywordCounts(metadataNode) {
-		metadataNode.keyword.each { keyword ->
-			_addKeyword(keyword.text())
-		}
-	}
-	
-	def _addKeyword(keyword) {
-		def keywordCount = keywordCounts[keyword]
-		if (!keywordCount) {
-			keywordCount = 0
-		}
-		keywordCounts[keyword] = keywordCount + 1
-	}
-	
 	def _buildResponseXml() {
 		def writer = new StringWriter()
 		
@@ -158,8 +143,10 @@ class GeoNetworkResponse {
 			def uuid = _parseUuid(metadataNode)
 			if (!featureUuids.contains(uuid)) {
 				_decrementSummaryCounts()
-				_subtractKeywordCounts(metadataNode)
 				metadataNode.replaceNode {}
+			}
+			else {
+				_incrementKeywordCounts(metadataNode)
 			}
 		}
 	}
@@ -189,12 +176,13 @@ class GeoNetworkResponse {
 		}
 	}
 	
-	def _subtractKeywordCounts(metadataNode) {
+	def _incrementKeywordCounts(metadataNode) {
 		metadataNode.keyword.each { keyword ->
 			def lCount = keywordCounts[keyword.text()]
-			if (lCount && lCount > 0) {
-				keywordCounts[keyword.text()] = lCount - 1
+			if (!lCount) {
+				lCount = 0
 			}
+			keywordCounts[keyword.text()] = lCount + 1
 		}
 	}
 	

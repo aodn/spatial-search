@@ -72,6 +72,20 @@ class GeoNetworkRequestServiceTests extends SpatialSearchingTest {
 		assertTrue metadata.size() > 0
 	}
 	
+	def testExtraPaginationResponse() { 
+		_queue(true)
+		_index(true, ['topp:argo_float'])
+		
+		// Check that the search has had to paginate further than the supplied
+		// to parameter
+		def params = ['from' : '1', 'to' : '15']
+		def result = _spatialSearch(params, _getAustraliaBounds())
+		println result
+		def xml = new XmlSlurper().parseText(result)
+		assertTrue 15 < xml.@to.toInteger()
+		assertTrue 15 < params.to.toInteger()
+	}
+	
 	def _addPagingParams(params) {
 		params.putAll(['from' : '1', 'to' : '15'])
 		return params
@@ -97,6 +111,10 @@ class GeoNetworkRequestServiceTests extends SpatialSearchingTest {
 	
 	def _getExclusiveBounds() {
 		return ['10', '0', '-10', '10']
+	}
+	
+	def _getInclusiveBounds() {
+		return ['0', '0', '-90', '180']
 	}
 	
 	def _spatialSearch(params, bounds) {

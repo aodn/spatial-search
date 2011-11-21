@@ -64,6 +64,13 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 	def _spatialSearch(params) {
 		params.relation = 'intersects'
 		
+		if (_isPaging(params)) {
+			// Grab an additional two pages worth from geonetwork i.e. three pages
+			def to = _getNumericParam(params, 'to')
+			def pageEnd = _getPageSize(params) * 2 + to
+			_updateNumericParam(params, 'to', pageEnd)
+		}
+		
 		def xml = _geoNetworkSearch(params)
 		def geoNetworkResponse = new GeoNetworkResponse(grailsApplication, xml)
 		def metadataCollection = geoNetworkResponse.getGeonetworkMetadataObjects()
@@ -71,7 +78,7 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 		def features = _searchForFeatures(params, geoNetworkResponse.uuids)
 		xml = geoNetworkResponse.getSpatialResponse(metadataCollection, features)
 		
-		if (!features && _pageForward(params, geoNetworkResponse)) {
+		if (!features && _pageForward(params, geoNetworkResponse.count)) {
 			xml = _spatialSearch(params)
 		}
 		return xml
@@ -133,24 +140,18 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 		return helper.toBoundingBox(north, east, south, west)
 	}
 	
-	def _pageForward(params, geoNetworkResponse) {
+	def _pageForward(params, stopper) {
+		assert stopper instanceof Integer, "Paging stopper is not an an Integer"
+		
 		def moved = false
-		try {
-			def from = Integer.valueOf(params.from)
-			def to = Integer.valueOf(params.to)
-			if (to < geoNetworkResponse.count) {
-				// There are more records that we can check against automatically
-				// page forward
-				def pageSize = to - from + 1
-				params.from = String.valueOf((from + pageSize))
-				params.to = String.valueOf((to + pageSize))
-				moved = true
-			}
-		}
-		catch (NumberFormatException nfe) {
-			// We can't determine pagination so return an empty geonetwork
-			// response but log something in case this keeps on occurring
-			log.error("Cannot parse 'from' or 'to' parameter for pagination", nfe)
+		def to = _getNumericParam(params, 'to')
+		if (to < stopper) {
+			// There are more records that we can check against automatically
+			// page forward
+			def pageSize = _getPageSize(params)
+			_updateNumericParam(params, 'from', to + 1)
+			_updateNumericParam(params, 'to', to + pageSize)
+			moved = true
 		}
 		return moved
 	}
@@ -165,5 +166,40 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 			force = new Boolean(params.force)
 		}
 		return force.booleanValue()
+	}
+	
+	def _isPaging(params) {
+		return params.from && params.to
+	}
+	
+	def _getPageSize(params) {
+		def from = _getNumericParam(params, 'from')
+		def to = _getNumericParam(params, 'to')
+		def pageSize = _getPageSize(from, to)
+		return pageSize
+	}
+	
+	def _getPageSize(from, to) {
+		def pageSize = 0
+		if (from && to) {
+			pageSize = to - from + 1
+		}
+		return pageSize
+	}
+	
+	def _getNumericParam(params, name) {
+		try {
+			return Integer.valueOf(params[name])
+		}
+		catch (NumberFormatException nfe) {
+			// We can't determine pagination so return an empty geonetwork
+			// response but log something in case this keeps on occurring
+			log.error("Cannot parse '$name' parameter to integer", nfe)
+		}
+		return null
+	}
+	
+	def _updateNumericParam(params, name, value) {
+		params[name] = String.valueOf(value)
 	}
 }
