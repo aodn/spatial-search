@@ -64,10 +64,12 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 	def _spatialSearch(params) {
 		params.relation = 'intersects'
 		
+		def pageSize = null
 		if (_isPaging(params)) {
 			// Grab an additional two pages worth from geonetwork i.e. three pages
 			def to = _getNumericParam(params, 'to')
-			def pageEnd = _getPageSize(params) * 2 + to
+			pageSize = _getPageSize(params)
+			def pageEnd = pageSize * 2 + to
 			_updateNumericParam(params, 'to', pageEnd)
 		}
 		
@@ -76,7 +78,7 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 		def metadataCollection = geoNetworkResponse.getGeonetworkMetadataObjects()
 		
 		def features = _searchForFeatures(params, geoNetworkResponse.uuids)
-		xml = geoNetworkResponse.getSpatialResponse(metadataCollection, features)
+		xml = geoNetworkResponse.getSpatialResponse(metadataCollection, features, pageSize)
 		
 		if (!features && _pageForward(params, geoNetworkResponse.count)) {
 			xml = _spatialSearch(params)

@@ -72,18 +72,37 @@ class GeoNetworkRequestServiceTests extends SpatialSearchingTest {
 		assertTrue metadata.size() > 0
 	}
 	
+	/*
+	 * This test might cause the JVM launched within the IDE to run out of heap
+	 * space, you'll need to increase the heap size in that case either via the
+	 * IDE or command line and run the tests accordingly I'm using the following
+	 * GRAILS_OPTS -Xmx1G -Xms512m -XX:PermSize=64m -XX:MaxPermSize=512m
+	 */
 	def testExtraPaginationResponse() { 
-		_queue(true)
-		_index(true, ['topp:argo_float'])
+		def metadata = geoNetworkRequestService.queue(['force' : true])
+		_index(true, null)
 		
 		// Check that the search has had to paginate further than the supplied
 		// to parameter
 		def params = ['from' : '1', 'to' : '15']
-		def result = _spatialSearch(params, _getAustraliaBounds())
-		println result
+		def result = _spatialSearch(params, _getInclusiveBounds())
 		def xml = new XmlSlurper().parseText(result)
+		def all = xml.metadata
 		assertTrue 15 < xml.@to.toInteger()
 		assertTrue 15 < params.to.toInteger()
+		// We should only be returning 15 matches
+		assertEquals 15, xml.summary.@count.toInteger()
+	}
+	
+	def testKeywordCounts() {
+		def params = ['from' : '1', 'to' : '15']
+		def result = _spatialSearch(params, _getAustraliaBounds())
+		def xml = new XmlSlurper().parseText(result)
+		// No keyword should feature more than 15 times if we're only getting
+		// 15 records back
+		xml.summary.keywords.keyword.each { keyword ->
+			assertTrue 15 > keyword.@count.toInteger()
+		}
 	}
 	
 	def _addPagingParams(params) {
@@ -110,11 +129,11 @@ class GeoNetworkRequestServiceTests extends SpatialSearchingTest {
 	}
 	
 	def _getExclusiveBounds() {
-		return ['10', '0', '-10', '10']
+		return ['10', '10', '-10', '0']
 	}
 	
 	def _getInclusiveBounds() {
-		return ['0', '0', '-90', '180']
+		return ['-30', '180', '-60', '100']
 	}
 	
 	def _spatialSearch(params, bounds) {
