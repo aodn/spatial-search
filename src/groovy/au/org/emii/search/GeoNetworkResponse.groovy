@@ -52,13 +52,13 @@ class GeoNetworkResponse {
 		}
 	}
 	
-	def getSpatialResponse(metadataCollection, features) {
+	def getSpatialResponse(metadataCollection, features, pageSize) {
 		if (!features || features.isEmpty()) {
 			return _emptyResponse()
 		}
 		
 		def featureUuids = features.collect { feature -> feature.geonetworkUuid }
-		_strip(featureUuids)
+		_strip(featureUuids, pageSize)
 		_updateKeywordCounts()
 		return _buildResponseXml()
 	}
@@ -138,15 +138,22 @@ class GeoNetworkResponse {
 		return writer.toString()
 	}
 	
-	def _strip(featureUuids) {
+	def _strip(featureUuids, pageSize) {
+		// If no page size has been specified give it a huge value to make the
+		// flow control boolean work and be easy to understand
+		if (!pageSize) {
+			pageSize = Integer.MAX_VALUE
+		}
+		def i = 1
 		tree.metadata.each { metadataNode ->
 			def uuid = _parseUuid(metadataNode)
-			if (!featureUuids.contains(uuid)) {
+			if (i > pageSize || !featureUuids.contains(uuid)) {
 				_decrementSummaryCounts()
 				metadataNode.replaceNode {}
 			}
 			else {
 				_incrementKeywordCounts(metadataNode)
+				i++
 			}
 		}
 	}
