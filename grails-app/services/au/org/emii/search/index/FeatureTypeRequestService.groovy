@@ -24,7 +24,7 @@ class FeatureTypeRequestService {
 		def indexRun = new IndexRun()
 		def metadataRecords = GeonetworkMetadata.findAllByIndexRunIsNull()
 		metadataRecords.each { metadata ->
-			def featureTypeRequestImpl = getFeatureTypeRequestImplementation(metadata.featureTypeName, messages)
+			def featureTypeRequestImpl = getFeatureTypeRequestImplementation(metadata, messages)
 			
 			try {
 				def features = new ArrayList(featureTypeRequestImpl.requestFeatureType(metadata))
@@ -93,7 +93,8 @@ class FeatureTypeRequestService {
 		}
 	}
 
-	def getFeatureTypeRequestImplementation(featureTypeName, messages) {
+	def getFeatureTypeRequestImplementation(metadata, messages) {
+		def featureTypeName = metadata.featureTypeName
 		def impl = featureTypeRequestFactory[featureTypeName]
 		if (!impl) {
 			def featureTypeRequestClass = FeatureTypeRequestClass.findByFeatureTypeName(featureTypeName)
@@ -103,7 +104,7 @@ class FeatureTypeRequestService {
 			else {
 				// Use the null implementation
 				impl = new NullFeatureTypeRequest()
-				messages << "No feature type request class configured for $featureTypeName please add an appropriate record to table feature_type_request_class"
+				messages << "No feature type request class configured for ${metadata.geoserverEndPoint}?$featureTypeName please add an appropriate record to table feature_type_request_class"
 			}
 			featureTypeRequestFactory[featureTypeName] = impl
 		}
