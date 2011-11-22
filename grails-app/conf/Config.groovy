@@ -61,18 +61,27 @@ environments {
 		geonetwork.search.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/en/xml.search"
 		geonetwork.index.serverURL = "${geonetwork.search.serverURL}"
 		geoserver.response.cache.dir = "/tmp"
+		feature.missing.email.to='developers@emii.org.au'
+		feature.missing.email.from='spatialsearch@emii.org.au'
+		feature.missing.email.subject='Spatial Search Index Action Required'
     }
     development {
         grails.serverURL = "http://localhost:${grails.server.port.http}/${appName}"
 		geonetwork.search.serverURL = "http://localhost:9090/geonetwork/srv/en/xml.search"
 		geonetwork.index.serverURL = "${geonetwork.search.serverURL}"
 		geoserver.response.cache.dir = "/tmp"
+		feature.missing.email.to='fotakt@utas.edu.au'
+		feature.missing.email.from='spatialsearch@emii.org.au'
+		feature.missing.email.subject='Spatial Search Index Action Required'
     }
     test {
         grails.serverURL = "http://localhost:${grails.server.port.http}/${appName}"
 		geonetwork.search.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/en/xml.search"
 		geonetwork.index.serverURL = "${geonetwork.search.serverURL}"
 		geoserver.response.cache.dir = "/tmp"
+		feature.missing.email.to='fotakt@utas.edu.au'
+		feature.missing.email.from='spatialsearch@emii.org.au'
+		feature.missing.email.subject='Spatial Search Index Action Required'
     }
 
 }

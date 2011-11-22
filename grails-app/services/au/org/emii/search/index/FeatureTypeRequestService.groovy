@@ -15,14 +15,16 @@ class FeatureTypeRequestService {
     static transactional = true
 	
 	def grailsApplication
+	def mailService
 	def featureTypeRequestFactory = [:]
 	
     def index() {
+		def messages = []
 		def featureCount = 0
 		def indexRun = new IndexRun()
 		def metadataRecords = GeonetworkMetadata.findAllByIndexRunIsNull()
 		metadataRecords.each { metadata ->
-			def featureTypeRequestImpl = getFeatureTypeRequestImplementation(metadata.featureTypeName)
+			def featureTypeRequestImpl = getFeatureTypeRequestImplementation(metadata.featureTypeName, messages)
 			
 			try {
 				def features = new ArrayList(featureTypeRequestImpl.requestFeatureType(metadata))
@@ -45,6 +47,8 @@ class FeatureTypeRequestService {
 			 */
 			_save(indexRun)
 		}
+		_sendMail(messages)
+		
 		return featureCount
     }
 	
@@ -89,7 +93,7 @@ class FeatureTypeRequestService {
 		}
 	}
 
-	def getFeatureTypeRequestImplementation(featureTypeName) {
+	def getFeatureTypeRequestImplementation(featureTypeName, messages) {
 		def impl = featureTypeRequestFactory[featureTypeName]
 		if (!impl) {
 			def featureTypeRequestClass = FeatureTypeRequestClass.findByFeatureTypeName(featureTypeName)
@@ -99,6 +103,7 @@ class FeatureTypeRequestService {
 			else {
 				// Use the null implementation
 				impl = new NullFeatureTypeRequest()
+				messages << "No feature type request class configured for $featureTypeName please add an appropriate record to table feature_type_request_class"
 			}
 			featureTypeRequestFactory[featureTypeName] = impl
 		}
@@ -146,5 +151,17 @@ class FeatureTypeRequestService {
 			log.error("Could not parse key \"feature.collection.slice.size\" value \"${s}\" to Integer")
 		}
 		return sliceSize
+	}
+	
+	def _sendMail(messages) {
+		def msgBody = messages.join("\n")
+		if (!messages.isEmpty()) {
+			mailService.sendMail {
+				to grailsApplication.config.feature.missing.email.to
+				from grailsApplication.config.feature.missing.email.from
+				subject grailsApplication.config.feature.missing.email.subject
+				body msgBody
+			}
+		}
 	}
 }
