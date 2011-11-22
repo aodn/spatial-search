@@ -16,7 +16,6 @@ class FeatureTypeRequestService {
 	
 	def grailsApplication
 	def mailService
-	def featureTypeRequestFactory = [:]
 	
     def index() {
 		def messages = []
@@ -95,20 +94,13 @@ class FeatureTypeRequestService {
 
 	def getFeatureTypeRequestImplementation(metadata, messages) {
 		def featureTypeName = metadata.featureTypeName
-		def impl = featureTypeRequestFactory[featureTypeName]
-		if (!impl) {
-			def featureTypeRequestClass = FeatureTypeRequestClass.findByFeatureTypeName(featureTypeName)
-			if (featureTypeRequestClass) {
-				impl = featureTypeRequestClass.featureTypeRequest
-			}
-			else {
-				// Use the null implementation
-				impl = new NullFeatureTypeRequest()
-				messages << "No feature type request class configured for ${metadata.geoserverEndPoint}?$featureTypeName please add an appropriate record to table feature_type_request_class"
-			}
-			featureTypeRequestFactory[featureTypeName] = impl
+		def featureTypeRequestClass = FeatureTypeRequestClass.findByFeatureTypeName(featureTypeName)
+		if (featureTypeRequestClass) {
+			return featureTypeRequestClass.featureTypeRequest
 		}
-		return impl
+		messages << "No feature type request class configured for server ${metadata.geoserverEndPoint} feature type $featureTypeName please add an appropriate record to table feature_type_request_class"
+		// Use the null implementation
+		return new NullFeatureTypeRequest()
 	}
 	
 	def _mapFeatureByFeatureTypeId(featureCollection) {
