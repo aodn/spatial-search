@@ -57,8 +57,8 @@ grails.exceptionresolver.params.exclude = ['password']
 // set per-environment serverURL stem for creating absolute links
 environments {
     production {
-        grails.serverURL = "http://www.changeme.com"
-		geonetwork.search.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/en/xml.search"
+        grails.serverURL = "http://spatialsearchtest.emii.org.au"
+		geonetwork.search.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/en/imos.xml.search"
 		geonetwork.index.serverURL = "${geonetwork.search.serverURL}"
 		geoserver.response.cache.dir = "/tmp"
 		feature.missing.email.to='developers@emii.org.au'
@@ -67,7 +67,7 @@ environments {
     }
     development {
         grails.serverURL = "http://localhost:${grails.server.port.http}/${appName}"
-		geonetwork.search.serverURL = "http://localhost:9090/geonetwork/srv/en/xml.search"
+		geonetwork.search.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/en/imos.xml.search"
 		geonetwork.index.serverURL = "${geonetwork.search.serverURL}"
 		geoserver.response.cache.dir = "/tmp"
 		feature.missing.email.to='fotakt@utas.edu.au'
@@ -76,7 +76,7 @@ environments {
     }
     test {
         grails.serverURL = "http://localhost:${grails.server.port.http}/${appName}"
-		geonetwork.search.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/en/xml.search"
+		geonetwork.search.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/en/imos.xml.search"
 		geonetwork.index.serverURL = "${geonetwork.search.serverURL}"
 		geoserver.response.cache.dir = "/tmp"
 		feature.missing.email.to='fotakt@utas.edu.au'
