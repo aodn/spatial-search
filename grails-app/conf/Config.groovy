@@ -131,8 +131,8 @@ log4j = {
 			root {
 				error 'file', 'stdout'
 			}
-			debug 'grails.app', 'file'
-			debug 'au.org.emii', 'file'
+			info 'grails.app'
+			info 'au.org.emii'
 		}
 		production {
 			root {
