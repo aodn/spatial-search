@@ -162,4 +162,8 @@ databaseChangeLog = {
 	changeSet(author: "tfotak", id: "1321934760000-1") {
 		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:soop_tmv_recent', 'au.org.emii.search.index.FeatureTypeRequest', 'soop_tmv_recent,id,geometry'")
 	}
+	
+	changeSet(author: "tfotak", id: "1322547045000-1") {
+		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:faimms_sensors', 'au.org.emii.search.index.NullFeatureTypeRequest', null")
+	}
 }
