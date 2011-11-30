@@ -1,11 +1,11 @@
 package au.org.emii.search
 
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentProducer;
-import org.apache.http.entity.EntityTemplate;
-import org.apache.http.impl.client.BasicResponseHandler;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.commons.io.IOUtils
+import org.apache.http.client.methods.HttpPost
+import org.apache.http.entity.ContentProducer
+import org.apache.http.entity.EntityTemplate
+import org.apache.http.impl.client.BasicResponseHandler
+import org.apache.http.impl.client.DefaultHttpClient
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
 

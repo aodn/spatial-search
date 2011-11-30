@@ -12,6 +12,9 @@
   <#if from?has_content>
   <from>${from}</from>
   </#if>
+  <#if to?has_content>
+  <to>${to}</to>
+  </#if>
   <#if eastBL?has_content>
   <eastBL>${eastBL}</eastBL>
   </#if>
