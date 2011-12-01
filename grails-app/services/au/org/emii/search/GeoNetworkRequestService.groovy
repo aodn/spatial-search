@@ -26,21 +26,22 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 	static transactional = true
 	
 	def queue(params) {
-		// Add the date params so we only fetch metadata records that have been
-		// modified since last run
-		def lastRun = _isForced(params) ? _initialiseLastRun() : _getLastRun()
-		params.dateFrom = lastRun
-		params.dateTo = new Date()
-		params.fast = 'false'
-		params.protocol = grailsApplication.config.geonetwork.request.protocol
+		def metadata = []
+		def queueSize = _peek(params)
+		if (queueSize == 0) {
+			return metadata
+		}
 		
-		def url = grailsApplication.config.geonetwork.index.serverURL
-		def xml = geoNetworkRequest.request(url, params)
+		// We could have large datasets especially on a forced or new index build
+		// so let's paginate
+		params.from = '1'
+		params.to = '50'
+		metadata.addAll(_queuePage(params))
+		while (_pageForward(params, queueSize)) {
+			metadata.addAll(_queuePage(params))
+		}
 		
-		def geoNetworkResponse = new GeoNetworkResponse(grailsApplication, xml)
-		def metadataCollection = geoNetworkResponse.getGeonetworkMetadataObjects()
-		_saveGeonetworkMetadata(metadataCollection)
-		return metadataCollection
+		return metadata
 	}
 	
 	def search(params) {
@@ -51,6 +52,23 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 			return _geoNetworkSearch(params)
 		}
 		return _spatialSearch(params)
+	}
+	
+	def _queuePage(params) {
+		// Add the date params so we only fetch metadata records that have been
+		// modified since last run
+		def lastRun = _isForced(params) ? _initialiseLastRun() : _getLastRun()
+		params.dateFrom = lastRun
+		params.dateTo = new Date()
+		params.fast = 'false'
+		params.protocol = grailsApplication.config.geonetwork.request.protocol
+		
+		def url = grailsApplication.config.geonetwork.index.serverURL
+		def xml = geoNetworkRequest.request(url, params)
+		def geoNetworkResponse = new GeoNetworkResponse(grailsApplication, xml)
+		def pageMetadata = geoNetworkResponse.getGeonetworkMetadataObjects()
+		_saveGeonetworkMetadata(pageMetadata)
+		return pageMetadata
 	}
 	
 	def _geoNetworkSearch(params) {
@@ -203,5 +221,21 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 	
 	def _updateNumericParam(params, name, value) {
 		params[name] = String.valueOf(value)
+	}
+	
+	def _peek(params) {
+		// Peek ahead to see how many records are going to be queued
+		def lastRun = _isForced(params) ? _initialiseLastRun() : _getLastRun()
+		params.dateFrom = lastRun
+		params.dateTo = new Date()
+		params.fast = 'true'
+		params.protocol = grailsApplication.config.geonetwork.request.protocol
+		params.from = '1'
+		params.to = '1'
+		
+		def url = grailsApplication.config.geonetwork.index.serverURL
+		def xml = geoNetworkRequest.request(url, params)
+		def geoNetworkResponse = new GeoNetworkResponse(grailsApplication, xml)
+		return geoNetworkResponse.count
 	}
 }

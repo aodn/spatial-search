@@ -64,7 +64,7 @@ class GeoNetworkRequestServiceTests extends SpatialSearchingTest {
 		assertEquals 0, xml.summary.@count.toInteger()
 	}
 	
-	def testForceQueue() {
+	void testForceQueue() {
 		geoNetworkRequestService.queue([:])
 		// Index just gliders for now
 		_index(true, ['topp:anfog_glider'])
@@ -78,7 +78,7 @@ class GeoNetworkRequestServiceTests extends SpatialSearchingTest {
 	 * IDE or command line and run the tests accordingly I'm using the following
 	 * GRAILS_OPTS -Xmx1G -Xms512m -XX:PermSize=64m -XX:MaxPermSize=512m
 	 */
-	def testExtraPaginationResponse() { 
+	void testExtraPaginationResponse() { 
 		def metadata = geoNetworkRequestService.queue(['force' : true])
 		_index(true, null)
 		
@@ -87,14 +87,13 @@ class GeoNetworkRequestServiceTests extends SpatialSearchingTest {
 		def params = ['from' : '1', 'to' : '15']
 		def result = _spatialSearch(params, _getInclusiveBounds())
 		def xml = new XmlSlurper().parseText(result)
-		def all = xml.metadata
 		assertTrue 15 < xml.@to.toInteger()
 		assertTrue 15 < params.to.toInteger()
 		// We should only be returning 15 matches
-		assertEquals 15, xml.summary.@count.toInteger()
+		assertEquals 15, xml.metadata.size()
 	}
 	
-	def testKeywordCounts() {
+	void testKeywordCounts() {
 		def params = ['from' : '1', 'to' : '15']
 		def result = _spatialSearch(params, _getAustraliaBounds())
 		def xml = new XmlSlurper().parseText(result)
@@ -103,6 +102,18 @@ class GeoNetworkRequestServiceTests extends SpatialSearchingTest {
 		xml.summary.keywords.keyword.each { keyword ->
 			assertTrue 15 > keyword.@count.toInteger()
 		}
+	}
+	
+	void testQueuePage() {
+		// Check that the search has had to paginate further than the supplied
+		// to parameter
+		def params = ['from' : '1', 'to' : '2', 'force' : 'true']
+		def metadata = geoNetworkRequestService._queuePage(params)
+		// Five is a bit of an arbitrary figure here but reasonably you'd not
+		// expect more than two feature records for a metadata record?  If this
+		// test starts failing look at what is being produced and see if there
+		// is a better test for expected results?
+		assertTrue 5 > metadata.size()
 	}
 	
 	def _addPagingParams(params) {

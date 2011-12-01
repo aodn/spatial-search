@@ -59,7 +59,7 @@ environments {
     production {
         grails.serverURL = "http://spatialsearchtest.emii.org.au"
 		geonetwork.search.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/en/imos.xml.search"
-		geonetwork.index.serverURL = "${geonetwork.search.serverURL}"
+		geonetwork.index.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/en/xml.search"
 		geoserver.response.cache.dir = "/tmp"
 		feature.missing.email.to='developers@emii.org.au'
 		feature.missing.email.from='spatialsearch@emii.org.au'
@@ -68,7 +68,7 @@ environments {
     development {
         grails.serverURL = "http://localhost:${grails.server.port.http}/${appName}"
 		geonetwork.search.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/en/imos.xml.search"
-		geonetwork.index.serverURL = "${geonetwork.search.serverURL}"
+		geonetwork.index.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/en/xml.search"
 		geoserver.response.cache.dir = "/tmp"
 		feature.missing.email.to='fotakt@utas.edu.au'
 		feature.missing.email.from='spatialsearch@emii.org.au'
@@ -76,8 +76,8 @@ environments {
     }
     test {
         grails.serverURL = "http://localhost:${grails.server.port.http}/${appName}"
-		geonetwork.search.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/en/imos.xml.search"
-		geonetwork.index.serverURL = "${geonetwork.search.serverURL}"
+		geonetwork.search.serverURL = "http://localhost:9090/geonetwork/srv/en/xml.search"
+		geonetwork.index.serverURL = "http://localhost:9090/geonetwork/srv/en/xml.search"
 		geoserver.response.cache.dir = "/tmp"
 		feature.missing.email.to='fotakt@utas.edu.au'
 		feature.missing.email.from='spatialsearch@emii.org.au'
@@ -131,15 +131,15 @@ log4j = {
 			root {
 				error 'file', 'stdout'
 			}
-			info 'grails.app'
-			info 'au.org.emii'
+			debug 'grails.app'
+			debug 'au.org.emii'
 		}
 		production {
 			root {
-				error 'file', 'stdout'
+				info 'file', 'stdout'
 			}
-			error 'grails.app', 'file'
-			error 'au.org.emii', 'file'
+			debug 'grails.app', 'file'
+			debug 'au.org.emii', 'file'
 		}
 	}
 }
