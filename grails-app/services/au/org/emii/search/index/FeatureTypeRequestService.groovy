@@ -60,11 +60,6 @@ class FeatureTypeRequestService {
 	}
 	
 	def _loadGeonetworkMetadata() {
-//		def metadataRecords = GeonetworkMetadata.createCriteria() {
-//			isNull("indexRun")
-//			order("geoserverEndPoint")
-//			order("featureTypeName")
-//		}
 		def metadataRecords = GeonetworkMetadata.findAllByIndexRunIsNull()
 		// Piff them out of the main session transaction so when modified by the
 		// async call they can be reloaded here
