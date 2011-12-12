@@ -30,8 +30,11 @@ class IndexController {
 	
 	def _index(params) {
 		def message = "Indexing started at ${new Date()}<br>"
-		def featureCount = featureTypeRequestService.index()
-		message += "${featureCount} features indexed finishing at ${new Date()}<br>"
+		//def featureCount = featureTypeRequestService.index()
+		runAsync {
+			featureTypeRequestService.index()
+		}
+		//message += "${featureCount} features indexed finishing at ${new Date()}<br>"
 		return message
 	}
 }

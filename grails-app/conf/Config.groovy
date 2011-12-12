@@ -131,15 +131,15 @@ log4j = {
 			root {
 				error 'file', 'stdout'
 			}
-			debug 'grails.app'
-			debug 'au.org.emii'
+			info 'grails.app'
+			info 'au.org.emii'
 		}
 		production {
 			root {
-				info 'file', 'stdout'
+				error 'file', 'stdout'
 			}
-			debug 'grails.app', 'file'
-			debug 'au.org.emii', 'file'
+			info 'grails.app', 'file'
+			info 'au.org.emii', 'file'
 		}
 	}
 }
@@ -148,7 +148,7 @@ log4j = {
 geonetwork.request.template.file = "geonetworkRequestTemplate.ftl"
 geonetwork.request.protocol = "OGC:WMS-1.1.1-http-get-map or OGC:WMS-1.3.0-http-get-map"
 geonetwork.link.protocol.regex = 'OGC:WMS-1\\.(1\\.1|3\\.0)-http-get-map'
-geonetwork.feature.type.indentifier.regex = 'topp:'
+geonetwork.feature.type.indentifier.regex = '[a-zA-Z]+:[a-zA-Z]+'
 feature.collection.slice.size = 100
 
 grails.gorm.default.mapping = {

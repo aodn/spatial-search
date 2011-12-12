@@ -54,9 +54,7 @@ class GeonetworkMetadata implements Comparable<GeonetworkMetadata> {
 	
 	@Override
 	String toString() {
-		return new ToStringBuilder(this)
-			.append("geonetworkUuid", geonetworkUuid)
-			.append("featureTypeName", featureTypeName)
+		return idString() + new ToStringBuilder(this)
 			.append("geoserverEndPoint", geoserverEndPoint)
 			.append("added", added)
 			.append("index", indexRun?.id)
@@ -68,5 +66,12 @@ class GeonetworkMetadata implements Comparable<GeonetworkMetadata> {
 			.append(geonetworkUuid, o.geonetworkUuid)
 			.append(featureTypeName, o.featureTypeName)
 			.toComparison()
+	}
+	
+	String idString() {
+		return new ToStringBuilder(this)
+			.append("geonetworkUuid", geonetworkUuid)
+			.append("featureTypeName", featureTypeName)
+			.toString()
 	}
 }

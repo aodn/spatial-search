@@ -14,9 +14,8 @@ class AutonomousUnderwaterVehicleRequest extends FeatureTypeRequest {
 	 * have a unique id
 	 */
 	
-	AutonomousUnderwaterVehicleRequest(String featureTypeElementName, String featureTypeGeometryElementName) {
+	AutonomousUnderwaterVehicleRequest(String featureTypeGeometryElementName) {
 		super()
-		this.featureTypeElementName = featureTypeElementName
 		this.featureTypeGeometryElementName = featureTypeGeometryElementName
 		properties << this.featureTypeGeometryElementName
 	}

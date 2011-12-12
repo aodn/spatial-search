@@ -45,13 +45,10 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 	}
 	
 	def search(params) {
-		// Guard code, if there is no protocol specified by the sender (portal)
-		// in this case then they're not doing a spatial search and we just
-		// return geonetwork results
-		if (!(params.protocol && _isBoundingBoxSubmitted(params))) {
-			return _geoNetworkSearch(params)
+		if (params.protocol && _isBoundingBoxSubmitted(params)) {
+			return _spatialSearch(params)
 		}
-		return _spatialSearch(params)
+		return _geoNetworkSearch(params)
 	}
 	
 	def _queuePage(params) {

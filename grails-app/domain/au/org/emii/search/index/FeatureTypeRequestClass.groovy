@@ -14,29 +14,27 @@ class FeatureTypeRequestClass {
     }
 	
 	def getFeatureTypeRequest() {
-		if (!featureTypeRequest) {
-			def clazz = grailsApplication.getClassLoader().loadClass(className)
-			
-			def args
-			if (constructorArgs) {
-				args = constructorArgs.split(',')
+		def clazz = grailsApplication.getClassLoader().loadClass(className)
+		
+		def args
+		if (constructorArgs) {
+			args = constructorArgs.split(',')
+		}
+		
+		if (!args) {
+			log.debug("Instantiating class ${className} with zero arg constructor")
+			featureTypeRequest = clazz.newInstance()
+			featureTypeRequest.grailsApplication = grailsApplication
+		}
+		else {
+			def argsClasses = new Class[args.length]
+			for (def i = 0; i < args.length; i++) {
+				argsClasses[i] = String.class
 			}
-			
-			if (!args) {
-				log.debug("Instantiating class ${className} with zero arg constructor")
-				featureTypeRequest = clazz.newInstance()
-				featureTypeRequest.grailsApplication = grailsApplication
-			}
-			else {
-				def argsClasses = new Class[args.length]
-				for (def i = 0; i < args.length; i++) {
-					argsClasses[i] = String.class
-				}
-				log.debug("Instantiating class ${className} with constructor args ${args}")
-				def constructor = clazz.getConstructor(argsClasses)
-				featureTypeRequest = constructor.newInstance(args)
-				featureTypeRequest.grailsApplication = grailsApplication
-			}
+			log.debug("Instantiating class ${className} with constructor args ${args}")
+			def constructor = clazz.getConstructor(argsClasses)
+			featureTypeRequest = constructor.newInstance(args)
+			featureTypeRequest.grailsApplication = grailsApplication
 		}
 		return featureTypeRequest
 	}

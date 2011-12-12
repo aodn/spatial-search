@@ -139,6 +139,10 @@ class GeometryHelper {
 	}
 	
 	def _splitCoordsText(coordsText) {
+		// Some tuples or or coords might be comma separated as for AIMS, for a
+		// quick win here just do a global find and replace, refactor as
+		// necessary when other datasources cause problems
+		coordsText = coordsText.replaceAll(',', ' ')
 		return coordsText.split(' ')
 	}
 	

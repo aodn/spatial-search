@@ -1,6 +1,6 @@
 <html>
     <head>
-        <title>Spatial Search Test Form</title>
+        <title>Geoserver Interrogation Form</title>
         <meta name="layout" content="main" />
         <style type="text/css" media="screen">
 
@@ -49,29 +49,21 @@
             margin-right:20px;
         }
         ul {
-        	list-style: none;
+            list-style: none;
         }
         </style>
+        <g:javascript library="prototype" />
     </head>
     <body>
         <div id="form">
-          <g:form id="search_form" action="search">
+          <g:formRemote name="geoserver_interrogation_form" method="GET" url="[ controller: 'describe', action:'query' ]" update="capabilities_div">
           <ul>
-          	<li>Any</li>
-            <li><g:textField name="any" value="" /></li>
-          	<li>Keyword</li>
-            <li><g:textField name="keyword" value="Sea Mammal Research Unit" /></li>
-            <li>North</li>
-            <li><g:textField name="northBL" value="" /></li>
-            <li>East</li>
-            <li><g:textField name="eastBL" value="" /></li>
-            <li>South</li>
-            <li><g:textField name="southBL" value="" /></li>
-            <li>West</li>
-            <li><g:textField name="westBL" value="" /></li>
+            <li>Geoserver</li>
+            <li><g:textField name="geoserver" value="maps.aims.gov.au" /></li>
             <li><g:submitButton name="submit" value="Search" /></li>
           </ul>
-          </g:form>
+          </g:formRemote>
         </div>
+        <div id="capabilities_div"></div>
     </body>
 </html>

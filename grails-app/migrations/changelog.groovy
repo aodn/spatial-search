@@ -113,22 +113,22 @@ databaseChangeLog = {
 	}
 	
 	changeSet(author: "tfotak", id: "1319582037000-2") {
-		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:anfog_glider', 'au.org.emii.search.index.FeatureTypeRequest', 'anfog_glider,uuid,thepoint_lonlat'")
-		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:soop_asf', 'au.org.emii.search.index.DiskCachingFeatureTypeRequest', 'soop_asf,id,geometry'")
-		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:soop_co2', 'au.org.emii.search.index.FeatureTypeRequest', 'soop_co2,id,geometry'")
-		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:soop_tmv', 'au.org.emii.search.index.FeatureTypeRequest', 'soop_tmv,id,geometry'")
-		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:soop_sst_without_1min_vw', 'au.org.emii.search.index.FeatureTypeRequest', 'soop_sst_without_1min_vw,id,geometry'")
-		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:soop_sst_recent_1min_avg_vw', 'au.org.emii.search.index.FeatureTypeRequest', 'soop_sst_recent_1min_avg_vw,id,geometry'")
-		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:anmn_acoustics', 'au.org.emii.search.index.FeatureTypeRequest', 'anmn_acoustics,code,geom'")
-		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:anmn_nrs', 'au.org.emii.search.index.FeatureTypeRequest', 'anmn_nrs,code,geom'")
-		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:anmn_regions', 'au.org.emii.search.index.FeatureTypeRequest', 'anmn_regions,ANMNCODE,geom'")
-		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:argo_float', 'au.org.emii.search.index.FeatureTypeRequest', 'argo_float,uuid,last_location'")
-		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:soop_xbt', 'au.org.emii.search.index.DiskCachingFeatureTypeRequest', 'soop_xbt,id,geometry'")
-		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:ctd_profile_vw', 'au.org.emii.search.index.DiskCachingFeatureTypeRequest', 'ctd_profile_vw,profile_id,geom'")
-		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:radar_stations', 'au.org.emii.search.index.FeatureTypeRequest', 'radar_stations,platform_code,geom'")
-		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:satellite', 'au.org.emii.search.index.FeatureTypeRequest', 'satellite,station,the_geom'")
-		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:sots', 'au.org.emii.search.index.FeatureTypeRequest', 'sots,pkid,geom'")
-		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:auv', 'au.org.emii.search.index.AutonomousUnderwaterVehicleRequest', 'auv,geom'")
+		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:anfog_glider', 'au.org.emii.search.index.FeatureTypeRequest', 'uuid,thepoint_lonlat'")
+		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:soop_asf', 'au.org.emii.search.index.DiskCachingFeatureTypeRequest', 'id,geometry'")
+		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:soop_co2', 'au.org.emii.search.index.FeatureTypeRequest', 'id,geometry'")
+		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:soop_tmv', 'au.org.emii.search.index.FeatureTypeRequest', 'id,geometry'")
+		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:soop_sst_without_1min_vw', 'au.org.emii.search.index.FeatureTypeRequest', 'id,geometry'")
+		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:soop_sst_recent_1min_avg_vw', 'au.org.emii.search.index.FeatureTypeRequest', 'id,geometry'")
+		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:anmn_acoustics', 'au.org.emii.search.index.FeatureTypeRequest', 'code,geom'")
+		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:anmn_nrs', 'au.org.emii.search.index.FeatureTypeRequest', 'code,geom'")
+		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:anmn_regions', 'au.org.emii.search.index.FeatureTypeRequest', 'ANMNCODE,geom'")
+		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:argo_float', 'au.org.emii.search.index.FeatureTypeRequest', 'uuid,last_location'")
+		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:soop_xbt', 'au.org.emii.search.index.DiskCachingFeatureTypeRequest', 'id,geometry'")
+		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:ctd_profile_vw', 'au.org.emii.search.index.DiskCachingFeatureTypeRequest', 'profile_id,geom'")
+		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:radar_stations', 'au.org.emii.search.index.FeatureTypeRequest', 'platform_code,geom'")
+		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:satellite', 'au.org.emii.search.index.FeatureTypeRequest', 'station,the_geom'")
+		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:sots', 'au.org.emii.search.index.FeatureTypeRequest', 'pkid,geom'")
+		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:auv', 'au.org.emii.search.index.AutonomousUnderwaterVehicleRequest', 'geom'")
 	}
 	
 	changeSet(author: "tfotak", id: "1319695385000-1") {
@@ -155,15 +155,19 @@ databaseChangeLog = {
 	}
 	
 	changeSet(author: "tfotak", id: "1320790055000-1") {
-		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:soop_sst', 'au.org.emii.search.index.FeatureTypeRequest', 'soop_sst,id,geometry'")
-		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:soop_asf_recent', 'au.org.emii.search.index.FeatureTypeRequest', 'soop_asf_recent,id,geometry'")
+		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:soop_sst', 'au.org.emii.search.index.FeatureTypeRequest', 'id,geometry'")
+		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:soop_asf_recent', 'au.org.emii.search.index.FeatureTypeRequest', 'id,geometry'")
 	}
 	
 	changeSet(author: "tfotak", id: "1321934760000-1") {
-		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:soop_tmv_recent', 'au.org.emii.search.index.FeatureTypeRequest', 'soop_tmv_recent,id,geometry'")
+		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:soop_tmv_recent', 'au.org.emii.search.index.FeatureTypeRequest', 'id,geometry'")
 	}
 	
 	changeSet(author: "tfotak", id: "1322547045000-1") {
 		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:faimms_sensors', 'au.org.emii.search.index.NullFeatureTypeRequest', null")
+	}
+	
+	changeSet(author: "tfotak", id: "1322802892000-1") {
+		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'aims:AIMS_TRIP_', 'au.org.emii.search.index.AimsFeatureTypeRequest', 'track_id,shape'")
 	}
 }

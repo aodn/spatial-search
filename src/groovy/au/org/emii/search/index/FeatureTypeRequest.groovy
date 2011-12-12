@@ -6,12 +6,9 @@ import org.apache.http.impl.client.DefaultHttpClient
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-import au.org.emii.search.FeatureType;
-import au.org.emii.search.geometry.GeometryHelper;
-
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.PrecisionModel;
-import com.vividsolutions.jts.io.WKTReader;
+import au.org.emii.search.FeatureType
+import au.org.emii.search.GetRequest
+import au.org.emii.search.geometry.GeometryHelper
 
 class FeatureTypeRequest {
 
@@ -30,11 +27,11 @@ class FeatureTypeRequest {
 		geometryHelper = new GeometryHelper();
 	}
 	
-	FeatureTypeRequest(String featureTypeElementName, String featureTypeIdElementName) {
-		this(featureTypeElementName, featureTypeIdElementName, 'geometry')
+	FeatureTypeRequest(String featureTypeIdElementName) {
+		this(featureTypeIdElementName, 'geometry')
 	}
 	
-	FeatureTypeRequest(String featureTypeElementName, String featureTypeIdElementName, String featureTypeGeometryElementName) {
+	FeatureTypeRequest(String featureTypeIdElementName, String featureTypeGeometryElementName) {
 		this()
 		this.featureTypeElementName = featureTypeElementName
 		this.featureTypeIdElementName = featureTypeIdElementName
@@ -44,8 +41,7 @@ class FeatureTypeRequest {
 	}
 	
 	String toGetUrl(GeonetworkMetadata metadata) {
-		def url = "${metadata.geoserverEndPoint}/wfs?service=wfs&version=1.1.0&request=GetFeature&typeName=${metadata.featureTypeName}&propertyName=${properties.join(',')}"
-		return url
+		return "${metadata.geoserverEndPoint}/wfs?service=wfs&version=1.1.0&request=GetFeature&typeName=${metadata.featureTypeName}&propertyName=${properties.join(',')}"
 	}
 	
 	def handleResponse(metadata, xml) {
@@ -54,7 +50,7 @@ class FeatureTypeRequest {
 		if (!xml) {
 			return features
 		}
-		
+		featureTypeElementName = trimNamespace(metadata.featureTypeName)
 		def tree = new XmlSlurper().parseText(xml)
 		tree.featureMembers[0]."${featureTypeElementName}".each { featureTree ->
 			def feature = new FeatureType(metadata)
@@ -82,33 +78,21 @@ class FeatureTypeRequest {
 		return featureTree."${featureTypeIdElementName}".text()
 	}
 	
-	def requestFeatureType(queuedDocument) {
+	def requestFeatureType(geonetworkMetadata) {
 		def httpResponse
 		try {
-			def httpClient = new DefaultHttpClient()
-			def url = toGetUrl(queuedDocument)
-			log.debug("Requesting WFS using GET ${url}")
-			def httpGet = setupHttpGet(url)
-			def responseHandler = getResponseHandler()
-			httpResponse = httpClient.execute(httpGet, responseHandler)
-			httpClient.getConnectionManager().shutdown()
+			def request = new GetRequest()
+			httpResponse = request.request(toGetUrl(geonetworkMetadata), getResponseHandler())
 		}
 		catch (Exception e) {
 			log.error("", e)
 			throw e
 		}
-		return handleResponse(queuedDocument, httpResponse)
+		return handleResponse(geonetworkMetadata, httpResponse)
 	}
 	
 	def getResponseHandler() {
 		return new BasicResponseHandler();
-	}
-	
-	def setupHttpGet(url) {
-		def httpGet = new HttpGet(url)
-		httpGet.addHeader("Content-Type", "text/xml")
-		httpGet.addHeader("Accept", "text/xml,application/xml;q=0.9")
-		return httpGet
 	}
 	
 	def _toGeometry(geometryElement) {
@@ -122,5 +106,12 @@ class FeatureTypeRequest {
 			return geometryElement.Curve.segments.LineStringSegment.join(', ')
 		}
 		return geometryElement.text()
+	}
+	
+	def trimNamespace(name) {
+		if (name.contains(':')) {
+			return name.substring(name.lastIndexOf(':') + 1)
+		}
+		return name
 	}
 }
