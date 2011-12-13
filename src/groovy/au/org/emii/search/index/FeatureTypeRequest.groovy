@@ -57,7 +57,9 @@ class FeatureTypeRequest {
 			feature.featureTypeId = getFeatureId(featureTree)
 			try { 
 				feature.geometry = _toGeometry(featureTree."${featureTypeGeometryElementName}")
-				features << feature
+				if (feature.geometry) {
+					features << feature
+				}
 			}
 			catch (Exception e) {
 				log.error("Could not create geometry for feature ${feature}: " + e.getMessage())
@@ -96,6 +98,9 @@ class FeatureTypeRequest {
 	}
 	
 	def _toGeometry(geometryElement) {
+		if (geometryElement.isEmpty()) {
+			return null
+		}
 		def geometryType = geometryElement.children()[0].name()
 		def text = _getCoordinateText(geometryType, geometryElement)
 		return geometryHelper.toGeometry(geometryType, text)
