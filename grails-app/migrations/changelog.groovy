@@ -16,10 +16,6 @@ databaseChangeLog = {
 				constraints(nullable: "false")
 			}
 
-			column(name: "geometry", type: "geometry") {
-				constraints(nullable: "false")
-			}
-
 			column(name: "geonetwork_uuid", type: "varchar(255)") {
 				constraints(nullable: "false")
 			}
@@ -27,6 +23,17 @@ databaseChangeLog = {
 			column(name: "feature_type_id", type: "varchar(255)") {
 				constraints(nullable: "false")
 			}
+		}
+		
+		sql("SELECT AddGeometryColumn('feature_type', 'geometry', 4326, 'GEOMETRY', 2)")
+		sql("create index idx_ft_geometry on feature_type using gist (geometry)")
+		// The below might need to be run separately, it can't be run as part of a transaction apparently
+		//sql("vacuum analyze feature_type")
+		
+		createIndex(tableName: "feature_type", indexName: "idx_ft_feature_type") {
+			column(name: "feature_type_name")
+			column(name: "geonetwork_uuid")
+			column(name: "feature_type_id")
 		}
 	}
 
@@ -47,6 +54,8 @@ databaseChangeLog = {
 			column(name: "feature_type_name", type: "varchar(255)") {
 				constraints(nullable: "false")
 			}
+			
+			column(name: "constructor_args", type: "varchar(255)")
 		}
 	}
 
@@ -96,20 +105,21 @@ databaseChangeLog = {
 
 			column(name: "index_run_id", type: "int8")
 		}
-	}
-
-	changeSet(author: "tfotak", id: "1318893850589-5") {
+		
+		createIndex(tableName: "geonetwork_metadata", indexName: "idx_qd_feature_type") {
+			column(name: "feature_type_name")
+			column(name: "geonetwork_uuid")
+		}
+		
+		createIndex(tableName: "geonetwork_metadata", indexName: "idx_qd_index_run_id") {
+			column(name: "index_run_id")
+		}
+		
 		addForeignKeyConstraint(baseColumnNames: "index_run_id", baseTableName: "geonetwork_metadata", constraintName: "FKE5C5EA6741AAA315", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "id", referencedTableName: "index_run", referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "tfotak", id: "1318893850589-6") {
 		createSequence(sequenceName: "hibernate_sequence")
-	}
-	
-	changeSet(author: "tfotak", id: "1319582037000-1") {
-		addColumn(tableName: "feature_type_request_class") {
-			column(name: "constructor_args", type: "varchar(255)")
-		}
 	}
 	
 	changeSet(author: "tfotak", id: "1319582037000-2") {
@@ -129,29 +139,6 @@ databaseChangeLog = {
 		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:satellite', 'au.org.emii.search.index.FeatureTypeRequest', 'station,the_geom'")
 		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:sots', 'au.org.emii.search.index.FeatureTypeRequest', 'pkid,geom'")
 		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:auv', 'au.org.emii.search.index.AutonomousUnderwaterVehicleRequest', 'geom'")
-	}
-	
-	changeSet(author: "tfotak", id: "1319695385000-1") {
-		createIndex(tableName: "geonetwork_metadata", indexName: "idx_qd_feature_type") {
-			column(name: "feature_type_name")
-			column(name: "geonetwork_uuid")
-		}
-		
-		createIndex(tableName: "geonetwork_metadata", indexName: "idx_qd_index_run_id") {
-			column(name: "index_run_id")
-		}
-		
-		createIndex(tableName: "feature_type", indexName: "idx_ft_feature_type") {
-			column(name: "feature_type_name")
-			column(name: "geonetwork_uuid")
-			column(name: "feature_type_id")
-		}
-	}
-	
-	changeSet(author: "tfotak", id: "1319695385000-2") {
-		sql("create index idx_ft_geometry on feature_type using gist (geometry)")
-		// The below might need to be run separately, it can't be run as part of a transaction apparently
-		//sql("vacuum analyze feature_type")
 	}
 	
 	changeSet(author: "tfotak", id: "1320790055000-1") {

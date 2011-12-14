@@ -21,6 +21,7 @@ class GeometryHelper {
 	 */
 	def toGeometry(geometryType, text) {
 		def wkt = _toWkt(geometryType, text)
+		log.debug(wkt)
 		def geom = new WKTReader(new GeometryFactory(PRECISION_MODEL, SRID)).read(wkt)
 		return geom
 	}
