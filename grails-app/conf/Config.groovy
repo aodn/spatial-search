@@ -95,7 +95,7 @@ log4j = {
     //    console name:'stdout', layout:pattern(conversionPattern: '%c{2} %m%n')
     //}
 
-	def rollingFile = new RollingFileAppender(name: 'file', layout: pattern(conversionPattern: '%d{ABSOLUTE}:%c: %m%n'))
+	def rollingFile = new RollingFileAppender(name: 'file', layout: pattern(conversionPattern: '%d{ABSOLUTE}:%p:%c: %m%n'))
 	def rollingPolicy = new TimeBasedRollingPolicy(fileNamePattern: '/var/log/spatialsearch/spatialsearch.%d{yyyy-ww}.gz', activeFileName: '/var/log/spatialsearch/spatialsearch.log')
 	
 	rollingPolicy.activateOptions()
@@ -103,7 +103,7 @@ log4j = {
 	
 	appenders {
 		appender rollingFile
-		console name:'stdout', layout:pattern(conversionPattern: '%d{ABSOLUTE}:%c: %m%n')
+		console name:'stdout', layout:pattern(conversionPattern: '%d{ABSOLUTE}:%p:%c: %m%n')
 	}
 	
     error  'org.codehaus.groovy.grails.web.servlet',  //  controllers
