@@ -41,6 +41,8 @@ class FeatureTypeRequest {
 	}
 	
 	String toGetUrl(GeonetworkMetadata metadata) {
+		// Describe feature info URL for convenience when adding new features
+		// ${metadata.geoserverEndPoint}/wfs?service=wfs&version=1.1.0&request=DescribeFeatureType&typeName=topp:soop_ba_mv
 		return "${metadata.geoserverEndPoint}/wfs?service=wfs&version=1.1.0&request=GetFeature&typeName=${metadata.featureTypeName}&propertyName=${properties.join(',')}"
 	}
 	
