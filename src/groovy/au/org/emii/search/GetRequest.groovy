@@ -21,7 +21,7 @@ class GetRequest {
 		def httpResponse
 		try {
 			def httpClient = new DefaultHttpClient()
-			log.debug("Requesting GET ${url}")
+			log.info("Requesting GET ${url}")
 			def httpGet = _setupHttpGet(url)
 			httpResponse = httpClient.execute(httpGet, responseHandler)
 			httpClient.getConnectionManager().shutdown()
