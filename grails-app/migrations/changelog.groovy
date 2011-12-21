@@ -163,4 +163,14 @@ databaseChangeLog = {
 		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:asfs', 'au.org.emii.search.index.FeatureTypeRequest', 'pkid,geom'")
 		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:faimms_vw', 'au.org.emii.search.index.IdAsAttributeFeatureTypeRequest', 'geom'")
 	}
+	
+	changeSet(author: "tfotak", id: "1324506034000-1") {
+		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:deepwater_arrays', 'au.org.emii.search.index.FeatureTypeRequest', 'pkid,geom'")
+		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:zooview', 'au.org.emii.search.index.IdAsAttributeFeatureTypeRequest', 'position'")
+		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:phytoview', 'au.org.emii.search.index.IdAsAttributeFeatureTypeRequest', 'position'")
+		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:srs_altimetry_deployments', 'au.org.emii.search.index.IdAsAttributeFeatureTypeRequest', 'geom'")
+		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:pciview', 'au.org.emii.search.index.IdAsAttributeFeatureTypeRequest', 'position'")
+		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:BioOptical_deployments', 'au.org.emii.search.index.IdAsAttributeFeatureTypeRequest', 'geom'")
+		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'aims:WeatherStation', 'au.org.emii.search.index.FeatureTypeRequest', 'OBJECTID,SHAPE'")
+	}
 }
