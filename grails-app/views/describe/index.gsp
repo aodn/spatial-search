@@ -51,6 +51,20 @@
         ul {
             list-style: none;
         }
+
+        li.heading {
+            margin-top: 5px;
+            font-weight: bold;
+        }
+        
+        li.subheading {
+            font-style: italic;
+        }
+        
+        div {
+            margin: 5px;
+            padding: 5px;
+        }
         </style>
         <g:javascript library="prototype" />
     </head>
@@ -58,12 +72,16 @@
         <div id="form">
           <g:formRemote name="geoserver_interrogation_form" method="GET" url="[ controller: 'describe', action:'query' ]" update="capabilities_div">
           <ul>
-            <li>Geoserver</li>
+            <li class="heading">Geoserver</li>
             <li><g:textField name="geoserver" value="maps.aims.gov.au" /></li>
             <li><g:submitButton name="submit" value="Search" /></li>
           </ul>
           </g:formRemote>
         </div>
+        <p>
         <div id="capabilities_div"></div>
     </body>
+<script type="text/javascript">
+
+</script>
 </html>

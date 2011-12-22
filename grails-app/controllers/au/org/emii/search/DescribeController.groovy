@@ -19,7 +19,13 @@ class DescribeController {
 	}
 	
 	def describe = {
-		
+		def url = _buildUrl(params.getLink, ['request': 'DescribeFeatureType', 'typeName': params.feature_type_name])
+		render(text: _request(url), contentType: 'text/xml', encoding: "UTF-8")
+	}
+	
+	def feature = {
+		def url = _buildUrl(params.getLink, ['maxFeatures': '10', 'request': 'GetFeature', 'typeName': params.feature_type_name])
+		render(text: _request(url), contentType: 'text/xml', encoding: "UTF-8")
 	}
 	
 	def _request(url) {
@@ -41,10 +47,26 @@ class DescribeController {
 		if (!(url =~ /http:\/\//)) {
 			url = "http://${url}"
 		}
-		return "${url}/geoserver/wfs?service=wfs&version=1.1.0"
+		return _appendServiceAndVersion("${url}/geoserver/wfs")
+	}
+	
+	def _buildUrl(url, map) {
+		return _append(_appendServiceAndVersion(url), map)
+	}
+	
+	def _appendServiceAndVersion(url) {
+		return _append("${url}?", ['service': 'wfs', 'version': '1.1.0'])
 	}
 	
 	def _buildGetCapabilities(geoserver) {
-		return _buildBaseUrl(params.geoserver) + '&request=GetCapabilities'
+		return _append(_buildBaseUrl(params.geoserver), ['request': 'GetCapabilities'])
+	}
+	
+	def _append(url, pairs) {
+		def s = new StringBuilder()
+		pairs.each { k, v ->
+			s.append("&${k}=${v}")
+		}
+		return "${url}${s.toString()}"
 	}
 }
