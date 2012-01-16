@@ -58,8 +58,8 @@ grails.exceptionresolver.params.exclude = ['password']
 environments {
     production {
         grails.serverURL = "http://spatialsearchtest.emii.org.au"
-		geonetwork.search.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/en/imos.xml.search"
-		geonetwork.index.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/en/xml.search"
+		geonetwork.search.serverURL = "http://mest-test.aodn.org.au/geonetwork/srv/en/imos.xml.search"
+		geonetwork.index.serverURL = "http://mest-test.aodn.org.au/geonetwork/srv/en/xml.search"
 		geoserver.response.cache.dir = "/tmp"
 		feature.missing.email.to='developers@emii.org.au'
 		feature.missing.email.from='spatialsearch@emii.org.au'
@@ -67,8 +67,8 @@ environments {
     }
     development {
         grails.serverURL = "http://localhost:${grails.server.port.http}/${appName}"
-		geonetwork.search.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/en/imos.xml.search"
-		geonetwork.index.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/en/xml.search"
+		geonetwork.search.serverURL = "http://mest-test.aodn.org.au/geonetwork/srv/en/imos.xml.search"
+		geonetwork.index.serverURL = "http://mest-test.aodn.org.au/geonetwork/srv/en/xml.search"
 		geoserver.response.cache.dir = "/tmp"
 		feature.missing.email.to='fotakt@utas.edu.au'
 		feature.missing.email.from='spatialsearch@emii.org.au'
