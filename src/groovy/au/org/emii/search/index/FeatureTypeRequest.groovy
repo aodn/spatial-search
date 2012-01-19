@@ -1,8 +1,8 @@
 package au.org.emii.search.index
 
-import org.apache.http.client.methods.HttpGet
+import groovy.xml.XmlUtil
+
 import org.apache.http.impl.client.BasicResponseHandler
-import org.apache.http.impl.client.DefaultHttpClient
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -18,13 +18,17 @@ class FeatureTypeRequest {
 	def featureTypeElementName
 	def featureTypeIdElementName
 	def featureTypeGeometryElementName
+	def featureMembersElementName
 	def geometry
 	def grailsApplication
 	def geometryHelper
+	def namespaceAware
 	
 	FeatureTypeRequest() {
 		super()
-		geometryHelper = new GeometryHelper();
+		geometryHelper = new GeometryHelper()
+		namespaceAware = true
+		init()
 	}
 	
 	FeatureTypeRequest(String featureTypeIdElementName) {
@@ -40,10 +44,25 @@ class FeatureTypeRequest {
 		properties << this.featureTypeGeometryElementName
 	}
 	
+	FeatureTypeRequest(String featureTypeIdElementName, String featureTypeGeometryElementName, String namespaceAware) {
+		this(featureTypeIdElementName, featureTypeGeometryElementName)
+		try {
+			this.namespaceAware = Boolean.valueOf(namespaceAware)
+		}
+		catch (Exception e) {
+			log.error("", e)
+		}
+	}
+	
 	String toGetUrl(GeonetworkMetadata metadata) {
 		// Describe feature info URL for convenience when adding new features
 		// ${metadata.geoserverEndPoint}/wfs?service=wfs&version=1.1.0&request=DescribeFeatureType&typeName=topp:soop_ba_mv
 		return "${metadata.geoserverEndPoint}/wfs?service=wfs&version=1.1.0&request=GetFeature&typeName=${metadata.featureTypeName}&propertyName=${properties.join(',')}"
+	}
+	
+	def init() {
+		// Post construction hook
+		featureMembersElementName = 'featureMembers'
 	}
 	
 	def handleResponse(metadata, xml) {
@@ -52,19 +71,25 @@ class FeatureTypeRequest {
 		if (!xml) {
 			return features
 		}
+		
 		featureTypeElementName = trimNamespace(metadata.featureTypeName)
-		def tree = new XmlSlurper().parseText(xml)
-		tree.featureMembers[0]."${featureTypeElementName}".each { featureTree ->
-			def feature = new FeatureType(metadata)
-			feature.featureTypeId = getFeatureId(featureTree)
-			try { 
-				feature.geometry = _toGeometry(featureTree."${featureTypeGeometryElementName}")
-				if (feature.geometry) {
-					features << feature
+		def tree = slurp(xml)
+		
+		tree."${featureMembersElementName}".each { featureMember ->
+			featureMember.children().each { member ->
+				if (featureTypeElementName == member.name()) {
+					def feature = new FeatureType(metadata)
+					feature.featureTypeId = getFeatureId(member)
+					try {
+						feature.gml = getGml(member."${featureTypeGeometryElementName}")
+						if (feature.gml) {
+							features << feature
+						}
+					}
+					catch (Exception e) {
+						log.error("Could not create geometry for feature ${feature}: " + e.getMessage())
+					}
 				}
-			}
-			catch (Exception e) {
-				log.error("Could not create geometry for feature ${feature}: " + e.getMessage())
 			}
 		}
 		
@@ -76,6 +101,10 @@ class FeatureTypeRequest {
 		}
 		
 		return features
+	}
+	
+	def slurp(xml) {
+		return new XmlSlurper(false, namespaceAware).parseText(xml)
 	}
 	
 	def getFeatureId(featureTree) {
@@ -99,26 +128,17 @@ class FeatureTypeRequest {
 		return new BasicResponseHandler();
 	}
 	
-	def _toGeometry(geometryElement) {
-		if (geometryElement.isEmpty()) {
-			return null
-		}
-		def geometryType = geometryElement.children()[0].name()
-		def text = _getCoordinateText(geometryType, geometryElement)
-		return geometryHelper.toGeometry(geometryType, text)
-	}
-	
-	def _getCoordinateText(geometryType, geometryElement) {
-		if ('curve' == geometryType.toLowerCase()) {
-			return geometryElement.Curve.segments.LineStringSegment.join(', ')
-		}
-		return geometryElement.text()
-	}
-	
 	def trimNamespace(name) {
 		if (name.contains(':')) {
 			return name.substring(name.lastIndexOf(':') + 1)
 		}
 		return name
+	}
+	
+	def getGml(geometryElement) {
+		if (geometryElement.isEmpty() || geometryElement.children().isEmpty()) {
+			return null
+		}
+		return XmlUtil.serialize(geometryElement.children()[0])
 	}
 }

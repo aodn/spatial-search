@@ -5,6 +5,7 @@ class FeatureTypeRequestClass {
 	String featureTypeName
 	String className
 	String constructorArgs
+	String featureMembersElementName
 	
 	def featureTypeRequest
 	def grailsApplication

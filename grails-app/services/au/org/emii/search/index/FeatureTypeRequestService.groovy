@@ -1,15 +1,14 @@
 package au.org.emii.search.index
 
-import org.apache.http.client.methods.HttpGet
-import org.apache.http.entity.ContentProducer
-import org.apache.http.entity.EntityTemplate
-import org.apache.http.impl.client.BasicResponseHandler
-import org.apache.http.impl.client.DefaultHttpClient
-import org.codehaus.groovy.grails.commons.GrailsApplication;
-import org.hibernate.LockMode;
-import org.hibernate.exception.SQLGrammarException;
+import java.sql.PreparedStatement
 
-import au.org.emii.search.FeatureType;
+import org.apache.http.client.HttpResponseException;
+import org.hibernate.LockMode
+import org.springframework.dao.DataAccessException
+import org.springframework.jdbc.core.BatchPreparedStatementSetter
+import org.springframework.jdbc.core.JdbcTemplate
+
+import au.org.emii.search.FeatureType
 
 class FeatureTypeRequestService {
 
@@ -18,6 +17,7 @@ class FeatureTypeRequestService {
 	def grailsApplication
 	def sessionFactory
 	def mailService
+	def dataSource
 	def propertyInstanceMap = org.codehaus.groovy.grails.plugins.DomainClassGrailsPlugin.PROPERTY_INSTANCE_MAP
 	
     def index() {
@@ -30,10 +30,19 @@ class FeatureTypeRequestService {
 		def servers = _toFeatureServiceServers(metadataRecords)
 		servers.values().each { server ->
 			server.featureTypeUuids.each { featureTypeName, metadataList ->
-				def future = callAsync {
-					_index(indexRun, metadataList, messages)
+				try {
+					def future = callAsync {
+						_index(indexRun, metadataList, messages)
+					}
+					featureCount += future.get()
 				}
-				featureCount += future.get()
+				catch (HttpResponseException e) {
+					messages << "Error ${server.url} not indexed due to http issue: ${e.toString()}\nCheck logs for more detail."
+				}
+				catch (Exception e) {
+					log.error("", e)
+					messages << "Error ${server.url} not indexed, could not retrieve features: ${e.toString()}"
+				}
 			}
 		}
 		log.info("Finished index run $indexRun")
@@ -44,17 +53,24 @@ class FeatureTypeRequestService {
 	def _index(indexRun, metadataRecords, messages) {
 		def featureCount = 0
 		
-		if (indexRun.documents > 0 || indexRun.failures > 0) {
+		if (indexRun.geonetworkMetadataDocs.size() > 0) {
 			_reattach(indexRun)
 		}
+		
 		def metadata = metadataRecords[0]
 		def featureTypeRequestImpl = getFeatureTypeRequestImplementation(metadata, messages)
 		def features = new ArrayList(featureTypeRequestImpl.requestFeatureType(metadata))
 		if (!features.isEmpty()) {
-			_addFeaturesForOtherMetadata(metadata, features, metadataRecords)
-			_updateIndexRun(indexRun, metadataRecords)
-			_saveMetadataFeatures(metadata, features)
-			featureCount = features.size()
+			try {
+				_addFeaturesForOtherMetadata(metadata, features, metadataRecords)
+				_saveMetadataFeatures(metadata, features)
+				_updateIndexRun(indexRun, metadataRecords)
+				featureCount = features.size()
+			}
+			catch (Exception e) {
+				// Features related to this metadata could not be saved
+				messages << "Error ${metadata.geoserverEndPoint} not indexed: ${e.toString()}"
+			}
 		}
 		return featureCount
 	}
@@ -68,7 +84,6 @@ class FeatureTypeRequestService {
 
 	def _updateIndexRun(indexRun, metadataList) {
 		indexRun.geonetworkMetadataDocs.addAll(metadataList)
-		indexRun.documents += metadataList.size()
 		metadataList*.indexRun = indexRun
 		/*
 		 * This looks stupid and inefficient but if save is not called on
@@ -86,8 +101,12 @@ class FeatureTypeRequestService {
 			def sliceEnd = index + (index + sliceSize < featureCount ? sliceSize : featureCount - index)
 			log.debug("Slicing from $index to " + sliceEnd)
 			def slice = features.subList(index, sliceEnd)
-			_saveFeatures(metadata, slice)
-			_clearGorm()
+			try {
+				_saveFeatures(metadata, slice)
+			}
+			finally {
+				_clearGorm()
+			}
 			// Now evict the features from the session in the hope
 			// the GC will pick them up
 			//features*.discard()
@@ -96,6 +115,7 @@ class FeatureTypeRequestService {
 	}
 	
 	def _saveFeatures(metadata, features) {
+		def featuresToPersist = []
 		def uuids = features.collect { feature -> feature.geonetworkUuid }.unique()
 		def featureTypeIds = features.collect { feature -> feature.featureTypeId }.unique()
 		
@@ -104,12 +124,108 @@ class FeatureTypeRequestService {
 		features.each() { feature ->
 			def featureToPersist = persistedFeaturesMap[feature.featureTypeId]
 			if (featureToPersist) {
-				featureToPersist.geometry = feature.geometry
+				featureToPersist.gml = feature.gml
 			}
 			else {
 				featureToPersist = feature
 			}
-			_save(featureToPersist)
+			featuresToPersist << featureToPersist
+		}
+		_jdbcBatchSaveFeatures(featuresToPersist)
+	}
+	
+	def _jdbcBatchSaveFeatures(features) {
+		def inserts = []
+		def updates = []
+		
+		features.each { feature ->
+			if (feature.id) {
+				updates << feature
+			}
+			else {
+				inserts << feature
+			}
+		}
+		
+		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource)
+		_doFeaturesJdbcBatchUpdate(jdbcTemplate, updates)
+		_doFeaturesJdbcBatchInsert(jdbcTemplate, inserts)
+	}
+	
+	def _doFeaturesJdbcBatchInsert(jdbcTemplate, featuresToInsert) {
+		if (!featuresToInsert.isEmpty()) {
+			try {
+				jdbcTemplate.batchUpdate(
+					"insert into feature_type (id, version, feature_type_id, feature_type_name, geonetwork_uuid, geometry) values (nextval('hibernate_sequence'), 0, ?, ?, ?, st_geomfromgml(?))", 
+					_getFeaturesJdbcBatchInsertStatementSetter(featuresToInsert)
+				)
+			}
+			catch (DataAccessException e) {
+				log.error('', e)
+				throw e
+			}
+			catch (Exception e) {
+				log.error('', e)
+				throw e
+			}
+		}
+	}
+	
+	def _doFeaturesJdbcBatchUpdate(jdbcTemplate, featuresToUpdate) {
+		if (!featuresToUpdate.isEmpty()) {
+			try {
+				jdbcTemplate.batchUpdate(
+					"update feature_type set version = version + 1, feature_type_id = ?, feature_type_name = ?, geonetwork_uuid = ?, geometry = st_geomfromgml(?) where id = ?",
+					_getFeaturesJdbcBatchUpdateStatementSetter(featuresToUpdate)
+				)
+			}
+			catch (DataAccessException e) {
+				log.error('', e)
+				throw e
+			}
+			catch (Exception e) {
+				log.error('', e)
+				throw e
+			}
+		}
+	}
+	
+	def _getFeaturesJdbcBatchInsertStatementSetter(featuresToInsert) {
+		return new BatchPreparedStatementSetter() {
+			def inserts = featuresToInsert
+			
+			int getBatchSize() {
+				return inserts.size();
+			}
+			
+			void setValues(PreparedStatement ps, int i) {
+				def feature = inserts[i]
+				int j = 1
+				ps.setString(j++, feature.featureTypeId)
+				ps.setString(j++, feature.featureTypeName)
+				ps.setString(j++, feature.geonetworkUuid)
+				ps.setString(j++, feature.gml)
+			}
+		}
+	}
+	
+	def _getFeaturesJdbcBatchUpdateStatementSetter(featuresToUpdate) {
+		return new BatchPreparedStatementSetter() {
+			def updates = featuresToUpdate
+			
+			int getBatchSize() {
+				return updates.size();
+			}
+			
+			void setValues(PreparedStatement ps, int i) {
+				def feature = updates[i]
+				int j = 1
+				ps.setString(j++, feature.featureTypeId)
+				ps.setString(j++, feature.featureTypeName)
+				ps.setString(j++, feature.geonetworkUuid)
+				ps.setString(j++, feature.gml)
+				ps.setLong(j++, feature.id)
+			}
 		}
 	}
 	
@@ -139,7 +255,11 @@ class FeatureTypeRequestService {
 					log.info("Best match for feature type currently ${bestMatch.featureTypeName}")
 				}
 			}
-			return bestMatch.featureTypeRequest
+			def instance = bestMatch.featureTypeRequest
+			if (bestMatch.featureMembersElementName) {
+				instance.featureMembersElementName = bestMatch.featureMembersElementName
+			}
+			return instance
 		}
 		messages << "No feature type request class configured for server ${metadata.geoserverEndPoint} feature type $featureTypeName please add an appropriate record to table feature_type_request_class"
 		// Use the null implementation
@@ -239,7 +359,7 @@ class FeatureTypeRequestService {
 			if (otherMetadata.geonetworkUuid != metadata.geonetworkUuid) {
 				def copy = new FeatureType(otherMetadata)
 				copy.featureTypeId = feature.featureTypeId
-				copy.geometry = feature.geometry
+				copy.gml = feature.gml
 				features << copy
 			}
 		}

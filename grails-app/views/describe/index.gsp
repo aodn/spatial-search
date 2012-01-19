@@ -73,7 +73,7 @@
           <g:formRemote name="geoserver_interrogation_form" method="GET" url="[ controller: 'describe', action:'query' ]" update="capabilities_div">
           <ul>
             <li class="heading">Geoserver</li>
-            <li><g:textField name="geoserver" value="maps.aims.gov.au" /></li>
+            <li><g:textField name="geoserver" value="" /></li>
             <li><g:submitButton name="submit" value="Search" /></li>
           </ul>
           </g:formRemote>

@@ -122,7 +122,9 @@ class GeoNetworkResponse {
 	}
 	
 	def _serverEndPointFrom(url) {
-		return url.substring(0, url.lastIndexOf("/"))
+		def markPoint = url.indexOf("?")
+		def endPoint = markPoint > 0 ? url.substring(0, markPoint) : url
+		return endPoint.substring(0, endPoint.lastIndexOf("/"))
 	}
 	
 	def _collectUuid(metadataNode) {

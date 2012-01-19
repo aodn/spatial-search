@@ -7,12 +7,8 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 class IndexRun {
 
 	Timestamp runDate
-	Integer documents
-	Integer failures
 	
     static constraints = {
-		documents(nullable: true)
-		failures(nullable: true)
     }
 	
 	static hasMany = [
@@ -22,8 +18,6 @@ class IndexRun {
 	IndexRun() {
 		super()
 		runDate = new Timestamp(System.currentTimeMillis())
-		documents = new Integer(0)
-		failures = new Integer(0)
 		geonetworkMetadataDocs = []
 	}
 	
@@ -31,8 +25,6 @@ class IndexRun {
 	String toString() {
 		return new ToStringBuilder(this)
 			.append("runDate", runDate)
-			.append("documents", documents)
-			.append("failures", failures)
 			.toString()
 	}
 }

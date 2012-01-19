@@ -603,6 +603,12 @@ Following a public call for proposals in 2007 for the IMOS infrastructure, the o
 		assertFalse true && result =~ />\s/
 	}
 	
+	void testServerEndPointFrom() {
+		assertEquals 'http://www.cmar.csiro.au/geoserver', geoNetworkResponse._serverEndPointFrom('http://www.cmar.csiro.au/geoserver/wms?service=WMS&version=1.1.0&request=GetMap&layers=bioreg:CAAB37018013&styles=&bbox=111.4,-44.3,156.5,-10.0&width=512&height=389&srs=EPSG:4326&format=application/openlayers')
+		assertEquals 'http://www.metoc.gov.au/geoserver', geoNetworkResponse._serverEndPointFrom('http://www.metoc.gov.au/geoserver/wms?SERVICE=WMS&')
+		assertEquals 'http://maps.aims.gov.au/geoserver', geoNetworkResponse._serverEndPointFrom('http://maps.aims.gov.au/geoserver/wms')
+	}
+	
 	def _getGliderFeature() {
 		mockDomain(FeatureType)
 		def featureType = new FeatureType()

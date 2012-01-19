@@ -29,6 +29,10 @@ class DiskCachingFeatureTypeRequest extends FeatureTypeRequest implements Respon
 		super(featureTypeIdElementName)
 	}
 	
+	DiskCachingFeatureTypeRequest(String featureTypeIdElementName, String featureTypeGeometryElementName, String namespaceAware) {
+		super(featureTypeIdElementName, featureTypeGeometryElementName, namespaceAware)
+	}
+	
 	def handleResponse(metadata, filePath) {
 		def features = [] as Set
 		if (filePath) {

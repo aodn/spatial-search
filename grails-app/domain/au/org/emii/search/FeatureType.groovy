@@ -10,6 +10,7 @@ class FeatureType {
 	String featureTypeName
 	String featureTypeId
 	Geometry geometry
+	String gml
 	
 	static mapping = {
 		featureTypeName index: 'idx_ft_feature_type'
@@ -20,6 +21,8 @@ class FeatureType {
 	
     static constraints = {
     }
+	
+	static transients = ['gml']
 	
 	FeatureType() {
 		super()

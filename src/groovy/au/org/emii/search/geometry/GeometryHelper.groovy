@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory
 
 import com.vividsolutions.jts.geom.GeometryFactory
 import com.vividsolutions.jts.geom.PrecisionModel
-import com.vividsolutions.jts.io.ParseException;
+import com.vividsolutions.jts.io.ParseException
 import com.vividsolutions.jts.io.WKTReader
 
 class GeometryHelper {
@@ -19,11 +19,16 @@ class GeometryHelper {
 	 * Text may be a coordinate string or a list of lists of coordinate strings
 	 * in the case of creating a multipolygon
 	 */
-	def toGeometry(geometryType, text) {
+	def toGeometryFromCoordinateText(geometryType, text) {
 		def wkt = _toWkt(geometryType, text)
 		log.debug(wkt)
 		def geom = new WKTReader(new GeometryFactory(PRECISION_MODEL, SRID)).read(wkt)
 		return geom
+	}
+	
+	def toGeometryFromGmlElement(geometryType, gmlElement) {
+		def text = _getCoordinateText(geometryType, gmlElement)
+		return toGeometryFromCoordinateText(geometryType, text)
 	}
 	
 	def toBoundingBox(north, east, south, west) {
@@ -114,8 +119,12 @@ class GeometryHelper {
 		return builder.toString()
 	}
 	
+	def _toMultiSurface(sequences) {
+		return _toMultiPolygon(sequences)
+	}
+	
 	def _toCoordinateSequence(builder, text) {
-		def coords = _splitCoordsText(text)
+		String[] coords = _splitCoordsText(text)
 		builder.append('(')
 		for (def i = 1; i < coords.size(); i += 2) {
 			_appendLongLatPair(builder, coords[i], coords[i - 1], ' ')
@@ -125,7 +134,7 @@ class GeometryHelper {
 		builder.append(')')
 	}
 	
-	def _appendLongLatPair(builder, longitude, latitude, delimeter) {
+	def _appendLongLatPair(StringBuilder builder, String longitude, String latitude, String delimeter) {
 		builder.append(longitude)
 		builder.append(delimeter)
 		builder.append(latitude)
@@ -140,7 +149,7 @@ class GeometryHelper {
 	}
 	
 	def _splitCoordsText(coordsText) {
-		// Some tuples or or coords might be comma separated as for AIMS, for a
+		// Some tuples or coords might be comma separated as for AIMS, for a
 		// quick win here just do a global find and replace, refactor as
 		// necessary when other datasources cause problems
 		coordsText = coordsText.replaceAll(',', ' ')
@@ -158,7 +167,7 @@ class GeometryHelper {
 	}
 	
 	def _toPolygonBoundingBox(north, east, south, west) {
-		return toGeometry('Polygon', "${north} ${west} ${north} ${east} ${south} ${east} ${south} ${west} ${north} ${west}")
+		return toGeometryFromCoordinateText('Polygon', "${north} ${west} ${north} ${east} ${south} ${east} ${south} ${west} ${north} ${west}")
 	}
 	
 	def _toMultiPolygonBoundingBox(north, east, south, west) {
@@ -166,6 +175,28 @@ class GeometryHelper {
 		def eastSide = ["${north} -180 ${north} ${east} ${south} ${east} ${south} -180 ${north} -180"]
 		def westSide = ["${north} ${west} ${north} 180 ${south} 180 ${south} ${west} ${north} ${west}"]
 		def multiPolygonSequence = [eastSide, westSide]
-		return toGeometry('MultiPolygon', multiPolygonSequence)
+		return toGeometryFromCoordinateText('MultiPolygon', multiPolygonSequence)
+	}
+	
+	def _getCoordinateText(geometryType, gmlElement) {
+		if ('curve' == geometryType.toLowerCase()) {
+			return gmlElement.Curve.segments.LineStringSegment.join(', ')
+		}
+		else if ('multisurface' == geometryType.toLowerCase()) {
+			return _getMultiSurfaceCoordinateText(gmlElement)
+		}
+		return gmlElement.text()
+	}
+	
+	def _getMultiSurfaceCoordinateText(gmlElement) {
+		def sequences = []
+		gmlElement.surfaceMember.each() { member ->
+			def memberSequence = []
+			member.Polygon.children().each { linearRing ->
+				memberSequence << linearRing.text()
+			}
+			sequences << memberSequence
+		}
+		return sequences
 	}
 }
