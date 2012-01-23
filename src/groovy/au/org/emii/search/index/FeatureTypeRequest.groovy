@@ -40,7 +40,10 @@ class FeatureTypeRequest {
 		this.featureTypeElementName = featureTypeElementName
 		this.featureTypeIdElementName = featureTypeIdElementName
 		this.featureTypeGeometryElementName = featureTypeGeometryElementName
-		properties << this.featureTypeIdElementName
+		// Don't push the id as a property if it's an attribute
+		if (!this.featureTypeIdElementName.startsWith('@')) {
+			properties << this.featureTypeIdElementName
+		}
 		properties << this.featureTypeGeometryElementName
 	}
 	

@@ -198,4 +198,13 @@ databaseChangeLog = {
 		}
 		sql("update feature_type_request_class set feature_members_element_name = 'featureMember' where feature_type_name = 'bioreg:CAAB'")
 	}
+	
+	changeSet(author: "tfotak", id: "1327357239000-3", failOnError: true) {
+		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'ran:xbt', 'au.org.emii.search.index.NullFeatureTypeRequest', null")
+		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'ran:secchi', 'au.org.emii.search.index.DiskCachingFeatureTypeRequest', '@id,SHAPE'")
+		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'ran:biolum', 'au.org.emii.search.index.DiskCachingFeatureTypeRequest', '@id,SHAPE'")
+		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'ran:seabed', 'au.org.emii.search.index.DiskCachingFeatureTypeRequest', '@id,SHAPE'")
+		sql("update feature_type_request_class set class_name = 'au.org.emii.search.index.FeatureTypeRequest', constructor_args = '@id,' || constructor_args where class_name = 'au.org.emii.search.index.IdAsAttributeFeatureTypeRequest'")
+		
+	}
 }
