@@ -75,9 +75,7 @@ class FeatureTypeRequest {
 			return features
 		}
 		
-		featureTypeElementName = trimNamespace(metadata.featureTypeName)
 		def tree = slurp(xml)
-		
 		tree."${featureMembersElementName}".each { featureMember ->
 			featureMember.children().each { member ->
 				if (featureTypeElementName == member.name()) {
@@ -115,6 +113,7 @@ class FeatureTypeRequest {
 	}
 	
 	def requestFeatureType(geonetworkMetadata) {
+		featureTypeElementName = trimNamespace(geonetworkMetadata.featureTypeName)
 		def httpResponse
 		try {
 			def request = new GetRequest()
