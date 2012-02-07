@@ -39,8 +39,12 @@
   <#if abstract?has_content>
   <abstract>${abstract}</abstract>
   </#if>
-  <#if themekey?has_content>
-  <themekey>${themekey}</themekey>
+  <#if themeKey?has_content>
+  <#if themeKey?is_enumerable>
+  <themekey><#list themeKey as item>${item}<#if item_has_next> or </#if></#list></themekey>
+  <#else>
+  <themekey>${themeKey}</themekey>
+  </#if>
   </#if>
   <#if template?has_content>
   <template>${template}</template>
