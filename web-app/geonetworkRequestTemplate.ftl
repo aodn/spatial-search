@@ -80,7 +80,25 @@
   <extTo>${extTo?string("yyyy-MM-dd")}</extTo>
   </#if>
   <#if category?has_content>
+  <#if category?is_enumerable>
+  <category><#list category as item>${item}<#if item_has_next> or </#if></#list></category>
+  <#else>
   <category>${category}</category>
+  </#if>
+  </#if>
+  <#if orgName?has_content>
+  <#if orgName?is_enumerable>
+  <orgName><#list orgName as item>${item}<#if item_has_next> or </#if></#list></orgName>
+  <#else>
+  <orgName>${orgName}</orgName>
+  </#if>
+  </#if>
+  <#if dataparam?has_content>
+  <#if dataparam?is_enumerable>
+  <longParamName><#list dataparam as item>${item}<#if item_has_next> or </#if></#list></longParamName>
+  <#else>
+  <longParamName>${dataparam}</longParamName>
+  </#if>
   </#if>
   <#if sortBy?has_content>
   <sortBy>${sortBy}</sortBy>
