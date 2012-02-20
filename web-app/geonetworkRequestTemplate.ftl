@@ -39,9 +39,14 @@
   <#if abstract?has_content>
   <abstract>${abstract}</abstract>
   </#if>
+  <#-- Example with has_next peek <#list themekey as item>${item}<#if item_has_next> or </#if></#list> -->
   <#if themekey?has_content>
   <#if themekey?is_enumerable>
-  <themekey><#list themekey as item>${item}<#if item_has_next> or </#if></#list></themekey>
+  <#list themekey as item>
+  <#if item?has_content>
+  <themekey>${item}</themekey>
+  </#if>
+  </#list>
   <#else>
   <themekey>${themekey}</themekey>
   </#if>
@@ -81,23 +86,46 @@
   </#if>
   <#if category?has_content>
   <#if category?is_enumerable>
-  <category><#list category as item>${item}<#if item_has_next> or </#if></#list></category>
+  <#list category as item>
+  <#if item?has_content>
+  <category>${item}</category>
+  </#if>
+  </#list>
   <#else>
   <category>${category}</category>
   </#if>
   </#if>
   <#if orgName?has_content>
   <#if orgName?is_enumerable>
-  <orgName><#list orgName as item>${item}<#if item_has_next> or </#if></#list></orgName>
+  <#list orgName as item>
+  <#if item?has_content>
+  <orgName>${item}</orgName>
+  </#if>
+  </#list>
   <#else>
   <orgName>${orgName}</orgName>
   </#if>
   </#if>
   <#if dataparam?has_content>
   <#if dataparam?is_enumerable>
-  <longParamName><#list dataparam as item>${item}<#if item_has_next> or </#if></#list></longParamName>
+  <#list dataparam as item>
+  <#if item?has_content>
+  <dataparam>${item}</dataparam>
+  </#if>
+  </#list>
   <#else>
-  <longParamName>${dataparam}</longParamName>
+  <dataparam>${dataparam}</dataparam>
+  </#if>
+  </#if>
+  <#if longParamName?has_content>
+  <#if longParamName?is_enumerable>
+  <#list longParamName as item>
+  <#if item?has_content>
+  <longParamName>${item}</longParamName>
+  </#if>
+  </#list>
+  <#else>
+  <longParamName>${longParamName}</longParamName>
   </#if>
   </#if>
   <#if sortBy?has_content>

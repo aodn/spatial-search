@@ -71,6 +71,7 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 	def _geoNetworkSearch(params) {
 		// Ensure we get back all the data we need to present to the user
 		params.fast = 'false'
+		_listifyKnownListParams(params)
 		def url = grailsApplication.config.geonetwork.search.serverURL
 		def xml = geoNetworkRequest.request(url, params)
 		return xml
@@ -234,5 +235,14 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 		def xml = geoNetworkRequest.request(url, params)
 		def geoNetworkResponse = new GeoNetworkResponse(grailsApplication, xml)
 		return geoNetworkResponse.count
+	}
+	
+	def _listifyKnownListParams(params) {
+		def knownListParams = grailsApplication.config.geonetwork.search.list.params.items
+		params.each { name, value ->
+			if (knownListParams.contains(name)) {
+				params[name] = value.split(grailsApplication.config.geonetwork.search.list.params.delimiter)
+			}
+		}
 	}
 }

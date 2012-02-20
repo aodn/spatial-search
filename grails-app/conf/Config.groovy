@@ -150,6 +150,8 @@ geonetwork.request.template.file = "geonetworkRequestTemplate.ftl"
 geonetwork.request.protocol = "OGC:WMS-1.1.1-http-get-map or OGC:WMS-1.3.0-http-get-map"
 geonetwork.link.protocol.regex = 'OGC:WMS-1\\.(1\\.1|3\\.0)-http-get-map'
 geonetwork.feature.type.indentifier.regex = '[a-zA-Z]+:[a-zA-Z]+'
+geonetwork.search.list.params.items = ['themekey', 'category', 'orgName', 'dataparam', 'longParamName']
+geonetwork.search.list.params.delimiter = ','
 feature.collection.slice.size = 100
 
 grails.gorm.default.mapping = {
