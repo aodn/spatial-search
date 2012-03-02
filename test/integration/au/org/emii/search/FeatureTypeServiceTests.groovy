@@ -6,7 +6,7 @@ import org.hibernatespatial.criterion.SpatialRestrictions
 
 import au.org.emii.search.geometry.GeometryHelper
 
-class FeatureTypeTests extends SpatialSearchingTest {
+class FeatureTypeServiceTests extends SpatialSearchingServiceTest {
     
 	protected void setUp() {
         //super.setUp()

@@ -3,7 +3,7 @@ package au.org.emii.search
 import grails.test.*
 import au.org.emii.search.index.GeonetworkMetadata
 
-class GeoNetworkRequestServiceTests extends SpatialSearchingTest {
+class GeoNetworkRequestServiceServiceTests extends SpatialSearchingServiceTest {
     
 	protected void setUp() {
         super.setUp()

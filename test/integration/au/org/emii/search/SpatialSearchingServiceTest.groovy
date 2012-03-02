@@ -2,7 +2,7 @@ package au.org.emii.search
 
 import au.org.emii.search.index.GeonetworkMetadata;
 
-class SpatialSearchingTest extends GroovyTestCase {
+class SpatialSearchingServiceTest extends GroovyTestCase {
 	
 	def geoNetworkRequestService
 	def featureTypeRequestService
