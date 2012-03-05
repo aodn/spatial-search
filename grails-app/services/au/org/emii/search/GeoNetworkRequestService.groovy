@@ -22,7 +22,7 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 	
 	def grailsApplication
 	def geoNetworkRequest
-	
+
 	static transactional = true
 	
 	def queue(params) {
@@ -45,8 +45,9 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 	}
 	
 	def search(params) {
+        log.debug("search params: " + params)
 		if (params.protocol && _isBoundingBoxSubmitted(params)) {
-			return _spatialSearch(params)
+            return _spatialSearch(params)
 		}
 		return _geoNetworkSearch(params)
 	}
@@ -79,23 +80,22 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 	
 	def _spatialSearch(params) {
 		params.relation = 'intersects'
-		
-		def pageSize = null
+        def pageSize = _getPageSize(params)
+
 		if (_isPaging(params)) {
-			// Grab an additional two pages worth from geonetwork i.e. three pages
-			def to = _getNumericParam(params, 'to')
-			pageSize = _getPageSize(params)
+            def to = _getNumericParam(params, 'to')
+
 			def pageEnd = pageSize * 2 + to
 			_updateNumericParam(params, 'to', pageEnd)
 		}
-		
+
 		def xml = _geoNetworkSearch(params)
 		def geoNetworkResponse = new GeoNetworkResponse(grailsApplication, xml)
 		def metadataCollection = geoNetworkResponse.getGeonetworkMetadataObjects()
-		
+
 		def features = _searchForFeatures(params, geoNetworkResponse.uuids)
 		xml = geoNetworkResponse.getSpatialResponse(metadataCollection, features, pageSize)
-		
+
 		if (!features && _pageForward(params, geoNetworkResponse.count)) {
 			xml = _spatialSearch(params)
 		}
@@ -191,10 +191,12 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 	}
 	
 	def _getPageSize(params) {
-		def from = _getNumericParam(params, 'from')
-		def to = _getNumericParam(params, 'to')
-		def pageSize = _getPageSize(from, to)
-		return pageSize
+        if (!params.pageSize) {
+            def from = _getNumericParam(params, 'from')
+            def to = _getNumericParam(params, 'to')
+            params.pageSize = _getPageSize(from, to)
+        }
+		return params.pageSize
 	}
 	
 	def _getPageSize(from, to) {
