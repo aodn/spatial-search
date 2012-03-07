@@ -73,16 +73,16 @@
   <attrset>${attrset}</attrset>
   </#if>
   <#if dateFrom?has_content>
-  <dateFrom>${dateFrom?string("yyyy-MM-dd")}</dateFrom>
+  <dateFrom>${dateFrom}</dateFrom>
   </#if>
   <#if dateTo?has_content>
-  <dateTo>${dateTo?string("yyyy-MM-dd")}</dateTo>
+  <dateTo>${dateTo}</dateTo>
   </#if>
   <#if extFrom?has_content>
-  <extFrom>${extFrom?string("yyyy-MM-dd")}</extFrom>
+  <extFrom>${extFrom}</extFrom>
   </#if>
   <#if extTo?has_content>
-  <extTo>${extTo?string("yyyy-MM-dd")}</extTo>
+  <extTo>${extTo}</extTo>
   </#if>
   <#if category?has_content>
   <#if category?is_enumerable>
