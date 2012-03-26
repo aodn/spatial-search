@@ -4,6 +4,7 @@ import groovy.xml.MarkupBuilder;
 import groovy.xml.StreamingMarkupBuilder;
 
 import java.sql.Timestamp
+import java.text.SimpleDateFormat;
 
 import org.hibernate.criterion.Restrictions;
 import org.hibernatespatial.criterion.SpatialRestrictions;
@@ -56,8 +57,8 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 		// Add the date params so we only fetch metadata records that have been
 		// modified since last run
 		def lastRun = _isForced(params) ? _initialiseLastRun() : _getLastRun()
-		params.dateFrom = lastRun
-		params.dateTo = new Date()
+		params.dateFrom = _dateToString(lastRun)
+		params.dateTo = _dateToString(new Date())
 		params.fast = 'false'
 		params.protocol = grailsApplication.config.geonetwork.request.protocol
 		
@@ -226,8 +227,8 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 	def _peek(params) {
 		// Peek ahead to see how many records are going to be queued
 		def lastRun = _isForced(params) ? _initialiseLastRun() : _getLastRun()
-		params.dateFrom = lastRun
-		params.dateTo = new Date()
+		params.dateFrom = _dateToString(lastRun)
+		params.dateTo = _dateToString(new Date())
 		params.fast = 'true'
 		params.protocol = grailsApplication.config.geonetwork.request.protocol
 		params.from = '1'
@@ -246,5 +247,10 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 				params[name] = value.split(grailsApplication.config.geonetwork.search.list.params.delimiter)
 			}
 		}
+	}
+	
+	def _dateToString(date) {
+		def sdf = new SimpleDateFormat("yyyy-MM-dd")
+		return sdf.format(date)
 	}
 }
