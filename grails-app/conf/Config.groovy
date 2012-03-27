@@ -54,6 +54,10 @@ grails.spring.bean.packages = []
 // request parameters to mask when logging exceptions
 grails.exceptionresolver.params.exclude = ['password']
 
+// Database migration.
+grails.plugin.databasemigration.updateOnStart = true
+grails.plugin.databasemigration.updateOnStartFileNames = ['changelog.groovy']
+
 // set per-environment serverURL stem for creating absolute links
 environments {
     production {
@@ -153,6 +157,21 @@ geonetwork.feature.type.indentifier.regex = '[a-zA-Z]+:[a-zA-Z]+'
 geonetwork.search.list.params.items = ['themekey', 'category', 'orgName', 'dataparam', 'longParamName']
 geonetwork.search.list.params.delimiter = ','
 feature.collection.slice.size = 100
+
+if(!grails.config.locations || !(grails.config.locations instanceof List)) {
+	grails.config.locations = []
+}
+
+if (System.properties["${appName}.config.location"]) {
+	grails.config.locations << "file:" + System.properties["${appName}.config.location"]
+}
+else {
+	def configInstance = System.properties["${appName}.instance"] ?: System.getenv("${appName}.instance")
+	if (configInstance) {
+		grails.config.locations << "classpath:instances/${configInstance}Config.groovy"
+		grails.config.locations << "file:./instances/${configInstance}Config.groovy"
+	}
+}
 
 grails.gorm.default.mapping = {
    'user-type'(type:org.hibernatespatial.GeometryUserType, class:com.vividsolutions.jts.geom.Geometry)

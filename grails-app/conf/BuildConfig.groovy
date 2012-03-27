@@ -47,4 +47,8 @@ grails.war.resources = {
 	 delete(file:"${stagingDir}/WEB-INF/lib/slf4j-api-1.5.2.jar")
 
 	 delete(file:"${stagingDir}/WEB-INF/lib/servlet-api-2.3.jar")
+	 
+	 copy(toDir: "${stagingDir}/WEB-INF/classes/instances") {
+		 fileset(dir: "instances")
+	 }
 }
