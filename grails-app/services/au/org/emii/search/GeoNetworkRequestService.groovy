@@ -75,6 +75,7 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 		params.fast = 'false'
 		_listifyKnownListParams(params)
 		def url = grailsApplication.config.geonetwork.search.serverURL
+		log.info("Searching geonetwork instance at $url")
 		def xml = geoNetworkRequest.request(url, params)
 		return xml
 	}
@@ -235,6 +236,7 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 		params.to = '1'
 		
 		def url = grailsApplication.config.geonetwork.index.serverURL
+		log.info("Using geonetwork instance at $url indexing changes between $params.dateFrom and $params.dateTo")
 		def xml = geoNetworkRequest.request(url, params)
 		def geoNetworkResponse = new GeoNetworkResponse(grailsApplication, xml)
 		return geoNetworkResponse.count
