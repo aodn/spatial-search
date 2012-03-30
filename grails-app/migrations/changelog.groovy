@@ -211,4 +211,14 @@ databaseChangeLog = {
 	changeSet(author: "tfotak", id: "1333080327000-1", failOnError: true) {
 		sql("insert into feature_type_request_class (id, version, class_name, feature_type_name, constructor_args, feature_members_element_name) select nextval('hibernate_sequence'), 0, class_name, 'imos'||substring(feature_type_name from position(':' in feature_type_name)), constructor_args, feature_members_element_name from feature_type_request_class where feature_type_name like 'topp:%'")
 	}
+    
+    changeSet(author: "craigj", id: "1333080327000-2", failOnError: true) {
+        sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'imos:argo_aggregation', 'au.org.emii.search.index.FeatureTypeRequest', 'uuid,geometry'")
+        sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'imos:ANMN_SOOC', 'au.org.emii.search.index.FeatureTypeRequest', 'METADATA,the_geom'")
+        sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:anmn_nrs_realtime', 'au.org.emii.search.index.FeatureTypeRequest', 'metadata_uuid,geom'")
+    }
+    
+    changeSet(author: "craigj", id: "1333080327000-3", failOnError: true) {
+        sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'imos:anmn_nrs_realtime', 'au.org.emii.search.index.FeatureTypeRequest', 'metadata_uuid,geom'")
+    }
 }
