@@ -56,11 +56,7 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 	def _queuePage(params) {
 		// Add the date params so we only fetch metadata records that have been
 		// modified since last run
-		def lastRun = _isForced(params) ? _initialiseLastRun() : _getLastRun()
-		params.dateFrom = _dateToString(lastRun)
-		params.dateTo = _dateToString(new Date())
-		params.fast = 'false'
-		params.protocol = grailsApplication.config.geonetwork.request.protocol
+		_addCommonQueueParams(params)
 		
 		def url = grailsApplication.config.geonetwork.index.serverURL
 		def xml = geoNetworkRequest.request(url, params)
@@ -227,11 +223,8 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 	
 	def _peek(params) {
 		// Peek ahead to see how many records are going to be queued
-		def lastRun = _isForced(params) ? _initialiseLastRun() : _getLastRun()
-		params.dateFrom = _dateToString(lastRun)
-		params.dateTo = _dateToString(new Date())
+		_addCommonQueueParams(params)
 		params.fast = 'true'
-		params.protocol = grailsApplication.config.geonetwork.request.protocol
 		params.from = '1'
 		params.to = '1'
 		
@@ -251,8 +244,22 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 		}
 	}
 	
+	def _addCommonQueueParams(params) {
+		def lastRun = _isForced(params) ? _initialiseLastRun() : _getLastRun()
+		params.dateFrom = _dateToString(lastRun)
+		params.dateTo = _dateToString(_tomorrow())
+		params.protocol = grailsApplication.config.geonetwork.request.protocol
+		params.fast = 'false'
+	}
+	
 	def _dateToString(date) {
 		def sdf = new SimpleDateFormat("yyyy-MM-dd")
 		return sdf.format(date)
+	}
+	
+	def _tomorrow() {
+		def cal = new GregorianCalendar()
+		cal.add(Calendar.DATE, 1)
+		return cal.getTime()
 	}
 }

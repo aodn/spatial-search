@@ -75,7 +75,7 @@ class GeoNetworkResponse {
 		
 		tree.metadata.each { metadataNode ->
 			def uuid = _parseUuid(metadataNode)
-			def metadata = _parseLinkElements(metadataNode, uuid)
+			_parseLinkElements(metadataNode, uuid)
 			if (metadataElementClosure) {
 				metadataElementClosure(metadataNode)
 			}
@@ -88,15 +88,14 @@ class GeoNetworkResponse {
 	}
 	
 	def _parseLinkElements(metadataNode, uuid) {
-		def metadata
 		metadataNode.link.each { link ->
-			metadata = _parseLinkElement(link)
+			def metadata = _parseLinkElement(link)
 			if (metadata) {
 				metadata.geonetworkUuid = uuid
 				metadataList << metadata
+				log.debug(metadata.toString())
 			}
 		}
-		return metadata
 	}
 	
 	def _parseLinkElement(link) {
