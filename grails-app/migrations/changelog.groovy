@@ -207,4 +207,8 @@ databaseChangeLog = {
 		sql("update feature_type_request_class set class_name = 'au.org.emii.search.index.FeatureTypeRequest', constructor_args = '@id,' || constructor_args where class_name = 'au.org.emii.search.index.IdAsAttributeFeatureTypeRequest'")
 		
 	}
+	
+	changeSet(author: "tfotak", id: "1333080327000-1", failOnError: true) {
+		sql("insert into feature_type_request_class (id, version, class_name, feature_type_name, constructor_args, feature_members_element_name) select nextval('hibernate_sequence'), 0, class_name, 'imos'||substring(feature_type_name from position(':' in feature_type_name)), constructor_args, feature_members_element_name from feature_type_request_class where feature_type_name like 'topp:%'")
+	}
 }
