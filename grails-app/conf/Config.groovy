@@ -80,8 +80,8 @@ environments {
     }
     test {
         grails.serverURL = "http://localhost:${grails.server.port.http}/${appName}"
-		geonetwork.search.serverURL = "http://mest-test.aodn.org.au/geonetwork/srv/en/imos.xml.search"
-		geonetwork.index.serverURL = "http://mest-test.aodn.org.au/geonetwork/srv/en/xml.search"
+		geonetwork.search.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/eng/q"
+		geonetwork.index.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/eng/q"
 		geoserver.response.cache.dir = "/tmp"
 		feature.missing.email.to='fotakt@utas.edu.au'
 		feature.missing.email.from='spatialsearch@emii.org.au'
