@@ -57,17 +57,6 @@ class GeoNetworkResponse {
 		}
 	}
 	
-	def getSpatialResponse(metadataCollection, features, pageSize) {
-		if (!features || features.isEmpty()) {
-			return _emptyResponse()
-		}
-		
-		def featureUuids = features.collect { feature -> feature.geonetworkUuid }
-		_strip(featureUuids, pageSize)
-		_updateKeywordCounts()
-		return _buildResponseXml()
-	}
-	
 	def getUuids() {
 		tree.metadata.each { metadataNode ->
 			_collectUuid(metadataNode)
@@ -143,79 +132,5 @@ class GeoNetworkResponse {
 	
 	def _collectUuid(metadataNode) {
 		uuids << _parseUuid(metadataNode)
-	}
-	
-	def _buildResponseXml() {
-		def writer = new StringWriter()
-		
-		def indentPrinter = new IndentPrinter(writer, '', false)
-		indentPrinter.indentLevel = 0
-		new XmlNodePrinter(indentPrinter).print(tree)
-		return writer.toString()
-	}
-	
-	def _strip(featureUuids, pageSize) {
-		// If no page size has been specified give it a huge value to make the
-		// flow control boolean work and be easy to understand
-		if (!pageSize) {
-			pageSize = Integer.MAX_VALUE
-		}
-		def i = 1
-		tree.metadata.each { metadataNode ->
-			def uuid = _parseUuid(metadataNode)
-			if (i > pageSize || !featureUuids.contains(uuid)) {
-				_decrementSummaryCounts()
-				metadataNode.replaceNode {}
-			}
-			else {
-				_incrementKeywordCounts(metadataNode)
-				i++
-			}
-		}
-	}
-	
-	def _decrementSummaryCounts() {
-		_updateSummaryCount(tree.summary[0].@count.toInteger() - 1)
-		_updateHitsUsedForSummaryCount(tree.summary[0].@hitsusedforsummary.toInteger() - 1)
-	}
-	
-	def _updateSummaryCount(count) {
-		tree.summary[0].@count = count.toString()
-	}
-	
-	def _updateHitsUsedForSummaryCount(count) {
-		tree.summary[0].@hitsusedforsummary = count.toString()
-	}
-	
-	def _updateKeywordCounts() {
-		def sorted = keywordCounts.entrySet().sort{ it.value }.reverse()
-		if (sorted.size() > 10) {
-			sorted = sorted[0..9]
-		}
-		
-		tree.summary.keywords[0].children().clear()
-		sorted.each	 { entry ->
-			tree.summary.keywords[0].appendNode("keyword", [count: entry.value, name: entry.key])
-		}
-	}
-	
-	def _incrementKeywordCounts(metadataNode) {
-		metadataNode.keyword.each { keyword ->
-			def lCount = keywordCounts[keyword.text()]
-			if (!lCount) {
-				lCount = 0
-			}
-			keywordCounts[keyword.text()] = lCount + 1
-		}
-	}
-	
-	def _emptyResponse() {
-		def r = """<response from="0" to="0" selected="0">
-		<summary count="0" type="local" hitsusedforsummary="0">
-			<dataParameters/>
-			<keywords/>
-			<organizationNames/>
-		</summary>
-</response>"""
 	}
 }

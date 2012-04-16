@@ -85,6 +85,7 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 		
 		def spatialResponse = new SpatialSearchResponse(grailsApplication, params, numberOfResultsToReturn, executorService, _getGeoNetworkSearchSummaryServiceBean())
 		while (_addSpatialResponse(params, spatialResponse)) {}
+		
 		return spatialResponse.getResponse()
 	}
 	

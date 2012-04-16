@@ -18,7 +18,6 @@ class SpatialSearchResponse {
 	def grailsApplication
 	def numberOfResultsToReturn = Long.MAX_VALUE
 	def metadataTree
-	def printedNodeCount
 	def nsGeonet
 	def summaryNode
 	def metadataNodes
@@ -35,7 +34,6 @@ class SpatialSearchResponse {
 		this.grailsApplication = grailsApplication
 		this.executorService = executorService
 		this.geoNetworkSearchSummaryService = geoNetworkSearchSummaryService
-		printedNodeCount = 0
 		metadataNodes = []
 		nsGeonet = new GeoNetworkNamespace()
 		keywordSummary = new GeoNetworkKeywordSummary()
@@ -60,6 +58,13 @@ class SpatialSearchResponse {
 	}
 	
 	def getResponse() {
+		if (isEmpty()) {
+			return _emptyResponse()
+		}
+		return _spatialResponse()
+	}
+	
+	def _spatialResponse() {
 		if (future) {
 			def futuredSummary = future.get()
 			if (futuredSummary) {
@@ -143,5 +148,19 @@ class SpatialSearchResponse {
 		future = executorService.submit({
 			geoNetworkSearchSummaryService.calculateSummaryKeywords(count, params)
 		} as Callable)
+	}
+	
+	def isEmpty() {
+		return metadataNodes.isEmpty()
+	}
+	
+	def _emptyResponse() {
+		return """<response from="0" to="0" selected="0">
+		<summary count="0" type="local" hitsusedforsummary="0">
+			<dataParameters/>
+			<keywords/>
+			<organizationNames/>
+		</summary>
+</response>"""
 	}
 }
