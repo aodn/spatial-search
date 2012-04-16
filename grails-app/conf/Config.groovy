@@ -71,8 +71,8 @@ environments {
     }
     development {
         grails.serverURL = "http://localhost:${grails.server.port.http}/${appName}"
-		geonetwork.search.serverURL = "http://mest-test.aodn.org.au/geonetwork/srv/en/imos.xml.search"
-		geonetwork.index.serverURL = "http://mest-test.aodn.org.au/geonetwork/srv/en/xml.search"
+		geonetwork.search.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/eng/q"
+		geonetwork.index.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/eng/q"
 		geoserver.response.cache.dir = "/tmp"
 		feature.missing.email.to='fotakt@utas.edu.au'
 		feature.missing.email.from='spatialsearch@emii.org.au'
@@ -156,6 +156,7 @@ geonetwork.link.protocol.regex = 'OGC:WMS-1\\.(1\\.1|3\\.0)-http-get-map'
 geonetwork.feature.type.indentifier.regex = '[a-zA-Z]+:[a-zA-Z]+'
 geonetwork.search.list.params.items = ['themekey', 'category', 'orgName', 'dataparam', 'longParamName']
 geonetwork.search.list.params.delimiter = ','
+geonetwork.search.page.size = 50
 feature.collection.slice.size = 100
 
 grails.gorm.default.mapping = {

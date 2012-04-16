@@ -1,17 +1,16 @@
 package au.org.emii.search
 
-import groovy.xml.MarkupBuilder;
-import groovy.xml.StreamingMarkupBuilder;
 
 import java.sql.Timestamp
+import java.sql.Types;
 import java.text.SimpleDateFormat;
 
-import org.hibernate.criterion.Restrictions;
-import org.hibernatespatial.criterion.SpatialRestrictions;
-import org.springframework.context.ApplicationContext
-import org.springframework.context.ApplicationContextAware
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 
-import com.vividsolutions.jts.io.ParseException;
 
 import au.org.emii.search.index.IndexRun
 import au.org.emii.search.index.GeonetworkMetadata
@@ -23,6 +22,9 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 	
 	def grailsApplication
 	def geoNetworkRequest
+	def executorService
+	def searchSummaryService
+	def dataSource
 
 	static transactional = true
 	
@@ -36,7 +38,7 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 		// We could have large datasets especially on a forced or new index build
 		// so let's paginate
 		params.from = '1'
-		params.to = '50'
+		params.to = '200'
 		metadata.addAll(_queuePage(params))
 		while (_pageForward(params, queueSize)) {
 			metadata.addAll(_queuePage(params))
@@ -46,7 +48,6 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 	}
 	
 	def search(params) {
-        log.debug("search params: " + params)
 		if (params.protocol && _isBoundingBoxSubmitted(params)) {
             return _spatialSearch(params)
 		}
@@ -67,55 +68,60 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 	}
 	
 	def _geoNetworkSearch(params) {
-		// Ensure we get back all the data we need to present to the user
-		params.fast = 'false'
-		_listifyKnownListParams(params)
 		def url = grailsApplication.config.geonetwork.search.serverURL
-		log.info("Searching geonetwork instance at $url")
-		def xml = geoNetworkRequest.request(url, params)
-		return xml
+		_addFastIndexParams(params)
+		log.info("Searching geonetwork instance at $url with $params")
+		return geoNetworkRequest.request(url, params)
 	}
 	
 	def _spatialSearch(params) {
 		params.relation = 'intersects'
-        def pageSize = _getPageSize(params)
+		def numberOfResultsToReturn = _getPageSize(params)
+		def pageSize = numberOfResultsToReturn
 
 		if (_isPaging(params)) {
-            def to = _getNumericParam(params, 'to')
-
-			def pageEnd = pageSize * 2 + to
-			_updateNumericParam(params, 'to', pageEnd)
+			_updateNumericParam(params, 'to', _getPageEnd(params))
 		}
-
+		
+		def spatialResponse = new SpatialSearchResponse(grailsApplication, params, numberOfResultsToReturn, executorService, _getGeoNetworkSearchSummaryServiceBean())
+		while (_addSpatialResponse(params, spatialResponse)) {}
+		return spatialResponse.getResponse()
+	}
+	
+	def _addSpatialResponse(params, spatialResponse) {
 		def xml = _geoNetworkSearch(params)
 		def geoNetworkResponse = new GeoNetworkResponse(grailsApplication, xml)
-		def metadataCollection = geoNetworkResponse.getGeonetworkMetadataObjects()
-
-		def features = _searchForFeatures(params, geoNetworkResponse.uuids)
-		xml = geoNetworkResponse.getSpatialResponse(metadataCollection, features, pageSize)
-
-		if (!features && _pageForward(params, geoNetworkResponse.count)) {
-			xml = _spatialSearch(params)
-		}
-		return xml
+		def features = _searchForFeatures(params, geoNetworkResponse.getUuids())
+		log.debug("There are ${features?.size()} matching spatial criteria in this response")
+		return spatialResponse.addResponse(features, geoNetworkResponse) && _pageForward(params, geoNetworkResponse.count)
 	}
 
 	def _searchForFeatures(params, uuids) {
-		def features = []
+		def featureUuids = []
 		if (uuids) {
+			def jdbcTemplate = new NamedParameterJdbcTemplate(dataSource)
 			try {
-				def box = _getGeometry(params)
-				def crit = FeatureType.createCriteria()
-				features = crit.list {
-					add(SpatialRestrictions.intersects('geometry', box))
-					add(Restrictions.in('geonetworkUuid', uuids))
-				}
+				featureUuids = jdbcTemplate.queryForList(
+					"select geonetwork_uuid from feature_type where intersects(geometry, ST_GeomFromText(:wkt, :srid)) and geonetwork_uuid in (:uuids)",
+					_getSqlParamaterSourceMap(_getGeometry(params).toText(), GeometryHelper.SRID, uuids),
+					String.class
+				)
 			}
-			catch (ParseException pe) {
-				// TODO add info to the returned XML to indicate no spatial search was performed
+			catch (DataAccessException e) {
+				log.error('', e)
+			}
+			catch (Exception e) {
+				log.error('', e)
 			}
 		}
-		return features
+		return featureUuids
+	}
+	
+	def _getSqlParamaterSourceMap(geometryWkt, srid, uuids) {
+		return new MapSqlParameterSource()
+			.addValue('wkt', geometryWkt)
+			.addValue('srid', srid)
+			.addValue('uuids', uuids)
 	}
 
 	def _saveGeonetworkMetadata(metadataCollection) {
@@ -164,9 +170,8 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 		if (to < stopper) {
 			// There are more records that we can check against automatically
 			// page forward
-			def pageSize = _getPageSize(params)
 			_updateNumericParam(params, 'from', to + 1)
-			_updateNumericParam(params, 'to', to + pageSize)
+			_updateNumericParam(params, 'to', to + 200)
 			moved = true
 		}
 		return moved
@@ -224,7 +229,6 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 	def _peek(params) {
 		// Peek ahead to see how many records are going to be queued
 		_addCommonQueueParams(params)
-		params.fast = 'true'
 		params.from = '1'
 		params.to = '1'
 		
@@ -235,21 +239,16 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 		return geoNetworkResponse.count
 	}
 	
-	def _listifyKnownListParams(params) {
-		def knownListParams = grailsApplication.config.geonetwork.search.list.params.items
-		params.each { name, value ->
-			if (knownListParams.contains(name)) {
-				params[name] = value.split(grailsApplication.config.geonetwork.search.list.params.delimiter)
-			}
-		}
-	}
-	
 	def _addCommonQueueParams(params) {
 		def lastRun = _isForced(params) ? _initialiseLastRun() : _getLastRun()
 		params.dateFrom = _dateToString(lastRun)
 		params.dateTo = _dateToString(_tomorrow())
 		params.protocol = grailsApplication.config.geonetwork.request.protocol
-		params.fast = 'false'
+		_addFastIndexParams(params)
+	}
+	
+	def _addFastIndexParams(params) {
+		params.fast = 'index'
 	}
 	
 	def _dateToString(date) {
@@ -261,5 +260,21 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 		def cal = new GregorianCalendar()
 		cal.add(Calendar.DATE, 1)
 		return cal.getTime()
+	}
+	
+	def _getPageEnd(params) {
+		def pageEnd = grailsApplication.config.geonetwork.search.page.size.toInteger()
+		def to = _getNumericParam(params, 'to')
+		if (to && to >= pageEnd) {
+			return to + pageEnd
+		}
+		return pageEnd
+	}
+	
+	def synchronized _getGeoNetworkSearchSummaryServiceBean() {
+		if (!searchSummaryService) {
+			searchSummaryService = applicationContext.getBean('geoNetworkSearchSummaryService')
+		}
+		return searchSummaryService
 	}
 }

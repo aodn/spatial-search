@@ -292,21 +292,24 @@ class FeatureTypeRequestService {
 	}
 	
 	def _getSliceSize() {
-		// Default to 100 when no setting found
-		def sliceSize = 100
+		def sliceSize
 		try {
-			def s = grailsApplication.config.feature.collection.slice.size
-			if (s) {
-				sliceSize = Integer.valueOf(s)
-			}
-			else {
-				log.warn('No configuration setting for key "feature.collection.slice.size"')
-			}
+			sliceSize = Integer.valueOf(_getConfiguredSliceSize().toString())
 		}
 		catch (NumberFormatException nfe) {
-			log.error("Could not parse key \"feature.collection.slice.size\" value \"${s}\" to Integer")
+			if (_getConfiguredSliceSize()) {
+				log.error("Could not parse key \"feature.collection.slice.size\" value \"${s}\" to Integer")
+			}
+		}
+		// Default to 100 when no good setting found
+		if (!sliceSize || sliceSize <= 0) {
+			sliceSize = 100
 		}
 		return sliceSize
+	}
+	
+	def _getConfiguredSliceSize() {
+		return grailsApplication.config.feature.collection.slice.size
 	}
 	
 	def _sendMail(messages) {

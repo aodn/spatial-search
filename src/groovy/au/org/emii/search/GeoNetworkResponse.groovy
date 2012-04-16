@@ -23,20 +23,25 @@ class GeoNetworkResponse {
 	def count
 	def nsGeonet
 	
+	GeoNetworkResponse(grailsApplication) {
+		this.grailsApplication = grailsApplication
+	}
+	
 	GeoNetworkResponse(grailsApplication, xml) {
+		this(grailsApplication)
+		
 		if (!xml) {
-			throw new NullPointerException('Cannot build geonetwork XML should not be null')
+			throw new NullPointerException('Cannot build response, geonetwork XML should not be null')
 		}
 		
 		uuids = []
 		keywordCounts = [:]
 		metadataList = []
-		this.grailsApplication = grailsApplication
 		
 		def validating = false
 		def namespaceAware = true
-		// TODO extract namespace to config?
-		nsGeonet = new Namespace('http://www.fao.org/geonetwork', 'geonet')
+		
+		nsGeonet = new GeoNetworkNamespace()
 		tree = new XmlParser(validating, namespaceAware).parseText(xml)
 		
 		from = tree.@from.toInteger()
@@ -63,6 +68,13 @@ class GeoNetworkResponse {
 		return _buildResponseXml()
 	}
 	
+	def getUuids() {
+		tree.metadata.each { metadataNode ->
+			_collectUuid(metadataNode)
+		}
+		return uuids
+	}
+	
 	def _parseXmlToGeonetworkMetadataObjects(metadataElementClosure) {
 		def allRecords = tree.metadata
 		log.debug("${allRecords.size()} metadata records returned")
@@ -84,7 +96,7 @@ class GeoNetworkResponse {
 	}
 	
 	def _parseUuid(metadataNode) {
-		return metadataNode[nsGeonet.info][0].uuid.text()
+		return nsGeonet.parseUuid(metadataNode)
 	}
 	
 	def _parseLinkElements(metadataNode, uuid) {
@@ -100,10 +112,13 @@ class GeoNetworkResponse {
 	
 	def _parseLinkElement(link) {
 		def metadata
-		if (_isProtocol(link.@protocol) && _isFeatureTypeLink(link.@name)) {
-			metadata = new GeonetworkMetadata()
-			metadata.featureTypeName = link.@name
-			metadata.geoserverEndPoint = _serverEndPointFrom(link.@href)
+		if (link) {
+			def gnLink = new GeoNetworkLink(link.text())
+			if (_isProtocol(gnLink.protocol) && _isFeatureTypeLink(gnLink.featureType)) {
+				metadata = new GeonetworkMetadata()
+				metadata.featureTypeName = gnLink.featureType
+				metadata.geoserverEndPoint = _serverEndPointFrom(gnLink.href)
+			}
 		}
 		return metadata
 	}

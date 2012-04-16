@@ -2,24 +2,13 @@ package au.org.emii.search
 
 import grails.test.*
 
-import org.codehaus.groovy.grails.commons.ConfigurationHolder;
-import org.codehaus.groovy.grails.commons.GrailsApplication
-
 class GeoNetworkRequestServiceTests extends GrailsUnitTestCase {
-	
-	def config
-	def responseXml
+    def responseXml
 	def service
 	
     protected void setUp() {
         super.setUp()
-		def config = new ConfigObject()
-		config.geonetwork.feature.type.indentifier.regex = 'topp:'
-		config.geonetwork.link.protocol.regex = 'OGC:WMS-1\\.(1\\.1|3\\.0)-http-get-map'
-		config.geonetwork.search.list.params.items = ['themekey', 'category', 'orgName', 'dataparam', 'longParamName']
-		config.geonetwork.search.list.params.delimiter = ','
-		ConfigurationHolder.config = config
-		GrailsApplication.metaClass.getConfig = {-> config }
+		_mockConfig()
 		
 		responseXml = """<response from="1" to="10" selected="0">
 		<summary count="50" type="local" hitsusedforsummary="50">
@@ -30,7 +19,8 @@ class GeoNetworkRequestServiceTests extends GrailsUnitTestCase {
 </response>"""
 		
 		service = new GeoNetworkRequestService()
-		service.grailsApplication = ConfigurationHolder.config
+		service.metaClass.getGrailsApplication = { -> [config: org.codehaus.groovy.grails.commons.ConfigurationHolder.config]}
+		service.grailsApplication = service.getGrailsApplication()
     }
 
     protected void tearDown() {
@@ -54,14 +44,14 @@ class GeoNetworkRequestServiceTests extends GrailsUnitTestCase {
 	}
 	
 	void testPageForward() {
-		def geoNetworkResponse = new GeoNetworkResponse(config, responseXml)
+		def geoNetworkResponse = new GeoNetworkResponse(service.grailsApplication.config, responseXml)
 		def params = ['from' : '1', 'to' : '10']
-		for (def i = 1; i < 40; i += 10) {
-			assertTrue service._pageForward(params, geoNetworkResponse.count)
+		for (def i = 1; i < 1000; i += 200) {
+			assertTrue service._pageForward(params, 900)
 		}
-		assertFalse service._pageForward(params, geoNetworkResponse.count)
-		assertEquals '41', params.from
-		assertEquals '50', params.to
+		assertFalse service._pageForward(params, 900)
+		assertEquals '811', params.from
+		assertEquals '1010', params.to
 	}
 	
 	void testIsBoundingBoxSubmitted() {
@@ -91,6 +81,22 @@ class GeoNetworkRequestServiceTests extends GrailsUnitTestCase {
 		assertTrue service._isForced(params)
 	}
 	
+	void testGetPageEnd() {
+		def pageEnd = service.grailsApplication.config.geonetwork.search.page.size
+		def params = [:]
+		params.to = 15
+		assertEquals(pageEnd, service._getPageEnd(params))
+		
+		params.to = pageEnd - 1
+		assertEquals(pageEnd, service._getPageEnd(params))
+		
+		params.to = 200
+		assertEquals(200 + pageEnd, service._getPageEnd(params))
+		
+		params.to = 599
+		assertEquals(599 + pageEnd, service._getPageEnd(params))
+	}
+	
 	void testListifyKnownListParams() {
 		/*
 		 * The configuration mocking doesn't appear to be working at test
@@ -103,5 +109,13 @@ class GeoNetworkRequestServiceTests extends GrailsUnitTestCase {
 //		assertEquals "bar", params.themekey[1]
 //		assertEquals(['foo', 'bar', 'sink', 'plug'], params.themekey)
 //		assertEquals "some,more,comma,separated,values", params.fake1
+	}
+	
+	def _mockConfig() {
+		mockConfig("geonetwork.feature.type.indentifier.regex = 'topp:'")
+		mockConfig("geonetwork.link.protocol.regex = 'OGC:WMS-1\\\\.(1\\\\.1|3\\\\.0)-http-get-map'")
+		mockConfig("geonetwork.search.list.params.items = ['themekey', 'category', 'orgName', 'dataparam', 'longParamName']")
+		mockConfig("geonetwork.search.list.params.delimiter = ','")
+		mockConfig("geonetwork.search.page.size = 50")
 	}
 }
