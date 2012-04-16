@@ -62,8 +62,8 @@ grails.plugin.databasemigration.updateOnStartFileNames = ['changelog.groovy']
 environments {
     production {
         grails.serverURL = "http://spatialsearchtest.emii.org.au"
-		geonetwork.search.serverURL = "http://mest-test.aodn.org.au/geonetwork/srv/en/imos.xml.search"
-		geonetwork.index.serverURL = "http://mest-test.aodn.org.au/geonetwork/srv/en/xml.search"
+		geonetwork.search.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/eng/q"
+		geonetwork.index.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/eng/q"
 		geoserver.response.cache.dir = "/tmp"
 		feature.missing.email.to='developers@emii.org.au'
 		feature.missing.email.from='spatialsearch@emii.org.au'
