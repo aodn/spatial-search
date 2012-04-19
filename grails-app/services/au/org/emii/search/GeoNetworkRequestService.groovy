@@ -48,6 +48,7 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 	}
 	
 	def search(params) {
+		log.info("Starting search with $params")
 		if (params.protocol && _isBoundingBoxSubmitted(params)) {
             return _spatialSearch(params)
 		}
@@ -78,22 +79,24 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 		params.relation = 'intersects'
 		def numberOfResultsToReturn = _getPageSize(params)
 		def pageSize = numberOfResultsToReturn
-
-		if (_isPaging(params)) {
-			_updateNumericParam(params, 'to', _getPageEnd(params))
-		}
 		
-		def spatialResponse = new SpatialSearchResponse(grailsApplication, params, numberOfResultsToReturn, executorService, _getGeoNetworkSearchSummaryServiceBean())
+		def spatialResponse = applicationContext.getBean('spatialSearchResponse')
+		spatialResponse.setup(params, numberOfResultsToReturn, executorService)
+		
 		while (_addSpatialResponse(params, spatialResponse)) {}
 		
 		return spatialResponse.getResponse()
 	}
 	
 	def _addSpatialResponse(params, spatialResponse) {
+		if (_isPaging(params)) {
+			if (!spatialResponse.updatePageParams(params)) {
+				_updateNumericParam(params, 'to', _getPageEnd(params))
+			}
+		}
 		def xml = _geoNetworkSearch(params)
 		def geoNetworkResponse = new GeoNetworkResponse(grailsApplication, xml)
 		def features = _searchForFeatures(params, geoNetworkResponse.getUuids())
-		log.debug("There are ${features?.size()} matching spatial criteria in this response")
 		return spatialResponse.addResponse(features, geoNetworkResponse) && _pageForward(params, geoNetworkResponse.count)
 	}
 
@@ -103,7 +106,7 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 			def jdbcTemplate = new NamedParameterJdbcTemplate(dataSource)
 			try {
 				featureUuids = jdbcTemplate.queryForList(
-					"select geonetwork_uuid from feature_type where intersects(geometry, ST_GeomFromText(:wkt, :srid)) and geonetwork_uuid in (:uuids)",
+					"select geonetwork_uuid from feature_type where intersects(geometry, ST_GeomFromText(:wkt, :srid)) and geonetwork_uuid in (:uuids) group by geonetwork_uuid",
 					_getSqlParamaterSourceMap(_getGeometry(params).toText(), GeometryHelper.SRID, uuids),
 					String.class
 				)
@@ -115,6 +118,7 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 				log.error('', e)
 			}
 		}
+		log.debug("There are ${featureUuids?.size()} matching spatial criteria")
 		return featureUuids
 	}
 	

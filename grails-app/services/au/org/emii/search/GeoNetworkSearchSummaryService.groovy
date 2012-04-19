@@ -10,20 +10,27 @@ class GeoNetworkSearchSummaryService extends GeoNetworkRequestService {
 	def nsGeonet = new GeoNetworkNamespace()
 
     def calculateSummaryKeywords(count, params) {
-		def pageSize = _calcuatePageSize(count, params.from.toInteger())
+		def paramsCopy = new HashMap(params)
+		def searchRequestPageSize = _calculateSearchRequestPageSize(paramsCopy)
+		
+		// Start at the first page
+		_updateNumericParam(paramsCopy, 'from', 1)
+		_updateNumericParam(paramsCopy, 'to', searchRequestPageSize + 1)
+		
+		def pageSize = _calcuatePageSize(count, paramsCopy.from.toInteger())
 		def keywordSummary = new GeoNetworkKeywordSummary()
-		while (_getNumericParam(params, 'to') < count) {
-			_updateNumericParam(params, 'from', _getNumericParam(params, 'to') + 1)
-			_updateNumericParam(params, 'to', _getNumericParam(params, 'to') + pageSize)
-			_fetchPage(params, keywordSummary)
+		while (_getNumericParam(paramsCopy, 'to') < count) {
+			_fetchPage(paramsCopy, keywordSummary, searchRequestPageSize)
+			_updateNumericParam(paramsCopy, 'from', _getNumericParam(paramsCopy, 'to') + 1)
+			_updateNumericParam(paramsCopy, 'to', _getNumericParam(paramsCopy, 'to') + pageSize)
 		}
+		keywordSummary.close()
 		return keywordSummary
     }
 	
-	def _fetchPage(params, keywordSummary) {
+	def _fetchPage(params, keywordSummary, searchRequestPageSize) {
 		def xml = _geoNetworkSearch(params)
 		def geoNetworkResponse = new GeoNetworkResponse(grailsApplication, xml)
-		keywordSummary.to = geoNetworkResponse.tree.@to.toInteger()
 		def features = _searchForFeatures(params, geoNetworkResponse.getUuids())
 		
 		if (CollectionUtils.isNotEmpty(features)) {
@@ -31,7 +38,11 @@ class GeoNetworkSearchSummaryService extends GeoNetworkRequestService {
 				if (features.contains(nsGeonet.parseUuid(metadataNode))) {
 					keywordSummary.addNodeKeywords(metadataNode)
 				}
+				keywordSummary.page(searchRequestPageSize)
 			}
+		}
+		else {
+			keywordSummary.pageFastForward(geoNetworkResponse.tree.metadata.size())
 		}
 	}
 	
@@ -40,10 +51,15 @@ class GeoNetworkSearchSummaryService extends GeoNetworkRequestService {
 		if (_hasMorePagesThanCutOff(count, from, result)) {
 			result = (count - from) / cutOff
 		}
+		
 		return result
 	}
 	
 	def _hasMorePagesThanCutOff(count, from, pageSize) {
 		return (count - from) / pageSize > cutOff
+	}
+	
+	def _calculateSearchRequestPageSize(params) {
+		return _getNumericParam(params, 'to') - _getNumericParam(params, 'from') + 1
 	}
 }

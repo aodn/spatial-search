@@ -19,24 +19,20 @@ class SpatialSearchResponse {
 	def numberOfResultsToReturn = Long.MAX_VALUE
 	def metadataTree
 	def nsGeonet
-	def summaryNode
 	def metadataNodes
-	def to
 	def future
 	def params
 	def count
-	def keywordSummary
 	def executorService
 	def geoNetworkSearchSummaryService
+	def geoNetworkSearchSummaryCache
+	def geoNetworkSearchShaBuilder
 	
-	SpatialSearchResponse(grailsApplication, params, numberOfResultsToReturn, executorService, geoNetworkSearchSummaryService) {
-		this.params = params
-		this.grailsApplication = grailsApplication
+	def setup(params, numberOfResultsToReturn, executorService) {
+		this.params = new HashMap(params)
 		this.executorService = executorService
-		this.geoNetworkSearchSummaryService = geoNetworkSearchSummaryService
 		metadataNodes = []
 		nsGeonet = new GeoNetworkNamespace()
-		keywordSummary = new GeoNetworkKeywordSummary()
 		if (numberOfResultsToReturn) {
 			this.numberOfResultsToReturn = numberOfResultsToReturn
 		}
@@ -44,11 +40,7 @@ class SpatialSearchResponse {
 	
 	def addResponse(features, geoNetworkResponse) {
 		_initMetadataTree(geoNetworkResponse.tree)
-		to = geoNetworkResponse.tree.@to.toInteger()
-		
-		if (_morePagesAreAvailable()) {
-			_getKeywordSummary(geoNetworkResponse.tree.summary[0].@count.toInteger()) 
-		}
+		_requestKeywordSummary(geoNetworkResponse.tree.summary[0].@count.toInteger()) 
 		
 		if (CollectionUtils.isNotEmpty(features)) {
 			_collect(features, geoNetworkResponse.tree)
@@ -64,37 +56,26 @@ class SpatialSearchResponse {
 		return _spatialResponse()
 	}
 	
-	def _spatialResponse() {
-		if (future) {
-			def futuredSummary = future.get()
-			if (futuredSummary) {
-				keywordSummary.merge(futuredSummary)
-			}
+	def updatePageParams(params) {
+		def summary = _getCachedKeywordSummary()
+		if (summary) {
+			summary.updatePageParams(params)
+			return true
 		}
+		return false
+	}
+	
+	def _spatialResponse() {
+		def summary = _getKeywordSummary()
 		
 		def writer = new StringWriter()
 		def builder = new MarkupBuilder(writer)
-		builder.response(from: metadataTree.@from, to: keywordSummary.to, selected: metadataTree.@selected) {
-			_buildSummaryNode(builder)
+		
+		builder.response(from: params.from, to: params.to, selected: metadataTree.@selected) {
+			summary.buildSummaryXmlNode(builder)
 			mkp.yieldUnescaped(_printMetadataNodes())
 		}
 		return writer.toString()
-	}
-	
-	def _buildSummaryNode(builder) {
-		def keywordSummariesToDisplay = keywordSummary.getKeywords()
-		if (keywordSummariesToDisplay?.size() > 10) {
-			keywordSummariesToDisplay = keywordSummariesToDisplay[0..9]
-		}
-		builder.summary(count: keywordSummary.hitsUsedForSummary, type: summaryNode.@type, hitsusedforsummary: keywordSummary.hitsUsedForSummary) {
-			keywordSummariesToDisplay.each { keyword ->
-				_buildSummaryKeywordNode(builder, keyword)
-			}
-		}
-	}
-	
-	def _buildSummaryKeywordNode(builder, keyword) {
-		builder.keyword(count: keyword.count, name: keyword.name, indexKey: keyword.indexKey)
 	}
 	
 	def _printMetadataNodes() {
@@ -109,13 +90,7 @@ class SpatialSearchResponse {
 	def _initMetadataTree(responseMetadataTree) {
 		if (!this.metadataTree) {
 			this.metadataTree = responseMetadataTree
-			_setSummaryNode(metadataTree.summary[0])
 		}
-	}
-	
-	def _setSummaryNode(summaryNode) {
-		this.summaryNode = summaryNode
-		this.count = summaryNode.@count.toInteger()
 	}
 	
 	def _collect(featureUuids, responseMetadataTree) {
@@ -135,19 +110,32 @@ class SpatialSearchResponse {
 	}
 	
 	def _addMetadataNode(metadataNode) {
-		keywordSummary.addNodeKeywords(metadataNode)
 		metadataNodes << metadataNode
 	}
 	
-	def _morePagesAreAvailable() {
-		def pageSize = grailsApplication.config.geonetwork.search.page.size.toInteger()
-		return summaryNode.@count.toInteger() > to + pageSize
+	def _requestKeywordSummary(count) {
+		if (!_getCachedKeywordSummary()) {
+			future = executorService.submit({
+				geoNetworkSearchSummaryService.calculateSummaryKeywords(count, params)
+			} as Callable)
+		}
 	}
 	
-	def _getKeywordSummary(count) {
-		future = executorService.submit({
-			geoNetworkSearchSummaryService.calculateSummaryKeywords(count, params)
-		} as Callable)
+	def _getKeywordSummary() {
+		def summary = _getCachedKeywordSummary() 
+		if (!summary) {
+			summary = _getFuture()
+			_cacheSummary(summary)
+		}
+		return summary
+	}
+	
+	def _getCachedKeywordSummary() {
+		return geoNetworkSearchSummaryCache.get(_getSha())
+	}
+	
+	def _getFuture() {
+		return future.get()
 	}
 	
 	def isEmpty() {
@@ -162,5 +150,13 @@ class SpatialSearchResponse {
 			<organizationNames/>
 		</summary>
 </response>"""
+	}
+	
+	def _getSha() {
+		return geoNetworkSearchShaBuilder.buildSha(params)
+	}
+	
+	def _cacheSummary(keywordSummary) {
+		geoNetworkSearchSummaryCache.add(_getSha(), keywordSummary)
 	}
 }

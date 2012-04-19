@@ -1,8 +1,9 @@
 package au.org.emii.search
 
+import java.io.Serializable;
 import org.apache.commons.lang.builder.CompareToBuilder;
 
-class GeoNetworkKeyword implements Comparable<GeoNetworkKeyword> {
+class GeoNetworkKeyword implements Comparable<GeoNetworkKeyword>, Serializable {
 
 	def count
 	def name

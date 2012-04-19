@@ -12,12 +12,13 @@ import au.org.emii.search.FeatureType
 
 class FeatureTypeRequestService {
 
-    static transactional = true
+    static transactional = false
 	
 	def grailsApplication
 	def sessionFactory
 	def mailService
 	def dataSource
+	def geoNetworkSearchSummaryCache
 	def propertyInstanceMap = org.codehaus.groovy.grails.plugins.DomainClassGrailsPlugin.PROPERTY_INSTANCE_MAP
 	
     def index() {
@@ -31,10 +32,7 @@ class FeatureTypeRequestService {
 		servers.values().each { server ->
 			server.featureTypeUuids.each { featureTypeName, metadataList ->
 				try {
-					def future = callAsync {
-						_index(indexRun, metadataList, messages)
-					}
-					featureCount += future.get()
+					featureCount += _index(indexRun, metadataList, messages)
 				}
 				catch (HttpResponseException e) {
 					messages << "Error ${server.url} not indexed due to http issue: ${e.toString()}\nCheck logs for more detail."
@@ -45,8 +43,14 @@ class FeatureTypeRequestService {
 				}
 			}
 		}
+		
+		if (featureCount > 0) {
+			_clearCache()
+		}
+		
 		log.info("Finished index run $indexRun")
 		_sendMail(messages)
+		
 		return featureCount
     }
 	
@@ -79,6 +83,7 @@ class FeatureTypeRequestService {
 		def metadataRecords = GeonetworkMetadata.findAllByIndexRunIsNull()
 		// Piff them out of the main session transaction so when modified by the
 		// async call they can be reloaded here
+		// There is no async call now but it's worth leaving this code in
 		metadataRecords*.discard()
 	}
 
@@ -366,5 +371,9 @@ class FeatureTypeRequestService {
 				features << copy
 			}
 		}
+	}
+	
+	def _clearCache() {
+		geoNetworkSearchSummaryCache.clear()
 	}
 }
