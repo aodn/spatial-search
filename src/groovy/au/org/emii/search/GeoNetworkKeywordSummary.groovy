@@ -100,9 +100,12 @@ class GeoNetworkKeywordSummary implements Serializable {
 	}
 	
 	def _sort() {
-		final l = []
+		def l = []
 		l.addAll(keywordsMap.values())
-		Collections.sort(l, Collections.reverseOrder())
+		l = l.sort({ a, b -> 
+				a.compareTo(b) * (-1) 
+			}
+		)
 		return l
 	}
 	

@@ -6,7 +6,9 @@ beans = {
 	
 	geoNetworkSearchSummaryCache(au.org.emii.search.GeoNetworkSearchSummaryCache)
 	
-	geoNetworkSearchShaBuilder(au.org.emii.search.GeoNetworkSearchShaBuilder)
+	geoNetworkSearchShaBuilder(au.org.emii.search.GeoNetworkSearchShaBuilder) {
+		grailsApplication = ref('grailsApplication')
+	}
 	
 	spatialSearchResponse(au.org.emii.search.SpatialSearchResponse) { bean ->
 		bean.scope = 'request'
