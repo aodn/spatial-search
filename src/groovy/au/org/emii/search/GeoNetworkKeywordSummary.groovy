@@ -4,6 +4,7 @@ import groovy.xml.MarkupBuilder;
 
 import java.io.Serializable;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory;
 
@@ -13,12 +14,14 @@ class GeoNetworkKeywordSummary implements Serializable {
 
 	def keywordsMap
 	def hitsUsedForSummary
+	def hitsUsedForCurrentPage
 	def recordCounter
 	def pages
 	
 	GeoNetworkKeywordSummary() {
 		keywordsMap = [:]
 		hitsUsedForSummary = 0
+		hitsUsedForCurrentPage = 0
 		recordCounter = 0
 		pages = []
 	}
@@ -34,6 +37,7 @@ class GeoNetworkKeywordSummary implements Serializable {
 			keyword.increment()
 		}
 		hitsUsedForSummary++
+		hitsUsedForCurrentPage++
 	}
 	
 	def buildSummaryXmlNode(builder) {
@@ -74,7 +78,7 @@ class GeoNetworkKeywordSummary implements Serializable {
 	
 	def page(pageSize) {
 		recordCounter++
-		if (hitsUsedForSummary % pageSize == 0) {
+		if (hitsUsedForCurrentPage > 0 && hitsUsedForCurrentPage % pageSize == 0) {
 			_page()
 		}
 	}
@@ -83,20 +87,41 @@ class GeoNetworkKeywordSummary implements Serializable {
 		recordCounter += pageSize
 	}
 	
-	def close() {
-		_page()
+	def getKeywords() {
+		return _sort()
+	}
+	
+	def isLastPage(geoNetworkResponse) {
+		def lastPage = _getLastPage()
+		if (lastPage) {
+			return geoNetworkResponse.to >= lastPage.to
+		}
+		return false
+	}
+	
+	def close(pageSize) {
+		if (hitsUsedForCurrentPage % pageSize > 0) {
+			_page()
+		}
+	}
+	
+	@Override
+	String toString() {
+		def writer = new StringWriter()
+		def builder = new MarkupBuilder(writer)
+		buildSummaryXmlNode(builder)
+		return writer.toString()
 	}
 	
 	def _page() {
-		pages << new GeoNetworkSpatialSearchPage(_getPageNumberForCurrentPage(), _getFromValueForCurrentPage(), recordCounter)
+		def page = new GeoNetworkSpatialSearchPage(_getPageNumberForCurrentPage(), _getFromValueForCurrentPage(), recordCounter)
+		pages << page
+		log.debug(page.toString())
+		hitsUsedForCurrentPage = 0
 	}
 	
 	def _addKeyword(keyword) {
 		keywordsMap[keyword.name] = keyword
-	}
-	
-	def getKeywords() {
-		return _sort()
 	}
 	
 	def _sort() {
@@ -121,12 +146,16 @@ class GeoNetworkKeywordSummary implements Serializable {
 		return pages.size() + 1
 	}
 	
-	@Override
-	String toString() {
-		def writer = new StringWriter()
-		def builder = new MarkupBuilder(writer)
-		buildSummaryXmlNode(builder)
-		return writer.toString()
+	def _getLastPage() {
+		if (_hasPages()) {
+			return pages[pages.size() - 1]
+		}
+		
+		return null
+	}
+	
+	def _hasPages() {
+		return CollectionUtils.isNotEmpty(pages)
 	}
 	
 	class GeoNetworkSpatialSearchPage implements Serializable {

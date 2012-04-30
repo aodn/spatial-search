@@ -38,7 +38,7 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 		// We could have large datasets especially on a forced or new index build
 		// so let's paginate
 		params.from = '1'
-		params.to = '200'
+		params.to = grailsApplication.config.geonetwork.search.page.size
 		metadata.addAll(_queuePage(params))
 		while (_pageForward(params, queueSize)) {
 			metadata.addAll(_queuePage(params))
@@ -49,7 +49,7 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 	
 	def search(params) {
 		log.info("Starting search with $params")
-		if (params.protocol && _isBoundingBoxSubmitted(params)) {
+		if (_isBoundingBoxSubmitted(params)) {
             return _spatialSearch(params)
 		}
 		return _geoNetworkSearch(params)
@@ -76,7 +76,10 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 	}
 	
 	def _spatialSearch(params) {
-		params.relation = 'intersects'
+		if (params.protocol) {
+			params.relation = 'intersects'
+		}
+		
 		def numberOfResultsToReturn = _getPageSize(params)
 		def pageSize = numberOfResultsToReturn
 		
@@ -97,6 +100,7 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 		def xml = _geoNetworkSearch(params)
 		def geoNetworkResponse = new GeoNetworkResponse(grailsApplication, xml)
 		def features = _searchForFeatures(params, geoNetworkResponse.getUuids())
+		
 		return spatialResponse.addResponse(features, geoNetworkResponse) && _pageForward(params, geoNetworkResponse.count)
 	}
 
@@ -176,7 +180,7 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 			// There are more records that we can check against automatically
 			// page forward
 			_updateNumericParam(params, 'from', to + 1)
-			_updateNumericParam(params, 'to', to + 200)
+			_updateNumericParam(params, 'to', to + grailsApplication.config.geonetwork.search.page.size.toInteger())
 			moved = true
 		}
 		return moved

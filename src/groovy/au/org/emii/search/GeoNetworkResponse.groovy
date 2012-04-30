@@ -102,26 +102,14 @@ class GeoNetworkResponse {
 	def _parseLinkElement(link) {
 		def metadata
 		if (link) {
-			def gnLink = new GeoNetworkLink(link.text())
-			if (_isProtocol(gnLink.protocol) && _isFeatureTypeLink(gnLink.featureType)) {
+			def gnLink = new GeoNetworkLink(grailsApplication, link.text())
+			if (gnLink.isMapLink()) {
 				metadata = new GeonetworkMetadata()
 				metadata.featureTypeName = gnLink.featureType
 				metadata.geoserverEndPoint = _serverEndPointFrom(gnLink.href)
 			}
 		}
 		return metadata
-	}
-	
-	def _isProtocol(text) {
-		def protocol = grailsApplication.config.geonetwork.link.protocol.regex
-		// The true is here to coerce the matcher into a boolean
-		return true && text =~ /$protocol/
-	}
-	
-	def _isFeatureTypeLink(text) {
-		def regexPattern = grailsApplication.config.geonetwork.feature.type.indentifier.regex
-		// The true is here to coerce the matcher into a boolean
-		return true && text =~ /$regexPattern/
 	}
 	
 	def _serverEndPointFrom(url) {

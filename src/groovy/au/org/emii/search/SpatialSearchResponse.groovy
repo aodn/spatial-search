@@ -18,11 +18,9 @@ class SpatialSearchResponse {
 	def grailsApplication
 	def numberOfResultsToReturn = Long.MAX_VALUE
 	def metadataTree
-	def nsGeonet
 	def metadataNodes
 	def future
 	def params
-	def count
 	def executorService
 	def geoNetworkSearchSummaryService
 	def geoNetworkSearchSummaryCache
@@ -32,7 +30,6 @@ class SpatialSearchResponse {
 		this.params = new HashMap(params)
 		this.executorService = executorService
 		metadataNodes = []
-		nsGeonet = new GeoNetworkNamespace()
 		if (numberOfResultsToReturn) {
 			this.numberOfResultsToReturn = numberOfResultsToReturn
 		}
@@ -42,11 +39,9 @@ class SpatialSearchResponse {
 		_initMetadataTree(geoNetworkResponse.tree)
 		_requestKeywordSummary(geoNetworkResponse.tree.summary[0].@count.toInteger()) 
 		
-		if (CollectionUtils.isNotEmpty(features)) {
-			_collect(features, geoNetworkResponse.tree)
-		}
+		_collect(features, geoNetworkResponse)
 		
-		return _isNotComplete()
+		return _isNotComplete(geoNetworkResponse)
 	}
 	
 	def getResponse() {
@@ -93,20 +88,22 @@ class SpatialSearchResponse {
 		}
 	}
 	
-	def _collect(featureUuids, responseMetadataTree) {
+	def _collect(featureUuids, geoNetworkResponse) {
+		def responseMetadataTree = geoNetworkResponse.tree
 		responseMetadataTree.metadata.each { metadataNode ->
-			if (_isNotComplete() && _isNodeWithSpatialFeature(metadataNode, featureUuids)) {
+			def evaluator = new GeoNetworkMetadataNodeEvaluator(grailsApplication, metadataNode, params.protocol)
+			if (_isNotComplete() && evaluator.includeInResponse(metadataNode, featureUuids)) {
 				_addMetadataNode(metadataNode)
 			}
 		}
 	}
 	
-	def _isNodeWithSpatialFeature(metadataNode, featureUuids) {
-		return featureUuids.contains(nsGeonet.parseUuid(metadataNode))
+	def _isNotComplete() {
+		return metadataNodes.size() < numberOfResultsToReturn
 	}
 	
-	def _isNotComplete() {
-		metadataNodes.size() < numberOfResultsToReturn
+	def _isNotComplete(geoNetworkResponse) {
+		return _isNotComplete() && !_isLastPage(geoNetworkResponse) 
 	}
 	
 	def _addMetadataNode(metadataNode) {
@@ -122,7 +119,7 @@ class SpatialSearchResponse {
 	}
 	
 	def _getKeywordSummary() {
-		def summary = _getCachedKeywordSummary() 
+		def summary = _getCachedKeywordSummary()
 		if (!summary) {
 			summary = _getFuture()
 			_cacheSummary(summary)
@@ -158,5 +155,14 @@ class SpatialSearchResponse {
 	
 	def _cacheSummary(keywordSummary) {
 		geoNetworkSearchSummaryCache.add(_getSha(), keywordSummary)
+	}
+	
+	def _isLastPage(geoNetworkResponse) {
+		def summary = _getCachedKeywordSummary()
+		if (summary) {
+			return summary.isLastPage(geoNetworkResponse)
+		}
+		
+		return false
 	}
 }

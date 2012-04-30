@@ -8,13 +8,16 @@ class GeoNetworkLink {
 	final int PROTOCOL_INDEX = 3
 	final int MIME_TYPE_INDEX = 4
 	
+	def grailsApplication
 	def featureType
 	def title
 	def href
 	def protocol
 	def mimeType
 	
-	GeoNetworkLink(link) {
+	GeoNetworkLink(grailsApplication, link) {
+		this.grailsApplication = grailsApplication
+		
 		if (link) {
 			def _link = link.split('\\|')
 			featureType = _getToSet(_link, FEATURE_TYPE_INDEX)
@@ -25,10 +28,26 @@ class GeoNetworkLink {
 		}
 	}
 	
+	def isMapLink() {
+		return _isProtocol() && _isFeatureTypeLink()
+	}
+	
 	def _getToSet(list, index) {
 		if (list && list.size() > index) {
 			return list[index]
 		}
 		return null
+	}
+	
+	def _isProtocol() {
+		def regexPattern = grailsApplication.config.geonetwork.link.protocol.regex
+		// The true is here to coerce the matcher into a boolean
+		return true && protocol =~ /$regexPattern/
+	}
+	
+	def _isFeatureTypeLink() {
+		def regexPattern = grailsApplication.config.geonetwork.feature.type.indentifier.regex
+		// The true is here to coerce the matcher into a boolean
+		return true && featureType =~ /$regexPattern/
 	}
 }

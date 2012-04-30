@@ -1,5 +1,7 @@
 package au.org.emii.search
 
+import org.codehaus.groovy.grails.commons.DefaultGrailsApplication;
+
 import grails.test.*
 
 class GeoNetworkRequestServiceTests extends GrailsUnitTestCase {
@@ -8,7 +10,7 @@ class GeoNetworkRequestServiceTests extends GrailsUnitTestCase {
 	
     protected void setUp() {
         super.setUp()
-		_mockConfig()
+		//_mockConfig()
 		
 		responseXml = """<response from="1" to="10" selected="0">
 		<summary count="50" type="local" hitsusedforsummary="50">
@@ -19,8 +21,8 @@ class GeoNetworkRequestServiceTests extends GrailsUnitTestCase {
 </response>"""
 		
 		service = new GeoNetworkRequestService()
-		service.metaClass.getGrailsApplication = { -> [config: org.codehaus.groovy.grails.commons.ConfigurationHolder.config]}
-		service.grailsApplication = service.getGrailsApplication()
+		//service.metaClass.getGrailsApplication = { -> [config: org.codehaus.groovy.grails.commons.ConfigurationHolder.config]}
+		service.grailsApplication = new DefaultGrailsApplication()
     }
 
     protected void tearDown() {
