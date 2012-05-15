@@ -11,7 +11,7 @@ environments {
 	}
 	
 	production {
-		grails.serverURL = "http://aodnsearch.emii.org.au"
+		grails.serverURL = "http://search.aodn.org.au"
 		geonetwork.search.serverURL = "http://catalogue.aodn.org.au/geonetwork/srv/eng/q"
 		geonetwork.index.serverURL = "http://catalogue.aodn.org.au/geonetwork/srv/eng/q"
 		geoserver.response.cache.dir = "/tmp"
