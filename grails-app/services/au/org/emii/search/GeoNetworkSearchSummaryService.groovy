@@ -15,15 +15,17 @@ class GeoNetworkSearchSummaryService extends GeoNetworkRequestService {
     def calculateSummaryKeywords(count, params) {
 		def paramsCopy = new HashMap(params)
 		def searchRequestPageSize = _calculateSearchRequestPageSize(paramsCopy)
+		def limit = searchRequestPageSize * 100
+		limit = limit > count ? count : limit
 		
 		// Start at the first page
 		_updateNumericParam(paramsCopy, 'from', 1)
-		def pageSize = _calcuatePageSize(count, paramsCopy.from.toInteger())
+		def pageSize = _calcuatePageSize(limit, paramsCopy.from.toInteger())
 		_updateNumericParam(paramsCopy, 'to', pageSize)
 		
 		def firstTime = true
 		def keywordSummary = new GeoNetworkKeywordSummary()
-		while (_getNumericParam(paramsCopy, 'to') < count || firstTime) {
+		while (_getNumericParam(paramsCopy, 'to') < limit || firstTime) {
 			firstTime = false
 			_fetchPage(paramsCopy, keywordSummary, searchRequestPageSize)
 			_updateNumericParam(paramsCopy, 'from', _getNumericParam(paramsCopy, 'to') + 1)
@@ -49,7 +51,7 @@ class GeoNetworkSearchSummaryService extends GeoNetworkRequestService {
 	def _calcuatePageSize(count, from) {
 		def result = grailsApplication.config.geonetwork.search.page.size.toInteger()
 		if (_hasMorePagesThanCutOff(count, from, result)) {
-			result = (count - from) / cutOff
+			result = ((count - from) / cutOff).intValue()
 		}
 		
 		return result
