@@ -25,7 +25,6 @@ class GeoNetworkRequest implements ApplicationContextAware {
 	}
 	
 	def request(searchUrl, params) {
-		_listifyKnownListParams(params)
 		def contentProducer = _setupContentProducer(params)
 		return _request(searchUrl, contentProducer)
 	}
@@ -70,12 +69,4 @@ class GeoNetworkRequest implements ApplicationContextAware {
 		return httpPost
 	}
 	
-	def _listifyKnownListParams(params) {
-		def knownListParams = grailsApplication.config.geonetwork.search.list.params.items
-		params.each { name, value ->
-			if (knownListParams.contains(name)) {
-				params[name] = value.split(grailsApplication.config.geonetwork.search.list.params.delimiter)
-			}
-		}
-	}
 }
