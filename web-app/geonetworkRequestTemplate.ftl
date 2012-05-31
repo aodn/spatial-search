@@ -33,6 +33,9 @@
   <#if any?has_content>
   <any>${any}</any>
   </#if>
+  <#if similarity?has_content>
+  <similarity>${similarity}</similarity>
+  </#if>
   <#if title?has_content>
   <title>${title}</title>
   </#if>
