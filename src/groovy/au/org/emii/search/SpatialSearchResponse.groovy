@@ -25,6 +25,7 @@ class SpatialSearchResponse {
 	def geoNetworkSearchSummaryService
 	def geoNetworkSearchSummaryCache
 	def geoNetworkSearchShaBuilder
+	def pretty
 	
 	def setup(params, numberOfResultsToReturn, executorService) {
 		this.params = new HashMap(params)
@@ -33,6 +34,7 @@ class SpatialSearchResponse {
 		if (numberOfResultsToReturn) {
 			this.numberOfResultsToReturn = numberOfResultsToReturn
 		}
+		pretty = params.pretty
 	}
 	
 	def addResponse(features, geoNetworkResponse) {
@@ -64,7 +66,7 @@ class SpatialSearchResponse {
 		def summary = _getKeywordSummary()
 		
 		def writer = new StringWriter()
-		def builder = new MarkupBuilder(writer)
+		def builder = new MarkupBuilder(_getIndentPrinter(writer))
 		
 		builder.response(from: params.from, to: params.to, selected: metadataTree.@selected) {
 			summary.buildSummaryXmlNode(builder)
@@ -75,7 +77,7 @@ class SpatialSearchResponse {
 	
 	def _printMetadataNodes() {
 		def writer = new StringWriter()
-		def nodePrinter = new XmlNodePrinter(new PrintWriter(writer))
+		def nodePrinter = new XmlNodePrinter(_getIndentPrinter(writer))
 		metadataNodes.each { node ->
 			nodePrinter.print(node)
 		}
@@ -164,5 +166,12 @@ class SpatialSearchResponse {
 		}
 		
 		return false
+	}
+	
+	def _getIndentPrinter(writer) {
+		if (pretty) {
+			return new IndentPrinter(writer)
+		}
+		return new IndentPrinter(writer, "", false)
 	}
 }
