@@ -62,7 +62,7 @@ class FeatureTypeRequestService {
 		}
 		
 		def metadata = metadataRecords[0]
-		def featureTypeRequestImpl = getFeatureTypeRequestImplementation(metadata, messages)
+		def featureTypeRequestImpl = _getFeatureTypeRequestImplementation(metadata, indexRun, messages)
 		def features = new ArrayList(featureTypeRequestImpl.requestFeatureType(metadata))
 		if (!features.isEmpty()) {
 			try {
@@ -239,12 +239,11 @@ class FeatureTypeRequestService {
 			domain.save(failOnError: true)
 		}
 		catch (Exception e) {
-			// Would love to do Haiku error messages!
 			log.error("Failure persisting domain object ${domain}: ", e)
 		}
 	}
 
-	def getFeatureTypeRequestImplementation(metadata, messages) {
+	def _getFeatureTypeRequestImplementation(metadata, indexRun, messages) {
 		def featureTypeName = metadata.featureTypeName
 		def featureTypeRequestClasses = FeatureTypeRequestClass.findAll("from FeatureTypeRequestClass as f where '${featureTypeName}' like f.featureTypeName || '%'")
 		if (featureTypeRequestClasses) {
@@ -261,9 +260,15 @@ class FeatureTypeRequestService {
 				}
 			}
 			def instance = bestMatch.featureTypeRequest
-			if (bestMatch.featureMembersElementName) {
-				instance.featureMembersElementName = bestMatch.featureMembersElementName
+			
+			if (instance instanceof DiskCachingFeatureTypeRequest) {
+				// Add a call back to persist features one by one for large WFS responses
+				instance.featureCallback = { feature ->
+					_saveFeatures(metadata, [feature])
+					_updateIndexRun(indexRun, [metadata])
+				}
 			}
+			
 			return instance
 		}
 		messages << "No feature type request class configured for server ${metadata.geoserverEndPoint} feature type $featureTypeName please add an appropriate record to table feature_type_request_class"

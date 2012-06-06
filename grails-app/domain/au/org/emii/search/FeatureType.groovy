@@ -43,4 +43,39 @@ class FeatureType {
 			.append("geometry", geometry?.geometryType)
 			.toString()
 	}
+	
+	def getSridFromGml() {
+		def gmlSrid
+		if (gml) {
+			def geomGml = new XmlParser(false, false).parseText(gml)
+			if (_srsUsesUrn(geomGml.@srsName)) {
+				gmlSrid = _getSridFromGmlUrn(geomGml.@srsName)
+			}
+			else {
+				gmlSrid = _getSridFromGmlHttp(geomGml.@srsName)
+			}
+			
+		}
+		// Default to the most common case on failure on the chance it will probably work for us
+		return gmlSrid ?: "4326"
+	}
+	
+	def _srsUsesUrn(srsName) {
+		return srsName.startsWith("urn")
+	}
+	
+	def _getSridFromGmlUrn(srsName) {
+		return _getSridFromGmlUsingSplitChar(srsName, ":")
+	}
+	
+	def _getSridFromGmlHttp(srsName) {
+		return _getSridFromGmlUsingSplitChar(srsName, "#")
+	}
+	
+	def _getSridFromGmlUsingSplitChar(srsName, splitter) {
+		def pieces = srsName.split(splitter)
+		if (pieces.size() > 1) {
+			return pieces[pieces.size() - 1]
+		}
+	}
 }

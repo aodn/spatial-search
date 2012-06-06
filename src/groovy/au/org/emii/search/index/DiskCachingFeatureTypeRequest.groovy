@@ -1,11 +1,14 @@
 package au.org.emii.search.index
 
+import javax.xml.parsers.SAXParserFactory;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ResponseHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.InputSource;
 
 class DiskCachingFeatureTypeRequest extends FeatureTypeRequest implements ResponseHandler<String> {
 	
@@ -16,6 +19,8 @@ class DiskCachingFeatureTypeRequest extends FeatureTypeRequest implements Respon
 	 * the XML is written to disk first to complete the request as quickly as
 	 * possible then it is parsed afterward
 	 */
+	
+	def featureCallback
 	
 	DiskCachingFeatureTypeRequest() {
 		super()
@@ -36,27 +41,23 @@ class DiskCachingFeatureTypeRequest extends FeatureTypeRequest implements Respon
 	def handleResponse(metadata, filePath) {
 		def features = [] as Set
 		if (filePath) {
-			def line
-			def reader
-			def file
+			def inputReader
 			def delete = false
 			try {
-				file = new File(filePath)
-				reader = new BufferedReader(new FileReader(file))
-				def cachedXml = new StringBuilder(10000)
-				while ((line = reader.readLine()) != null) {
-					cachedXml.append(line)
-				}
-				features = super.handleResponse(metadata, cachedXml.toString())
+				def handler = new DiskCachingFeatureTypeParser(metadata, this)
+				def reader = SAXParserFactory.newInstance().newSAXParser().XMLReader
+				reader.setContentHandler(handler)
+				inputReader = new BufferedReader(new FileReader(filePath))
+				reader.parse(new InputSource(inputReader))
 				delete = true
 			}
 			catch (IOException ioe) {
 				log.error("Could not read cached xml response from ${filePath}", ioe)
 			}
 			finally {
-				IOUtils.closeQuietly(reader)
+				IOUtils.closeQuietly(inputReader)
 				if (delete) {
-					FileUtils.deleteQuietly(file)
+					FileUtils.deleteQuietly(new File(filePath))
 				}
 			}
 		}

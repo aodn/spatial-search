@@ -3,8 +3,8 @@ environments {
 	
 	development {
 		grails.serverURL = "http://localhost:8080"
-		geonetwork.search.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/eng/q"
-		geonetwork.index.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/eng/q"
+		geonetwork.search.serverURL = "http://mest.imos.org.au/geonetwork/srv/eng/q"
+		geonetwork.index.serverURL = "http://mest.imos.org.au/geonetwork/srv/eng/q"
 		geoserver.response.cache.dir = "/tmp"
 		feature.missing.email.from='imossearch@emii.org.au'
 		feature.missing.email.subject='IMOS Search Index Action Required'

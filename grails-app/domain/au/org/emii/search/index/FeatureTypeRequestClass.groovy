@@ -6,6 +6,7 @@ class FeatureTypeRequestClass {
 	String className
 	String constructorArgs
 	String featureMembersElementName
+	String outputFormat
 	
 	def featureTypeRequest
 	def grailsApplication
@@ -36,6 +37,7 @@ class FeatureTypeRequestClass {
 			def constructor = clazz.getConstructor(argsClasses)
 			featureTypeRequest = constructor.newInstance(args)
 			featureTypeRequest.grailsApplication = grailsApplication
+			featureTypeRequest.configure(this)
 		}
 		return featureTypeRequest
 	}

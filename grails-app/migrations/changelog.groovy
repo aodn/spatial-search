@@ -258,4 +258,46 @@ databaseChangeLog = {
         sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'shed.', 'au.org.emii.search.index.NcwmsFeatureTypeRequest', null")
         sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'storm_', 'au.org.emii.search.index.NcwmsFeatureTypeRequest', null")
     }
+	
+	changeSet(author: "tfotak", id: "1338789394000-1", failOnError: true) {
+		addColumn(tableName: "feature_type_request_class") {
+			column(name: "output_format", type: "varchar(10)")
+		}
+	}
+	
+	changeSet(author: "tfotak", id: "1338789394000-2", failOnError: true) {
+		update(tableName: "feature_type_request_class") {
+			column(name: "output_format", value: "gml2")
+			column(name: "class_name", value: "au.org.emii.search.index.DiskCachingFeatureTypeRequest")
+			where("class_name = 'au.org.emii.search.index.Gml2FeatureTypeRequest'")
+		}
+	}
+	
+	changeSet(author: "tfotak", id: "1338864976000-1", failOnError: true) {
+		update(tableName: "feature_type_request_class") {
+			column(name: "output_format", value: "gml2")
+			where("feature_type_name like '%:soop_asf'")
+		}
+	}
+	
+	changeSet(author: "tfotak", id: "1338864976000-2", failOnError: true) {
+		update(tableName: "feature_type_request_class") {
+			column(name: "output_format", value: "gml2")
+			where("feature_type_name like '%:soop_sst'")
+		}
+	}
+	
+	changeSet(author: "tfotak", id: "1338864976000-3", failOnError: true) {
+		update(tableName: "feature_type_request_class") {
+			column(name: "output_format", value: "gml2")
+			where("feature_type_name like '%:ctd_profile_vw'")
+		}
+	}
+	
+	changeSet(author: "tfotak", id: "1338864976000-4", failOnError: true) {
+		update(tableName: "feature_type_request_class") {
+			column(name: "output_format", value: "gml2")
+			where("feature_type_name like '%:soop_co2'")
+		}
+	}
 }

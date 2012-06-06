@@ -23,12 +23,12 @@ class FeatureTypeRequest {
 	def grailsApplication
 	def geometryHelper
 	def namespaceAware
+	def outputFormat
 	
 	FeatureTypeRequest() {
 		super()
 		geometryHelper = new GeometryHelper()
 		namespaceAware = true
-		init()
 	}
 	
 	FeatureTypeRequest(String featureTypeIdElementName) {
@@ -37,7 +37,6 @@ class FeatureTypeRequest {
 	
 	FeatureTypeRequest(String featureTypeIdElementName, String featureTypeGeometryElementName) {
 		this()
-		this.featureTypeElementName = featureTypeElementName
 		this.featureTypeIdElementName = featureTypeIdElementName
 		this.featureTypeGeometryElementName = featureTypeGeometryElementName
 		// Don't push the id as a property if it's an attribute
@@ -60,12 +59,11 @@ class FeatureTypeRequest {
 	String toGetUrl(GeonetworkMetadata metadata) {
 		// Describe feature info URL for convenience when adding new features
 		// ${metadata.geoserverEndPoint}/wfs?service=wfs&version=1.1.0&request=DescribeFeatureType&typeName=topp:soop_ba_mv
-		return "${metadata.geoserverEndPoint}/wfs?service=wfs&version=1.1.0&request=GetFeature&typeName=${metadata.featureTypeName}&propertyName=${properties.join(',')}"
-	}
-	
-	def init() {
-		// Post construction hook
-		featureMembersElementName = 'featureMembers'
+		def getUrl = "${metadata.geoserverEndPoint}/wfs?service=wfs&version=1.1.0&request=GetFeature&srsName=EPSG:4326&typeName=${metadata.featureTypeName}&propertyName=${properties.join(',')}"
+		if (_isGml2OutputDesired()) {
+			getUrl += "&outputFormat=gml2"
+		}
+		return getUrl
 	}
 	
 	def handleResponse(metadata, xml) {
@@ -142,5 +140,28 @@ class FeatureTypeRequest {
 			return null
 		}
 		return XmlUtil.serialize(geometryElement.children()[0])
+	}
+	
+	def _isGml2OutputDesired() {
+		return outputFormat && outputFormat == 'gml2'
+	}
+	
+	def _setFeatureMembersElementName(featureMembersElementName) {
+		if (featureMembersElementName) {
+			this.featureMembersElementName = featureMembersElementName
+		}
+		else if (_isGml2OutputDesired()) {
+			this.featureMembersElementName = 'featureMember'
+		}
+		else {
+			this.featureMembersElementName = 'featureMembers'
+		}
+	}
+	
+	def configure(featureTypeRequestClass) {
+		if (featureTypeRequestClass.outputFormat) {
+			outputFormat = featureTypeRequestClass.outputFormat
+		}
+		_setFeatureMembersElementName(featureTypeRequestClass.featureMembersElementName)
 	}
 }

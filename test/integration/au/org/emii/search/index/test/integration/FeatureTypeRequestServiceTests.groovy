@@ -20,7 +20,7 @@ class FeatureTypeRequestServiceTests extends GroovyTestCase {
 		def metadata = all[0]
 		
 		def messages = []
-		def impl = featureTypeRequestService.getFeatureTypeRequestImplementation(metadata, messages)
+		def impl = featureTypeRequestService._getFeatureTypeRequestImplementation(metadata, null, messages)
 		
 		assertTrue messages.isEmpty()
 		assertTrue 'au.org.emii.search.index.NullFeatureTypeRequest' != impl.getClass().getName()
@@ -32,7 +32,7 @@ class FeatureTypeRequestServiceTests extends GroovyTestCase {
 		assertFalse all.isEmpty()
 		
 		def messages = []
-		def impl = featureTypeRequestService.getFeatureTypeRequestImplementation(metadata, messages)
+		def impl = featureTypeRequestService._getFeatureTypeRequestImplementation(metadata, null, messages)
 		assertTrue messages.isEmpty()
 		
 		def features = new ArrayList(impl.requestFeatureType(metadata))
