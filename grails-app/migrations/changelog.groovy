@@ -300,4 +300,11 @@ databaseChangeLog = {
 			where("feature_type_name like '%:soop_co2'")
 		}
 	}
+	
+	changeSet(author: "tfotak", id: "1339040995000-1", failOnError: true) {
+		update(tableName: "feature_type_request_class") {
+			column(name: "output_format", value: "gml2")
+			where("feature_type_name like '%:soop_asf_recent'")
+		}
+	}
 }
