@@ -40,7 +40,7 @@ class DiskCachingFeatureTypeParser extends DefaultHandler2 {
 	
 	void startElement(String ns, String localName, String qname, Attributes atts) {
 		if (qname =~ /$featureTypeElementName/) {
-			_startFeatureType(qname, atts)
+			_startFeatureType(ns, localName, qname, atts)
 		}
 		if (qname =~ /$featureTypeIdElementName/) {
 			charactersHandler = _parseFeatureTypeId
@@ -71,10 +71,14 @@ class DiskCachingFeatureTypeParser extends DefaultHandler2 {
 		}
     }
 	
-	def _startFeatureType(qname, atts) {
+	def _startFeatureType(ns, localName, qname, atts) {
 		featureType = new FeatureType(metadata)
 		if (_idIsAttribute()) {
-			featureType.featureTypeId = atts.getValue(featureTypeIdElementName)
+			// This really doesn't feel robust to me but I can't find a way to
+			// get the id attribute from the element using passed in parameters
+			// without also looping over all the attributes
+			featureType.featureTypeId = atts.getValue("gml:${_getIdAttributeName()}")
+			log.debug("=> $featureType.featureTypeId")
 		}
 		featureTypeGmlBuilder = new StringBuilder()
 	}
@@ -130,6 +134,10 @@ class DiskCachingFeatureTypeParser extends DefaultHandler2 {
 	
 	def _idIsAttribute() {
 		return featureTypeIdElementName.startsWith("@")
+	}
+	
+	def _getIdAttributeName() {
+		return featureTypeIdElementName.substring(1)
 	}
 	
 //	static void foo() {
