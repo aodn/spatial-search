@@ -271,7 +271,7 @@ class FeatureTypeRequestService {
 			
 			return instance
 		}
-		messages << "No feature type request class configured for server ${metadata.geoserverEndPoint} feature type $featureTypeName please add an appropriate record to table feature_type_request_class"
+		messages << _getMessageForMissingFeatureTypeRequestClass(metadata)
 		// Use the null implementation
 		return new NullFeatureTypeRequest()
 	}
@@ -380,5 +380,15 @@ class FeatureTypeRequestService {
 	
 	def _clearCache() {
 		geoNetworkSearchSummaryCache.clear()
+	}
+	
+	def _getMessageForMissingFeatureTypeRequestClass(metadata) {
+		def ftRequest = new FeatureTypeRequest()
+		def url = ftRequest.toGetUrl(metadata) + "&maxFeatures=1"
+		return """\
+No feature type request class configured for server ${metadata.geoserverEndPoint} feature type ${metadata.featureTypeName}.
+Please add an appropriate record to table feature_type_request_class
+Feature type quick link $url		
+"""
 	}
 }
