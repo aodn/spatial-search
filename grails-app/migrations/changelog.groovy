@@ -307,4 +307,87 @@ databaseChangeLog = {
 			where("feature_type_name like '%:soop_asf_recent'")
 		}
 	}
+	
+	// WA IVEC records
+	changeSet(author: "tfotak", id: "1340761212000-1", failOnError: true) {
+		
+		insert(tableName: "feature_type_request_class") {
+			column(name: "id", valueComputed: "nextval('hibernate_sequence')")
+			column(name: "version", valueNumeric: "0")
+			column(name: "feature_type_name", value: "waodn:Dept_of_Transport-Port_Areas")
+			column(name: "class_name", value: "au.org.emii.search.index.FeatureTypeRequest")
+			column(name: "constructor_args", value: "@id,the_geom")
+		}
+		
+		insert(tableName: "feature_type_request_class") {
+			column(name: "id", valueComputed: "nextval('hibernate_sequence')")
+			column(name: "version", valueNumeric: "0")
+			column(name: "feature_type_name", value: "waodn:Dept_of_Transport-Navigable_Water_Regulation_Areas")
+			column(name: "class_name", value: "au.org.emii.search.index.FeatureTypeRequest")
+			column(name: "constructor_args", value: "@id,the_geom")
+		}
+		
+		insert(tableName: "feature_type_request_class") {
+			column(name: "id", valueComputed: "nextval('hibernate_sequence')")
+			column(name: "version", valueNumeric: "0")
+			column(name: "feature_type_name", value: "waodn:Dept_of_Transport-Declared_Mooring_Control_Areas")
+			column(name: "class_name", value: "au.org.emii.search.index.FeatureTypeRequest")
+			column(name: "constructor_args", value: "@id,the_geom")
+		}
+		
+		insert(tableName: "feature_type_request_class") {
+			column(name: "id", valueComputed: "nextval('hibernate_sequence')")
+			column(name: "version", valueNumeric: "0")
+			column(name: "feature_type_name", value: "waodn:Dept_of_Transport-Navigation_Aids")
+			column(name: "class_name", value: "au.org.emii.search.index.FeatureTypeRequest")
+			column(name: "constructor_args", value: "@id,the_geom")
+		}
+		
+		insert(tableName: "feature_type_request_class") {
+			column(name: "id", valueComputed: "nextval('hibernate_sequence')")
+			column(name: "version", valueNumeric: "0")
+			column(name: "feature_type_name", value: "waodn:Areas_under_Marine_and_Harbours_Act_1981")
+			column(name: "class_name", value: "au.org.emii.search.index.NullFeatureTypeRequest")
+		}
+		
+		insert(tableName: "feature_type_request_class") {
+			column(name: "id", valueComputed: "nextval('hibernate_sequence')")
+			column(name: "version", valueNumeric: "0")
+			column(name: "feature_type_name", value: "waodn:Dept_of_Transport-Mooring_Control_Areas")
+			column(name: "class_name", value: "au.org.emii.search.index.FeatureTypeRequest")
+			column(name: "constructor_args", value: "@id,the_geom")
+		}
+		
+		insert(tableName: "feature_type_request_class") {
+			column(name: "id", valueComputed: "nextval('hibernate_sequence')")
+			column(name: "version", valueNumeric: "0")
+			column(name: "feature_type_name", value: "waodn:Dept_of_Transport-Hydrographic_chart_locations")
+			column(name: "class_name", value: "au.org.emii.search.index.FeatureTypeRequest")
+			column(name: "constructor_args", value: "@id,the_geom")
+		}
+		
+		insert(tableName: "feature_type_request_class") {
+			column(name: "id", valueComputed: "nextval('hibernate_sequence')")
+			column(name: "version", valueNumeric: "0")
+			column(name: "feature_type_name", value: "waodn:SRFME_algal_biomass")
+			column(name: "class_name", value: "au.org.emii.search.index.DiskCachingFeatureTypeRequest")
+			column(name: "constructor_args", value: "@id,the_geom")
+		}
+		
+		insert(tableName: "feature_type_request_class") {
+			column(name: "id", valueComputed: "nextval('hibernate_sequence')")
+			column(name: "version", valueNumeric: "0")
+			column(name: "feature_type_name", value: "waodn:Cape_N_to_L_Beaches")
+			column(name: "class_name", value: "au.org.emii.search.index.FeatureTypeRequest")
+			column(name: "constructor_args", value: "@id,the_geom")
+		}
+		
+		insert(tableName: "feature_type_request_class") {
+			column(name: "id", valueComputed: "nextval('hibernate_sequence')")
+			column(name: "version", valueNumeric: "0")
+			column(name: "feature_type_name", value: "topp:argo_aggregation")
+			column(name: "class_name", value: "au.org.emii.search.index.FeatureTypeRequest")
+			column(name: "constructor_args", value: "uuid,geometry")
+		}
+	}
 }
