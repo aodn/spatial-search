@@ -11,8 +11,6 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 
-
-import au.org.emii.search.index.IndexRun
 import au.org.emii.search.index.GeonetworkMetadata
 import au.org.emii.search.geometry.GeometryHelper
 
@@ -134,30 +132,22 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 	}
 
 	def _saveGeonetworkMetadata(metadataCollection) {
-		def metadataRecords = GeonetworkMetadata.findAllByIndexRunIsNull()
-		def added = new Timestamp(new Date().time)
-		metadataCollection.removeAll(metadataRecords)
+		def now = new Timestamp(System.currentTimeMillis())
+		def persistedMetadata = GeonetworkMetadata.list()
 		metadataCollection.each { metadata ->
-			metadata.added = added
-			metadata.save(failOnError: true)
-		}
-	}
-	
-	def _getLastRun() {
-		def c = IndexRun.createCriteria()
-		def lastRun = c.get {
-			projections {
-				max('runDate')
+			def metadataToSave = persistedMetadata.find { 
+				it.geonetworkUuid == metadata.geonetworkUuid && it.featureTypeName == metadata.featureTypeName 
+			} ?: metadata
+			
+			metadataToSave.with {
+				changeDate = metadata.changeDate
+				added = added ?: now
+				save(failOnError: true)
 			}
 		}
-		if (lastRun == null) {
-			lastRun = _initialiseLastRun()
-		}
-		log.debug(lastRun)
-		return lastRun
 	}
 	
-	def _initialiseLastRun() {
+	def _getZeroedTimestamp() {
 		return new Timestamp(new Date(0).time)
 	}
 	
@@ -188,14 +178,6 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 	
 	def _isBoundingBoxSubmitted(params) {
 		return params.northBL && params.eastBL && params.southBL && params.westBL
-	}
-	
-	def _isForced(params) {
-		def force = false
-		if (params.force) {
-			force = new Boolean(params.force)
-		}
-		return force.booleanValue()
 	}
 	
 	def _isPaging(params) {
@@ -249,8 +231,7 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 	}
 	
 	def _addCommonQueueParams(params) {
-		def lastRun = _isForced(params) ? _initialiseLastRun() : _getLastRun()
-		params.dateFrom = _dateToString(lastRun)
+		params.dateFrom = _dateToString(_getZeroedTimestamp())
 		params.dateTo = _dateToString(_tomorrow())
 		params.protocol = grailsApplication.config.geonetwork.request.protocol
 		_addFastIndexParams(params)

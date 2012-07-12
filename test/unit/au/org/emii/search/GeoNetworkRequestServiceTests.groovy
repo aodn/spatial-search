@@ -66,23 +66,6 @@ class GeoNetworkRequestServiceTests extends GrailsUnitTestCase {
 		assertTrue service._isBoundingBoxSubmitted(params)
 	}
 	
-	void testIsForced() {
-		def params = [:]
-		assertFalse service._isForced(params)
-		
-		params.force = false
-		assertFalse service._isForced(params)
-		
-		params.force = 'false'
-		assertFalse service._isForced(params)
-		
-		params.force = true
-		assertTrue service._isForced(params)
-		
-		params.force = 'true'
-		assertTrue service._isForced(params)
-	}
-	
 	void testGetPageEnd() {
 		def pageEnd = service.grailsApplication.config.geonetwork.search.page.size
 		def params = [:]
@@ -97,20 +80,6 @@ class GeoNetworkRequestServiceTests extends GrailsUnitTestCase {
 		
 		params.to = 599
 		assertEquals(599 + pageEnd, service._getPageEnd(params))
-	}
-	
-	void testListifyKnownListParams() {
-		/*
-		 * The configuration mocking doesn't appear to be working at test
-		 * time, it sees a ConfigObject that has no contains(Object) method
-		 * which is fair enough. I need to improve integration testing so they
-		 * can be run more efficiently
-		 */
-//		def params = ['themekey': 'foo,bar,sink,plug', 'fake1': 'some,more,comma,separated,values']
-//		service._listifyKnownListParams(params)
-//		assertEquals "bar", params.themekey[1]
-//		assertEquals(['foo', 'bar', 'sink', 'plug'], params.themekey)
-//		assertEquals "some,more,comma,separated,values", params.fake1
 	}
 	
 	def _mockConfig() {

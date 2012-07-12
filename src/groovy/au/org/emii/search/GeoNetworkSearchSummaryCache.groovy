@@ -16,8 +16,10 @@ class GeoNetworkSearchSummaryCache {
 	
 	GeoNetworkSearchSummaryCache() {
 		manager = CacheManager.create()
-		manager.addCache(CACHE_NAME)
-		_setDynamicConfigurationParameters()
+		if (!manager.cacheExists(CACHE_NAME)) {
+			manager.addCache(CACHE_NAME)
+			_setDynamicConfigurationParameters()
+		}
 	}
 	
 	def add(sha, summary) {

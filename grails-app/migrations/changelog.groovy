@@ -390,4 +390,48 @@ databaseChangeLog = {
 			column(name: "constructor_args", value: "uuid,geometry")
 		}
 	}
+	
+	changeSet(author: "tfotak", id: "1341883299000-1", failOnError: true) {
+		addColumn(tableName: "geonetwork_metadata") {
+			column(name: "change_date", type: "timestamp")
+			column(name: "last_indexed", type: "timestamp")
+		}
+	}
+	
+	changeSet(author: "tfotak", id: "1341883299000-2", failOnError: true) {
+		dropColumn(columnName: "index_run_id", tableName: "geonetwork_metadata")
+		dropTable(tableName: "index_run")
+	}
+	
+	changeSet(author: "tfotak", id: "1341883299000-3", failOnError: true) {
+		update(tableName: "feature_type_request_class") {
+			column(name: "class_name", value: "au.org.emii.search.index.DiskCachingFeatureTypeRequest")
+			where("feature_type_name like '%:soop%'")
+		}
+	}
+	
+	changeSet(author: "tfotak", id: "1341883299000-4", failOnError: true) {
+		update(tableName: "geonetwork_metadata") {
+			column(name: "change_date", valueComputed: "to_date('01 Jan 1970', 'DD Mon YYYY')")
+		}
+	}
+	
+	changeSet(author: "tfotak", id: "1341883299000-5", failOnError: true) {
+		addNotNullConstraint(tableName: "geonetwork_metadata", columnName: "change_date")
+	}
+	
+	changeSet(author: "tfotak", id: "1341974714000-1", failOnError: true) {
+		update(tableName: "feature_type_request_class") {
+			column(name: "output_format", value: "gml2")
+			where("feature_type_name like 'waodn:%'")
+		}
+	}
+	
+	changeSet(author: "tfotak", id: "1341974714000-2", failOnError: true) {
+		sql("update feature_type_request_class set constructor_args = replace(constructor_args, '@id', '@fid') where feature_type_name like 'waodn:%'")
+	}
+	
+	changeSet(author: "tfotak", id: "1341974714000-3", failOnError: true) {
+		sql("update feature_type_request_class set constructor_args = replace(constructor_args, '@id', '@gml:id') where constructor_args like '@id%' and class_name = 'au.org.emii.search.index.DiskCachingFeatureTypeRequest'")
+	}
 }

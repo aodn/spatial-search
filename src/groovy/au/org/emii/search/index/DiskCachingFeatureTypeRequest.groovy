@@ -21,6 +21,7 @@ class DiskCachingFeatureTypeRequest extends FeatureTypeRequest implements Respon
 	 */
 	
 	def featureCallback
+	def metadataCallback
 	
 	DiskCachingFeatureTypeRequest() {
 		super()

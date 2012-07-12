@@ -14,18 +14,6 @@ class GeoNetworkSearchShaBuilderTests extends GrailsUnitTestCase {
         super.tearDown()
     }
 	
-	void testCleanListParams() {
-		def param = 'theme9,theme8,theme7,atheme,themez,btheme,theme1,theme5'
-		def shaBuilder = new GeoNetworkSearchShaBuilder()
-		
-		mockConfig("geonetwork.search.list.params.delimiter = ','")
-		_applyConfig(shaBuilder)
-		
-		def result = shaBuilder._cleanListParam(param)
-		
-		assertEquals("atheme,btheme,theme1,theme5,theme7,theme8,theme9,themez", result)
-	}
-
     void testCleanParams() {
 		def params = new TreeMap()
 		params.from = '1'
@@ -35,7 +23,6 @@ class GeoNetworkSearchShaBuilderTests extends GrailsUnitTestCase {
 		params['ext-comp-2'] = '1234567890'
 		params['ext-comp-3'] = 'poipiwopiiwer'
 		params['ext-comp-4'] = 'adasdasdsa'
-		params['themekey'] = 'theme9,theme8,theme7,atheme,themez,btheme,theme1,theme5'
 		
 		def shaBuilder = new GeoNetworkSearchShaBuilder()
 		
@@ -54,7 +41,6 @@ class GeoNetworkSearchShaBuilderTests extends GrailsUnitTestCase {
 		assertFalse(params.containsKey('ext-comp-2'))
 		assertFalse(params.containsKey('ext-comp-3'))
 		assertFalse(params.containsKey('ext-comp-4'))
-		assertEquals("atheme,btheme,theme1,theme5,theme7,theme8,theme9,themez", params.themekey)
     }
 	
 	def _applyConfig(o) {

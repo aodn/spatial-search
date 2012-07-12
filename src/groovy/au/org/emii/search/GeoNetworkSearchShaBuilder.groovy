@@ -20,24 +20,13 @@ class GeoNetworkSearchShaBuilder {
 	}
 	
 	def _cleanParams(params) {
-		//def knownListParams = grailsApplication.config.geonetwork.search.list.params.items
-		
 		for (Iterator i = params.entrySet().iterator(); i.hasNext();) {
 			def entry = i.next()
 			if (entry.key.startsWith('ext-comp') || volatileParams.contains(entry.key)) {
 				i.remove()
 			}
-//			if (knownListParams.contains(entry.key)) {
-//				params[entry.key] = _cleanListParam(entry.value)
-//			}
 		}
 	}
-	
-//	def _cleanListParam(param) {
-//		def l = param.split(grailsApplication.config.geonetwork.search.list.params.delimiter)
-//		l = l.sort()
-//		return l.join(',')
-//	}
 	
 	def _buildShaInputString(params) {
 		def sha = params.keySet().inject("") { result, key ->

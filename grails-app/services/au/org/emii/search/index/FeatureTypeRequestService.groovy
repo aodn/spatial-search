@@ -1,6 +1,7 @@
 package au.org.emii.search.index
 
 import java.sql.PreparedStatement
+import java.sql.Timestamp;
 
 import org.apache.http.client.HttpResponseException;
 import org.hibernate.LockMode
@@ -24,7 +25,6 @@ class FeatureTypeRequestService {
     def index() {
 		def featureCount = 0
 		def messages = []
-		def indexRun = new IndexRun()
 		def metadataRecords = _loadGeonetworkMetadata()
 		log.info("Loaded ${metadataRecords.size()} metadata records for indexing")
 		
@@ -32,7 +32,7 @@ class FeatureTypeRequestService {
 		servers.values().each { server ->
 			server.featureTypeUuids.each { featureTypeName, metadataList ->
 				try {
-					featureCount += _index(indexRun, metadataList, messages)
+					featureCount += _index(metadataList, messages)
 				}
 				catch (HttpResponseException e) {
 					messages << "Error ${server.url} not indexed due to http issue: ${e.toString()}\nCheck logs for more detail."
@@ -48,56 +48,40 @@ class FeatureTypeRequestService {
 			_clearCache()
 		}
 		
-		log.info("Finished index run $indexRun")
+		log.info("Finished index run")
 		_sendMail(messages)
 		
 		return featureCount
     }
 	
-	def _index(indexRun, metadataRecords, messages) {
+	def _index(metadataRecords, messages) {
 		def featureCount = 0
 		
-		if (indexRun.geonetworkMetadataDocs.size() > 0) {
-			_reattach(indexRun)
-		}
-		
 		def metadata = metadataRecords[0]
-		def featureTypeRequestImpl = _getFeatureTypeRequestImplementation(metadata, indexRun, messages)
-		def features = new ArrayList(featureTypeRequestImpl.requestFeatureType(metadata))
-		if (!features.isEmpty()) {
-			try {
-				_addFeaturesForOtherMetadata(metadata, features, metadataRecords)
-				_saveMetadataFeatures(metadata, features)
-				_updateIndexRun(indexRun, metadataRecords)
-				featureCount = features.size()
+		if (_unindexed(metadataRecords)) {
+			def featureTypeRequestImpl = _getFeatureTypeRequestImplementation(metadata, messages)
+			def features = new ArrayList(featureTypeRequestImpl.requestFeatureType(metadata))
+			if (!features.isEmpty()) {
+				try {
+					_addFeaturesForOtherMetadata(metadata, features, metadataRecords)
+					_saveMetadataFeatures(metadata, features)
+					featureCount = features.size()
+				}
+				catch (Exception e) {
+					// Features related to this metadata could not be saved
+					_errorMetadataRecords(metadataRecords)
+					messages << "Error ${metadata.geoserverEndPoint} not indexed: ${e.toString()}"
+				}
 			}
-			catch (Exception e) {
-				// Features related to this metadata could not be saved
-				messages << "Error ${metadata.geoserverEndPoint} not indexed: ${e.toString()}"
-			}
+			_saveAndFlushMetadata(metadataRecords)
 		}
 		return featureCount
 	}
 	
 	def _loadGeonetworkMetadata() {
-		def metadataRecords = GeonetworkMetadata.findAllByIndexRunIsNull()
-		// Piff them out of the main session transaction so when modified by the
-		// async call they can be reloaded here
-		// There is no async call now but it's worth leaving this code in
-		metadataRecords*.discard()
+		return GeonetworkMetadata.list()
 	}
 
-	def _updateIndexRun(indexRun, metadataList) {
-		indexRun.geonetworkMetadataDocs.addAll(metadataList)
-		metadataList*.indexRun = indexRun
-		/*
-		 * This looks stupid and inefficient but if save is not called on
-		 * IndexRun here an exception relating to a transient object is
-		 * thrown
-		 */
-		_save(indexRun)
-	}
-	
 	def _saveMetadataFeatures(metadata, features) {
 		def featureCount = features.size()
 		def index = 0
@@ -110,11 +94,8 @@ class FeatureTypeRequestService {
 				_saveFeatures(metadata, slice)
 			}
 			finally {
-				_clearGorm()
+				//_clearGorm()
 			}
-			// Now evict the features from the session in the hope
-			// the GC will pick them up
-			//features*.discard()
 			index = sliceEnd
 		}
 	}
@@ -242,9 +223,9 @@ class FeatureTypeRequestService {
 			log.error("Failure persisting domain object ${domain}: ", e)
 		}
 	}
-
-	def _getFeatureTypeRequestImplementation(metadata, indexRun, messages) {
-		def featureTypeName = metadata.featureTypeName
+	
+	def _getFeatureTypeRequestImplementation(geonetworkMetadata, messages) {
+		def featureTypeName = geonetworkMetadata.featureTypeName
 		def featureTypeRequestClasses = FeatureTypeRequestClass.findAll("from FeatureTypeRequestClass as f where '${featureTypeName}' like f.featureTypeName || '%'")
 		if (featureTypeRequestClasses) {
 			def bestMatch
@@ -263,15 +244,18 @@ class FeatureTypeRequestService {
 			
 			if (instance instanceof DiskCachingFeatureTypeRequest) {
 				// Add a call back to persist features one by one for large WFS responses
-				instance.featureCallback = { feature ->
+				instance.featureCallback = { metadata, feature ->
 					_saveFeatures(metadata, [feature])
-					_updateIndexRun(indexRun, [metadata])
+				}
+				
+				instance.metadataCallback = { metadata ->
+					_saveAndFlushMetadata([metadata])
 				}
 			}
 			
 			return instance
 		}
-		messages << _getMessageForMissingFeatureTypeRequestClass(metadata)
+		messages << _getMessageForMissingFeatureTypeRequestClass(geonetworkMetadata)
 		// Use the null implementation
 		return new NullFeatureTypeRequest()
 	}
@@ -341,10 +325,6 @@ class FeatureTypeRequestService {
 		propertyInstanceMap.get().clear()
 	}
 	
-	def _reattach(object) {
-		_getSession().lock(object, LockMode.NONE)
-	}
-	
 	def _getSession() {
 		return sessionFactory.getCurrentSession()
 	}
@@ -390,5 +370,30 @@ No feature type request class configured for server ${metadata.geoserverEndPoint
 Please add an appropriate record to table feature_type_request_class
 Feature type quick link $url		
 """
+	}
+	
+	def _unindexed(metadataRecords) {
+		return metadataRecords.grep { it.unindexed() }.size() > 0
+	}
+	
+	def _updateMetadataIndexing(metadataRecords) {
+		def now = new Timestamp(System.currentTimeMillis())
+		metadataRecords.each {
+			if (!it.error) {
+				it.lastIndexed = now
+				_save(it)
+			}
+		}
+	}
+	
+	def _saveAndFlushMetadata(metadataRecords) {
+		_updateMetadataIndexing(metadataRecords)
+		_getSession().flush()
+	}
+	
+	def _errorMetadataRecords(metadataRecords) {
+		metadataRecords.each {
+			it.error = true
+		}
 	}
 }

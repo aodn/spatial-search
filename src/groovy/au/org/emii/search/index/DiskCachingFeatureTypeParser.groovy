@@ -20,6 +20,8 @@ class DiskCachingFeatureTypeParser extends DefaultHandler2 {
 	def featureTypeIdElementName
 	def featureTypeGeometryElementName
 	def featureCallback
+	def metadataCallback
+	def idParser
 	
 	// State/flow controls
 	def featureType
@@ -31,11 +33,14 @@ class DiskCachingFeatureTypeParser extends DefaultHandler2 {
 	DiskCachingFeatureTypeParser(GeonetworkMetadata metadata, DiskCachingFeatureTypeRequest featureTypeRequest) {
 		featureTypes = []
 		featureCollectionStarted = false
+		idParser = new FeatureTypeIndentifierParser()
+		
 		this.metadata = metadata
 		this.featureTypeElementName = featureTypeRequest.featureTypeElementName
 		this.featureTypeIdElementName = featureTypeRequest.featureTypeIdElementName
 		this.featureTypeGeometryElementName = featureTypeRequest.featureTypeGeometryElementName
 		this.featureCallback = featureTypeRequest.featureCallback
+		this.metadataCallback = featureTypeRequest.metadataCallback
 	}
 	
 	void startElement(String ns, String localName, String qname, Attributes atts) {
@@ -71,15 +76,16 @@ class DiskCachingFeatureTypeParser extends DefaultHandler2 {
 		}
     }
 	
+	void endDocument() {
+		if (metadataCallback) {
+			metadataCallback(this.metadata)
+		}
+	}
+	
 	def _startFeatureType(ns, localName, qname, atts) {
 		featureType = new FeatureType(metadata)
-		if (_idIsAttribute()) {
-			// This really doesn't feel robust to me but I can't find a way to
-			// get the id attribute from the element using passed in parameters
-			// without also looping over all the attributes
-			featureType.featureTypeId = atts.getValue("gml:${_getIdAttributeName()}")
-			log.debug("=> $featureType.featureTypeId")
-		}
+		featureType.featureTypeId = featureType.featureTypeId ?: idParser.parseInlineAsAttribute(featureTypeIdElementName, ns, localName, qname, atts)
+		log.debug("===================================> start feature type with $featureType.featureTypeId")
 		featureTypeGmlBuilder = new StringBuilder()
 	}
 	
@@ -110,7 +116,12 @@ class DiskCachingFeatureTypeParser extends DefaultHandler2 {
 	
 	def _endFeatureType(ns, localName, qname) {
 		if (featureCallback) {
-			featureCallback(featureType)
+			try {
+				featureCallback(metadata, featureType)
+			}
+			catch (Exception e) {
+				metadata.error = true
+			}
 		}
 		else {
 			featureTypes << featureType
@@ -119,9 +130,8 @@ class DiskCachingFeatureTypeParser extends DefaultHandler2 {
 	}
 	
 	def _parseFeatureTypeId = { chars, offset, length ->
-		if (!_idIsAttribute()) {
-			featureType.featureTypeId = new String(chars, offset, length)
-		}
+		featureType.featureTypeId = featureType.featureTypeId ?: idParser.parseInlineAsCharacters(featureTypeIdElementName, chars, offset, length)
+		log.debug("===================================> parsing feature type id with $featureType.featureTypeId")
 	}
 	
 	def _parseGeometryElement = { chars, offset, length ->
@@ -130,14 +140,6 @@ class DiskCachingFeatureTypeParser extends DefaultHandler2 {
 	
 	def _endGeometryElement(ns, localName, qname) {
 		featureType.gml = featureTypeGmlBuilder.toString()
-	}
-	
-	def _idIsAttribute() {
-		return featureTypeIdElementName.startsWith("@")
-	}
-	
-	def _getIdAttributeName() {
-		return featureTypeIdElementName.substring(1)
 	}
 	
 //	static void foo() {

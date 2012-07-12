@@ -24,11 +24,13 @@ class FeatureTypeRequest {
 	def geometryHelper
 	def namespaceAware
 	def outputFormat
+	def idParser
 	
 	FeatureTypeRequest() {
 		super()
 		geometryHelper = new GeometryHelper()
 		namespaceAware = true
+		idParser = new FeatureTypeIndentifierParser()
 	}
 	
 	FeatureTypeRequest(String featureTypeIdElementName) {
@@ -78,7 +80,7 @@ class FeatureTypeRequest {
 			featureMember.children().each { member ->
 				if (featureTypeElementName == member.name()) {
 					def feature = new FeatureType(metadata)
-					feature.featureTypeId = getFeatureId(member)
+					feature.featureTypeId = _getFeatureId(member)
 					try {
 						feature.gml = getGml(member."${featureTypeGeometryElementName}")
 						if (feature.gml) {
@@ -106,8 +108,8 @@ class FeatureTypeRequest {
 		return new XmlSlurper(false, namespaceAware).parseText(xml)
 	}
 	
-	def getFeatureId(featureTree) {
-		return featureTree."${featureTypeIdElementName}".text()
+	def _getFeatureId(featureTree) {
+		return idParser.parseFromNode(featureTypeIdElementName, featureTree)
 	}
 	
 	def requestFeatureType(geonetworkMetadata) {

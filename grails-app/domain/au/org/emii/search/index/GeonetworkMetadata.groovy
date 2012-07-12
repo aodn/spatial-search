@@ -13,21 +13,21 @@ class GeonetworkMetadata implements Comparable<GeonetworkMetadata> {
 	Timestamp added
 	String featureTypeName
 	String geoserverEndPoint
+	Timestamp changeDate
+	Timestamp lastIndexed
+	
+	def error
 	
 	static mapping = {
 		featureTypeName index: 'idx_qd_feature_type'
 		geonetworkUuid index: 'idx_qd_feature_type'
-		indexRun indexColumn:[name:"idx_qd_index_run_id", type:Integer]
 	}
 	
 	static constraints = {
 		added(nullable : true)
-		indexRun(nullable : true)
+		changeDate(nullable : false)
+		lastIndexed(nullable : true)
 	}
-	
-	static belongsTo = [
-		indexRun: IndexRun
-	]
 	
 	@Override
 	boolean equals(o) {
@@ -54,10 +54,12 @@ class GeonetworkMetadata implements Comparable<GeonetworkMetadata> {
 	
 	@Override
 	String toString() {
-		return idString() + new ToStringBuilder(this)
+		return new ToStringBuilder(this)
+			.appendToString(idString())
 			.append("geoserverEndPoint", geoserverEndPoint)
 			.append("added", added)
-			.append("index", indexRun?.id)
+			.append("changeDate", changeDate)
+			.append("lastIndexed", lastIndexed)
 			.toString()
 	}
 	
@@ -73,5 +75,9 @@ class GeonetworkMetadata implements Comparable<GeonetworkMetadata> {
 			.append("geonetworkUuid", geonetworkUuid)
 			.append("featureTypeName", featureTypeName)
 			.toString()
+	}
+	
+	def unindexed() {
+		return lastIndexed == null || changeDate.after(lastIndexed)
 	}
 }
