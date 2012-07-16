@@ -29,7 +29,7 @@ class GeoNetworkLink {
 	}
 	
 	def isMapLink() {
-		return _isProtocol() && _isFeatureTypeLink()
+		return _isProtocol()
 	}
 	
 	def _getToSet(list, index) {
@@ -43,11 +43,5 @@ class GeoNetworkLink {
 		def regexPattern = grailsApplication.config.geonetwork.link.protocol.regex
 		// The true is here to coerce the matcher into a boolean
 		return true && protocol =~ /$regexPattern/
-	}
-	
-	def _isFeatureTypeLink() {
-		def regexPattern = grailsApplication.config.geonetwork.feature.type.indentifier.regex
-		// The true is here to coerce the matcher into a boolean
-		return true && featureType =~ /$regexPattern/
 	}
 }

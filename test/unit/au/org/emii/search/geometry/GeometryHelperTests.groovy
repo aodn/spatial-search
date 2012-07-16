@@ -1,11 +1,12 @@
 package au.org.emii.search.geometry
 
+import au.org.emii.search.geometry.GeometryHelper.CoordinateFormat
 import grails.test.*
 
 class GeometryHelperTests extends GrailsUnitTestCase {
-    
+
 	def helper = new GeometryHelper()
-	
+
 	protected void setUp() {
         super.setUp()
     }
@@ -20,36 +21,36 @@ class GeometryHelperTests extends GrailsUnitTestCase {
 		assertEquals 'com.vividsolutions.jts.geom.Point', g.getClass().getName()
 		assertEquals 132.736816d, g.getX()
     }
-	
+
 	void testToLineString() {
 		def s = '-43.897892 132.736816 -43.897892 140.537109 -42.3475345 148.337402 -40.797177 140.537109 -40.797177 132.736816 -42.3475345 124.936523'
 		def g = helper.toGeometryFromCoordinateText('LineString', s)
 		assertEquals 'com.vividsolutions.jts.geom.LineString', g.getClass().getName()
 	}
-	
+
 	void testToCurve() {
 		def s = '-43.897892 132.736816 -43.897892 140.537109 -42.3475345 148.337402 -40.797177 140.537109 -40.797177 132.736816 -42.3475345 124.936523'
 		def g = helper.toGeometryFromCoordinateText('Curve', s)
 		assertEquals 'com.vividsolutions.jts.geom.LineString', g.getClass().getName()
 	}
-	
+
 	void testToPolygon() {
 		def s = '-43.897892 132.736816 -43.897892 140.537109 -42.3475345 148.337402 -40.797177 140.537109 -40.797177 132.736816 -42.3475345 124.936523 -43.897892 132.736816'
 		def g = helper.toGeometryFromCoordinateText('Polygon', s)
 		assertEquals 'com.vividsolutions.jts.geom.Polygon', g.getClass().getName()
 	}
-	
+
 	void testToMultiPolygonWkt() {
 		def l = [
-			['40 40 20 45 45 30 40 40'], 
-			['-43.897892 132.736816 -43.897892 140.537109 -42.3475345 148.337402 -40.797177 140.537109 -40.797177 132.736816 -42.3475345 124.936523 -43.897892 132.736816', '0 10 0 20 10 20 10 10 0 10'], 
+			['40 40 20 45 45 30 40 40'],
+			['-43.897892 132.736816 -43.897892 140.537109 -42.3475345 148.337402 -40.797177 140.537109 -40.797177 132.736816 -42.3475345 124.936523 -43.897892 132.736816', '0 10 0 20 10 20 10 10 0 10'],
 		    ['20 35 45 20 30 5 10 10 10 30 20 35', '30 20 20 25 20 15 30 20']
 		]
 		def s = 'MULTIPOLYGON (((40 40, 45 20, 30 45, 40 40)), ((132.736816 -43.897892, 140.537109 -43.897892, 148.337402 -42.3475345, 140.537109 -40.797177, 132.736816 -40.797177, 124.936523 -42.3475345, 132.736816 -43.897892), (10 0, 20 0, 20 10, 10 10, 10 0)), ((35 20, 20 45, 5 30, 10 10, 30 10, 35 20), (20 30, 25 20, 15 20, 20 30)))'
 		def wkt = helper._toMultiPolygon(l)
 		assertEquals s, wkt
 	}
-	
+
 	void testToMultiPolygon() {
 		def l = [
 			['40 40 20 45 45 30 40 40'],
@@ -59,33 +60,33 @@ class GeometryHelperTests extends GrailsUnitTestCase {
 		def g = helper.toGeometryFromCoordinateText('MultiPolygon', l)
 		assertEquals 'com.vividsolutions.jts.geom.MultiPolygon', g.getClass().getName()
 	}
-	
+
 	void testMultiPolygonWithHole() {
 		def l = [
 			['40 40 45 20 30 45 40 40'],
 			['35 20 20 45 5 30 10 10 30 10 35 20', '20 30 25 20 15 20 20 30']
 		]
-		
+
 		def s = 'MULTIPOLYGON (((40 40, 20 45, 45 30, 40 40)), ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20)))'
 		def wkt = helper._toMultiPolygon(l)
 		assertEquals s, wkt
 	}
-	
+
 	void testToBoundingBox() {
 		def north = '1.37'
 		def east = '168.16'
 		def south = '-51.37'
 		def west = '97.84'
-		
+
 		def bb = helper.toBoundingBox(north, east, south, west)
 		assertEquals 'com.vividsolutions.jts.geom.Polygon', bb.getClass().getName()
-		
+
 		// If we cross the anti-meridian we expect a multipolygon
 		east = '-178'
 		bb = helper.toBoundingBox(north, east, south, west)
 		assertEquals 'com.vividsolutions.jts.geom.MultiPolygon', bb.getClass().getName()
 	}
-	
+
 	void testGetMultiSurfaceCoordinateText() {
 		def gml = """<MultiSurface srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:4326">
   <surfaceMember>
@@ -108,14 +109,14 @@ class GeometryHelperTests extends GrailsUnitTestCase {
     </Polygon>
   </surfaceMember>
 </MultiSurface>"""
-		
+
 		def exterior = '-10.1 124.6 -10.0 124.6 -10.0 124.5 -10.1 124.5 -10.1 124.4 -10.1 124.3 -10.1 124.2 -10.1 124.1 -10.1 124.0 -10.2 124.0 -10.2 123.9 -10.3 123.9 -10.3 123.8 -10.3 123.7 -10.3 123.6 -10.3 123.5 -10.2 123.5 -10.2 123.6 -10.2 123.7 -10.2 123.8 -10.1 123.8 -10.0 123.8 -10.0 123.7 -10.0 123.6 -10.0 123.5 -10.1 123.5 -10.1 123.4 -10.1 123.3 -10.2 123.3 -10.2 123.2 -10.3 123.2 -10.4 123.2 -10.5 123.2 -10.5 123.1 -10.6 123.1 -10.6 123.0 -10.7 123.0 -10.7 122.9 -10.7 122.8 -10.7 122.7 -10.7 122.6 -10.8 122.6 -10.9 122.6 -10.9 122.7 -11.0 122.7 -11.0 122.8 -11.1 122.8 -11.1 122.9 -11.0 122.9 -11.0 123.0 -11.0 123.1 -10.9 123.1 -10.9 123.2 -10.9 123.3 -10.8 123.3 -10.8 123.4 -10.7 123.4 -10.7 123.5 -10.6 123.5 -10.5 123.5 -10.4 123.5 -10.4 123.6 -10.4 123.7 -10.4 123.8 -10.4 123.9 -10.4 124.0 -10.3 124.0 -10.3 124.1 -10.2 124.1 -10.2 124.2 -10.3 124.2 -10.3 124.3 -10.3 124.4 -10.3 124.5 -10.2 124.5 -10.2 124.6 -10.1 124.6'
 		def interior1 = '-10.7 123.2 -10.8 123.2 -10.8 123.1 -10.7 123.1 -10.7 123.2'
 		def interior2 = '-10.6 123.3 -10.7 123.3 -10.7 123.2 -10.6 123.2 -10.6 123.3'
-		
+
 		def gpath = new XmlSlurper(false, true).parseText(gml)
 		def result = helper._getMultiSurfaceCoordinateText(gpath)
-		
+
 		assertEquals 1, result.size()
 		assertEquals 3, result[0].size()
 		assertEquals exterior, result[0][0]
@@ -123,7 +124,7 @@ class GeometryHelperTests extends GrailsUnitTestCase {
 		assertEquals interior2, result[0][2]
 		assertEquals([[exterior, interior1, interior2]], result)
 	}
-	
+
 	void testMultiSurfaceCoordinateAsWkt() {
 		def gml = """<MultiSurface srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:4326">
   <surfaceMember>
@@ -146,7 +147,7 @@ class GeometryHelperTests extends GrailsUnitTestCase {
     </Polygon>
   </surfaceMember>
 </MultiSurface>"""
-		
+
 		def gpath = new XmlSlurper(false, true).parseText(gml)
 		def result = helper._toWkt('MultiSurface', helper._getMultiSurfaceCoordinateText(gpath))
 		assertEquals(
@@ -171,7 +172,7 @@ class GeometryHelperTests extends GrailsUnitTestCase {
 			result
 		)
 	}
-	
+
 	void testGetMultiSurfaceCoordinateTextForMultipleSurfaceMembers() {
 		def gml = """<MultiSurface srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:4326">
   <surfaceMember>
@@ -218,7 +219,7 @@ class GeometryHelperTests extends GrailsUnitTestCase {
     </Polygon>
   </surfaceMember>
 </MultiSurface>"""
-		
+
 		def exterior1 = '-10.1 124.6 -10.0 124.6 -10.0 124.5 -10.1 124.5 -10.1 124.4 -10.1 124.3 -10.1 124.2 -10.1 124.1 -10.1 124.0 -10.2 124.0 -10.2 123.9 -10.3 123.9 -10.3 123.8 -10.3 123.7 -10.3 123.6 -10.3 123.5 -10.2 123.5 -10.2 123.6 -10.2 123.7 -10.2 123.8 -10.1 123.8 -10.0 123.8 -10.0 123.7 -10.0 123.6 -10.0 123.5 -10.1 123.5 -10.1 123.4 -10.1 123.3 -10.2 123.3 -10.2 123.2 -10.3 123.2 -10.4 123.2 -10.5 123.2 -10.5 123.1 -10.6 123.1 -10.6 123.0 -10.7 123.0 -10.7 122.9 -10.7 122.8 -10.7 122.7 -10.7 122.6 -10.8 122.6 -10.9 122.6 -10.9 122.7 -11.0 122.7 -11.0 122.8 -11.1 122.8 -11.1 122.9 -11.0 122.9 -11.0 123.0 -11.0 123.1 -10.9 123.1 -10.9 123.2 -10.9 123.3 -10.8 123.3 -10.8 123.4 -10.7 123.4 -10.7 123.5 -10.6 123.5 -10.5 123.5 -10.4 123.5 -10.4 123.6 -10.4 123.7 -10.4 123.8 -10.4 123.9 -10.4 124.0 -10.3 124.0 -10.3 124.1 -10.2 124.1 -10.2 124.2 -10.3 124.2 -10.3 124.3 -10.3 124.4 -10.3 124.5 -10.2 124.5 -10.2 124.6 -10.1 124.6'
 		def exterior2 = '-11.6 153.9 -11.5 153.9 -11.5 153.8 -11.4 153.8 -11.4 153.7 -11.4 153.6 -11.4 153.5 -11.3 153.5 -11.2 153.5 -11.2 153.4 -11.2 153.3 -11.1 153.3 -11.1 153.2 -11.1 153.1 -11.1 153.0 -11.0 153.0 -11.0 152.9 -11.0 152.8 -10.9 152.8 -10.9 152.7 -10.9 152.6 -10.8 152.6 -10.8 152.7 -10.8 152.8 -10.8 152.9 -10.7 152.9 -10.6 152.9 -10.6 152.8 -10.6 152.7 -10.6 152.6 -10.6 152.5 -10.6 152.4 -10.6 152.3 -10.7 152.3 -10.8 152.3 -10.8 152.2 -10.8 152.1 -10.9 152.1 -10.9 152.2 -10.9 152.3 -10.9 152.4 -11.0 152.4 -11.0 152.3 -11.1 152.3 -11.1 152.2 -11.1 152.1 -11.1 152.0 -11.1 151.9 -11.1 151.8 -11.1 151.7 -11.1 151.6 -11.0 151.6 -11.0 151.5 -11.0 151.4 -11.0 151.3 -11.0 151.2 -10.9 151.2 -10.8 151.2 -10.8 151.3 -10.8 151.4 -10.7 151.4 -10.6 151.4 -10.5 151.4 -10.5 151.5 -10.4 151.5 -10.3 151.5 -10.3 151.4 -10.3 151.3 -10.2 151.3 -10.1 151.3 -10.0 151.3 -10.0 151.2 -10.0 151.1 -10.0 151.0 -10.0 150.9 -10.0 150.8 -10.1 150.8 -10.1 150.9 -10.2 150.9 -10.2 150.8 -10.2 150.7 -10.2 150.6 -10.2 150.5 -10.2 150.4 -10.1 150.4 -10.1 150.3 -10.1 150.2 -10.0 150.2 -10.0 150.1 -10.0 150.0 -10.0 149.9 -10.0 149.8 -10.1 149.8 -10.1 149.9 -10.1 150.0 -10.1 150.1 -10.2 150.1 -10.2 150.2 -10.2 150.3 -10.3 150.3 -10.3 150.4 -10.3 150.5 -10.3 150.6 -10.3 150.7 -10.4 150.7 -10.4 150.8 -10.4 150.9 -10.4 151.0 -10.5 151.0 -10.6 151.0 -10.6 150.9 -10.6 150.8 -10.6 150.7 -10.6 150.6 -10.6 150.5 -10.6 150.4 -10.6 150.3 -10.7 150.3 -10.7 150.2 -10.6 150.2 -10.6 150.1 -10.6 150.0 -10.5 150.0 -10.4 150.0 -10.4 149.9 -10.3 149.9 -10.3 149.8 -10.3 149.7 -10.3 149.6 -10.3 149.5 -10.2 149.5 -10.2 149.4 -10.2 149.3 -10.2 149.2 -10.2 149.1 -10.2 149.0 -10.2 148.9 -10.2 148.8 -10.1 148.8 -10.1 148.7 -10.1 148.6 -10.1 148.5 -10.2 148.5 -10.2 148.4 -10.1 148.4 -10.1 148.3 -10.0 148.3 -10.0 148.2 -10.0 148.1 -10.1 148.1 -10.1 148.0 -10.0 148.0 -10.0 147.9 -10.0 147.8 -10.0 147.7 -10.0 147.6 -10.0 147.5 -10.1 147.5 -10.1 147.6 -10.2 147.6 -10.2 147.7 -10.2 147.8 -10.2 147.9 -10.2 148.0 -10.3 148.0 -10.3 148.1 -10.3 148.2 -10.3 148.3 -10.3 148.4 -10.4 148.4 -10.4 148.5 -10.4 148.6 -10.4 148.7 -10.4 148.8 -10.4 148.9 -10.4 149.0 -10.4 149.1 -10.4 149.2 -10.5 149.2 -10.5 149.3 -10.5 149.4 -10.6 149.4 -10.6 149.5 -10.6 149.6 -10.7 149.6 -10.7 149.7 -10.7 149.8 -10.7 149.9 -10.7 150.0 -10.7 150.1 -10.8 150.1 -10.8 150.2 -10.9 150.2 -10.9 150.3 -10.9 150.4 -10.9 150.5 -11.0 150.5 -11.0 150.6 -11.0 150.7 -11.0 150.8 -11.1 150.8 -11.1 150.9 -11.1 151.0 -11.2 151.0 -11.2 151.1 -11.2 151.2 -11.2 151.3 -11.2 151.4 -11.3 151.4 -11.3 151.5 -11.3 151.6 -11.2 151.6 -11.2 151.7 -11.2 151.8 -11.3 151.8 -11.3 151.9 -11.3 152.0 -11.3 152.1 -11.3 152.2 -11.4 152.2 -11.4 152.3 -11.4 152.4 -11.4 152.5 -11.5 152.5 -11.5 152.6 -11.5 152.7 -11.6 152.7 -11.6 152.8 -11.6 152.9 -11.7 152.9 -11.7 153.0 -11.7 153.1 -11.7 153.2 -11.7 153.3 -11.7 153.4 -11.7 153.5 -11.7 153.6 -11.8 153.6 -11.8 153.7 -11.8 153.8 -11.7 153.8 -11.7 153.9 -11.6 153.9'
 		def interior1 = '-10.7 123.2 -10.8 123.2 -10.8 123.1 -10.7 123.1 -10.7 123.2'
@@ -226,16 +227,16 @@ class GeometryHelperTests extends GrailsUnitTestCase {
 		def interior3 = '-10.8 152.6 -10.8 152.5 -10.7 152.5 -10.7 152.6 -10.8 152.6'
 		def interior4 = '-10.3 151.2 -10.3 151.1 -10.2 151.1 -10.2 151.2 -10.3 151.2'
 		def interior5 = '-10.3 151.3 -10.4 151.3 -10.4 151.2 -10.3 151.2 -10.3 151.3'
-		
+
 		def gpath = new XmlSlurper(false, true).parseText(gml)
 		def result = helper._getMultiSurfaceCoordinateText(gpath)
-		
+
 		assertEquals 2, result.size()
 		assertEquals 3, result[0].size()
 		assertEquals exterior1, result[0][0]
 		assertEquals interior1, result[0][1]
 		assertEquals interior2, result[0][2]
-		
+
 		assertEquals 4, result[1].size()
 		assertEquals exterior2, result[1][0]
 		assertEquals interior3, result[1][1]
@@ -243,7 +244,7 @@ class GeometryHelperTests extends GrailsUnitTestCase {
 		assertEquals interior5, result[1][3]
 		assertEquals([[exterior1, interior1, interior2], [exterior2, interior3, interior4, interior5]], result)
 	}
-	
+
 	void testMultiSurfaceCoordinateAsWktForMultipleSurfaceMembers() {
 		def gml = """<MultiSurface srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:4326">
   <surfaceMember>
@@ -290,7 +291,7 @@ class GeometryHelperTests extends GrailsUnitTestCase {
     </Polygon>
   </surfaceMember>
 </MultiSurface>"""
-		
+
 		def gpath = new XmlSlurper(false, true).parseText(gml)
 		def result = helper._toWkt('MultiSurface', helper._getMultiSurfaceCoordinateText(gpath))
 		assertEquals(
@@ -367,7 +368,7 @@ class GeometryHelperTests extends GrailsUnitTestCase {
 			result
 		)
 	}
-	
+
 	void testToComplexMultiPolygon() {
 		def gml = """<MultiSurface srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:4326">
   <surfaceMember>
@@ -414,9 +415,57 @@ class GeometryHelperTests extends GrailsUnitTestCase {
     </Polygon>
   </surfaceMember>
 </MultiSurface>"""
-		
+
 		def gpath = new XmlSlurper(false, true).parseText(gml)
 		def g = helper.toGeometryFromGmlElement('MultiSurface', gpath)
 		assertEquals 'com.vividsolutions.jts.geom.MultiPolygon', g.getClass().getName()
+	}
+
+	void testIsMultiPoint(){
+		def coords = [
+			["-19.2084 146.8437 -19.2084 146.8437"],
+			["-18.6216 146.4825 -18.6216 146.4825"],
+			["-20.4464 148.9443 -20.4464 148.9443"],
+			["-23.1550 150.897 -23.1550 150.897"],
+			["-23.1548 150.8973 -23.1548 150.8973"],
+			["-23.0665 150.9546 -23.0665 150.9546"],
+			["-23.2058 150.9667 -23.2058 150.9667"],
+			["-23.1553 150.9244 -23.1553 150.9244"],
+			["-23.2110 150.9633 -23.2110 150.9633"],
+			["-21.7059 152.5566 -21.7059 152.5566"],
+			["-21.4785 152.5559 -21.4785 152.5559"],
+			["-20.3533 149.4081 -20.3533 149.4081"],
+			["-18.6156 146.4825 -18.6156 146.4825"]
+		]
+		assertTrue helper.isMultiPoint(coords)
+	}
+
+	void testIsNotMultiPoint(){
+		def coords = [
+			["-19.2084 146.8437 -20 146.8437"],
+			["-18.6216 146.4825 -18.6216 146.4825"],
+			["-20.4464 148.9443 -20.4464 148.9443"],
+			["-23.1550 150.897 -23.1550 150.897"],
+			["-23.1548 150.8973 -23.1548 150.8973"],
+			["-23.0665 150.9546 -23.0665 150.9546"],
+			["-23.2058 150.9667 -23.2058 150.9667"],
+			["-23.1553 150.9244 -23.1553 150.9244"],
+			["-23.2110 150.9633 -23.2110 150.9633"],
+			["-21.7059 152.5566 -21.7059 152.5566"],
+			["-21.4785 152.5559 -21.4785 152.5559"],
+			["-20.3533 149.4081 -20.3533 149.4081"],
+			["-18.6156 146.4825 -18.6156 146.4825"]
+		]
+		assertFalse helper.isMultiPoint(coords)
+	}
+
+	void testOrderCoordText(){
+		def input = "-24.2 150.8 -21.9 153.6"
+		def inputFormat = [CoordinateFormat.SOUTH, CoordinateFormat.WEST, CoordinateFormat.NORTH, CoordinateFormat.EAST]
+
+		assertEquals("-21.9 153.6 -24.2 150.8", helper.orderCoordText(inputFormat, [CoordinateFormat.NORTH, CoordinateFormat.EAST, CoordinateFormat.SOUTH, CoordinateFormat.WEST], input))
+		assertEquals("-24.2 150.8 -21.9 153.6", helper.orderCoordText(inputFormat, [CoordinateFormat.SOUTH, CoordinateFormat.WEST, CoordinateFormat.NORTH, CoordinateFormat.EAST], input))
+		assertEquals("-21.9 150.8 -24.2 153.6", helper.orderCoordText(inputFormat, [CoordinateFormat.NORTH, CoordinateFormat.WEST, CoordinateFormat.SOUTH, CoordinateFormat.EAST], input))
+		assertEquals("153.6 150.8 -24.2 -21.9", helper.orderCoordText(inputFormat, [CoordinateFormat.EAST, CoordinateFormat.WEST, CoordinateFormat.SOUTH, CoordinateFormat.NORTH], input))
 	}
 }

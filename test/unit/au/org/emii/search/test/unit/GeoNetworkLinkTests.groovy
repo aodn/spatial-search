@@ -13,12 +13,6 @@ class GeoNetworkLinkTests extends GrailsUnitTestCase {
 	
 	protected void setUp() {
         super.setUp()
-		//def mockedConfig = new ConfigObject()
-		//mockedConfig.config.geonetwork.link.protocol.regex = 'OGC:WMS-1\\.(1\\.1|3\\.0)-http-get-map'
-		//mockedConfig.config.geonetwork.feature.type.indentifier.regex = '[a-zA-Z]+:[a-zA-Z]+'
-		//ConfigurationHolder.config = mockedConfig
-		//grailsApplication = [config: ConfigurationHolder.config] as GrailsApplication
-		//grailsApplication.metaClass.getConfig = { -> ConfigurationHolder.config }
     }
 
     protected void tearDown() {
@@ -54,13 +48,9 @@ class GeoNetworkLinkTests extends GrailsUnitTestCase {
 		assertFalse(link._isProtocol())
 	}
 	
-	void testIsFeatureType() {
-		def link = new GeoNetworkLink(grailsApplication, """imos:pciview|SOOP CPR Plankton Colour Index Survey|http://imos2.ersa.edu.au/geo2/imos/wms|OGC:WMS-1.1.1-http-get-map|application/vnd.ogc.wms_xml""")
-		assertTrue(link._isFeatureTypeLink())
-	}
-	
-	void testIsNotFeatureType() {
-		def link = new GeoNetworkLink(grailsApplication, """imospciview|SOOP CPR Plankton Colour Index Survey|http://imos2.ersa.edu.au/geo2/imos/wms|OGC:WMS-1.1.1-http-get-map|application/vnd.ogc.wms_xml""")
-		assertFalse(link._isFeatureTypeLink())
+	void testMatchesNcWms() {
+		def link = new GeoNetworkLink(grailsApplication, """ACORN_raw_data_CBG_4k_grid/UCUR|eastward_sea_water_velocity (non QC data March 2011 ongoing)|http://ncwms.emii.org.au/ncWMS/wms|OGC:WMS-1.1.1-http-get-map|application/vnd.ogc.wms_xml""")
+		assertTrue(link.isMapLink())
+		assertEquals(link.href, "http://ncwms.emii.org.au/ncWMS/wms")
 	}
 }

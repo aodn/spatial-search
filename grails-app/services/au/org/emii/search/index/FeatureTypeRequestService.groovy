@@ -1,10 +1,9 @@
 package au.org.emii.search.index
 
 import java.sql.PreparedStatement
-import java.sql.Timestamp;
+import java.sql.Timestamp
 
-import org.apache.http.client.HttpResponseException;
-import org.hibernate.LockMode
+import org.apache.http.client.HttpResponseException
 import org.springframework.dao.DataAccessException
 import org.springframework.jdbc.core.BatchPreparedStatementSetter
 import org.springframework.jdbc.core.JdbcTemplate
@@ -14,20 +13,20 @@ import au.org.emii.search.FeatureType
 class FeatureTypeRequestService {
 
     static transactional = false
-	
+
 	def grailsApplication
 	def sessionFactory
 	def mailService
 	def dataSource
 	def geoNetworkSearchSummaryCache
 	def propertyInstanceMap = org.codehaus.groovy.grails.plugins.DomainClassGrailsPlugin.PROPERTY_INSTANCE_MAP
-	
+
     def index() {
 		def featureCount = 0
 		def messages = []
 		def metadataRecords = _loadGeonetworkMetadata()
 		log.info("Loaded ${metadataRecords.size()} metadata records for indexing")
-		
+
 		def servers = _toFeatureServiceServers(metadataRecords)
 		servers.values().each { server ->
 			server.featureTypeUuids.each { featureTypeName, metadataList ->
@@ -43,20 +42,20 @@ class FeatureTypeRequestService {
 				}
 			}
 		}
-		
+
 		if (featureCount > 0) {
 			_clearCache()
 		}
-		
+
 		log.info("Finished index run")
 		_sendMail(messages)
-		
+
 		return featureCount
     }
-	
+
 	def _index(metadataRecords, messages) {
 		def featureCount = 0
-		
+
 		def metadata = metadataRecords[0]
 		if (_unindexed(metadataRecords)) {
 			def featureTypeRequestImpl = _getFeatureTypeRequestImplementation(metadata, messages)
@@ -77,7 +76,7 @@ class FeatureTypeRequestService {
 		}
 		return featureCount
 	}
-	
+
 	def _loadGeonetworkMetadata() {
 		return GeonetworkMetadata.list()
 	}
@@ -94,17 +93,17 @@ class FeatureTypeRequestService {
 				_saveFeatures(metadata, slice)
 			}
 			finally {
-				//_clearGorm()
+				_clearGorm()
 			}
 			index = sliceEnd
 		}
 	}
-	
+
 	def _saveFeatures(metadata, features) {
 		def featuresToPersist = []
 		def uuids = features.collect { feature -> feature.geonetworkUuid }.unique()
 		def featureTypeIds = features.collect { feature -> feature.featureTypeId }.unique()
-		
+
 		def persistedFeatures = fetchFeatureTypes(metadata.featureTypeName, uuids, featureTypeIds)
 		def persistedFeaturesMap = _mapFeatureByFeatureTypeId(persistedFeatures)
 		features.each() { feature ->
@@ -119,30 +118,44 @@ class FeatureTypeRequestService {
 		}
 		_jdbcBatchSaveFeatures(featuresToPersist)
 	}
-	
+
 	def _jdbcBatchSaveFeatures(features) {
-		def inserts = []
-		def updates = []
-		
+		def gmlInserts = []
+		def geometryInserts = []
+		def gmlUpdates = []
+		def geometryUpdates = []
+
 		features.each { feature ->
 			if (feature.id) {
-				updates << feature
+				if (feature.gml) {
+					gmlUpdates << feature
+				}
+				else {
+					geometryUpdates << feature
+				}
 			}
 			else {
-				inserts << feature
+				if (feature.gml) {
+					gmlInserts << feature
+				}
+				else {
+					geometryInserts << feature
+				}
 			}
 		}
-		
+
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource)
-		_doFeaturesJdbcBatchUpdate(jdbcTemplate, updates)
-		_doFeaturesJdbcBatchInsert(jdbcTemplate, inserts)
+		_doFeaturesJdbcBatchUpdate(jdbcTemplate, gmlUpdates, true)
+		_doFeaturesJdbcBatchInsert(jdbcTemplate, gmlInserts, true)
+		_doFeaturesJdbcBatchUpdate(jdbcTemplate, geometryUpdates, false)
+		_doFeaturesJdbcBatchInsert(jdbcTemplate, geometryInserts, false)
 	}
-	
-	def _doFeaturesJdbcBatchInsert(jdbcTemplate, featuresToInsert) {
+
+	def _doFeaturesJdbcBatchInsert(jdbcTemplate, featuresToInsert, gmlBased) {
 		if (!featuresToInsert.isEmpty()) {
 			try {
 				jdbcTemplate.batchUpdate(
-					"insert into feature_type (id, version, feature_type_id, feature_type_name, geonetwork_uuid, geometry) values (nextval('hibernate_sequence'), 0, ?, ?, ?, st_geomfromgml(?))", 
+					_getJdbcInsertStatement(gmlBased),
 					_getFeaturesJdbcBatchInsertStatementSetter(featuresToInsert)
 				)
 			}
@@ -156,12 +169,12 @@ class FeatureTypeRequestService {
 			}
 		}
 	}
-	
-	def _doFeaturesJdbcBatchUpdate(jdbcTemplate, featuresToUpdate) {
+
+	def _doFeaturesJdbcBatchUpdate(jdbcTemplate, featuresToUpdate, gmlBased) {
 		if (!featuresToUpdate.isEmpty()) {
 			try {
 				jdbcTemplate.batchUpdate(
-					"update feature_type set version = version + 1, feature_type_id = ?, feature_type_name = ?, geonetwork_uuid = ?, geometry = st_geomfromgml(?) where id = ?",
+					_getJdbcUpdateStatement(gmlBased),
 					_getFeaturesJdbcBatchUpdateStatementSetter(featuresToUpdate)
 				)
 			}
@@ -175,46 +188,46 @@ class FeatureTypeRequestService {
 			}
 		}
 	}
-	
+
 	def _getFeaturesJdbcBatchInsertStatementSetter(featuresToInsert) {
 		return new BatchPreparedStatementSetter() {
 			def inserts = featuresToInsert
-			
+
 			int getBatchSize() {
-				return inserts.size();
+				return inserts.size()
 			}
-			
+
 			void setValues(PreparedStatement ps, int i) {
 				def feature = inserts[i]
 				int j = 1
 				ps.setString(j++, feature.featureTypeId)
 				ps.setString(j++, feature.featureTypeName)
 				ps.setString(j++, feature.geonetworkUuid)
-				ps.setString(j++, feature.gml)
+				ps.setString(j++, feature.gml ?: feature.geometry.toText())
 			}
 		}
 	}
-	
+
 	def _getFeaturesJdbcBatchUpdateStatementSetter(featuresToUpdate) {
 		return new BatchPreparedStatementSetter() {
 			def updates = featuresToUpdate
-			
+
 			int getBatchSize() {
-				return updates.size();
+				return updates.size()
 			}
-			
+
 			void setValues(PreparedStatement ps, int i) {
 				def feature = updates[i]
 				int j = 1
 				ps.setString(j++, feature.featureTypeId)
 				ps.setString(j++, feature.featureTypeName)
 				ps.setString(j++, feature.geonetworkUuid)
-				ps.setString(j++, feature.gml)
+				ps.setString(j++, feature.gml ?: feature.geometry.toText())
 				ps.setLong(j++, feature.id)
 			}
 		}
 	}
-	
+
 	def _save(domain) {
 		try {
 			domain.save(failOnError: true)
@@ -223,7 +236,7 @@ class FeatureTypeRequestService {
 			log.error("Failure persisting domain object ${domain}: ", e)
 		}
 	}
-	
+
 	def _getFeatureTypeRequestImplementation(geonetworkMetadata, messages) {
 		def featureTypeName = geonetworkMetadata.featureTypeName
 		def featureTypeRequestClasses = FeatureTypeRequestClass.findAll("from FeatureTypeRequestClass as f where '${featureTypeName}' like f.featureTypeName || '%'")
@@ -241,33 +254,33 @@ class FeatureTypeRequestService {
 				}
 			}
 			def instance = bestMatch.featureTypeRequest
-			
+
 			if (instance instanceof DiskCachingFeatureTypeRequest) {
 				// Add a call back to persist features one by one for large WFS responses
 				instance.featureCallback = { metadata, feature ->
 					_saveFeatures(metadata, [feature])
 				}
-				
+
 				instance.metadataCallback = { metadata ->
 					_saveAndFlushMetadata([metadata])
 				}
 			}
-			
+
 			return instance
 		}
 		messages << _getMessageForMissingFeatureTypeRequestClass(geonetworkMetadata)
 		// Use the null implementation
 		return new NullFeatureTypeRequest()
 	}
-	
+
 	def _mapFeatureByFeatureTypeId(featureCollection) {
 		def map = [:]
 		featureCollection.each { feature ->
-			map[feature.featureTypeId] = feature	
+			map[feature.featureTypeId] = feature
 		}
 		return map
 	}
-	
+
 	def fetchFeatureTypes(featureTypeName, uuids, featureTypeIds) {
 		def features = []
 		try {
@@ -284,7 +297,7 @@ class FeatureTypeRequestService {
 		}
 		return features
 	}
-	
+
 	def _getSliceSize() {
 		def sliceSize
 		try {
@@ -301,11 +314,11 @@ class FeatureTypeRequestService {
 		}
 		return sliceSize
 	}
-	
+
 	def _getConfiguredSliceSize() {
 		return grailsApplication.config.feature.collection.slice.size
 	}
-	
+
 	def _sendMail(messages) {
 		def msgBody = messages.join("\n")
 		if (!messages.isEmpty()) {
@@ -317,18 +330,18 @@ class FeatureTypeRequestService {
 			}
 		}
 	}
-	
+
 	def _clearGorm() {
 		def session = _getSession()
 		session.flush()
 		session.clear()
 		propertyInstanceMap.get().clear()
 	}
-	
+
 	def _getSession() {
 		return sessionFactory.getCurrentSession()
 	}
-	
+
 	def _toFeatureServiceServers(metadataRecords) {
 		def servers = [:]
 		metadataRecords.each { metadata ->
@@ -341,12 +354,12 @@ class FeatureTypeRequestService {
 		}
 		return servers
 	}
-	
+
 	def _addFeaturesForOtherMetadata(metadata, features, metadataRecords) {
 		if (!features || features.isEmpty()) {
 			return
 		}
-		
+
 		def feature = features[0]
 		metadataRecords.each { otherMetadata ->
 			if (otherMetadata.geonetworkUuid != metadata.geonetworkUuid) {
@@ -357,25 +370,25 @@ class FeatureTypeRequestService {
 			}
 		}
 	}
-	
+
 	def _clearCache() {
 		geoNetworkSearchSummaryCache.clear()
 	}
-	
+
 	def _getMessageForMissingFeatureTypeRequestClass(metadata) {
 		def ftRequest = new FeatureTypeRequest()
 		def url = ftRequest.toGetUrl(metadata) + "&maxFeatures=1"
 		return """\
 No feature type request class configured for server ${metadata.geoserverEndPoint} feature type ${metadata.featureTypeName}.
 Please add an appropriate record to table feature_type_request_class
-Feature type quick link $url		
+Feature type quick link $url
 """
 	}
-	
+
 	def _unindexed(metadataRecords) {
 		return metadataRecords.grep { it.unindexed() }.size() > 0
 	}
-	
+
 	def _updateMetadataIndexing(metadataRecords) {
 		def now = new Timestamp(System.currentTimeMillis())
 		metadataRecords.each {
@@ -385,15 +398,29 @@ Feature type quick link $url
 			}
 		}
 	}
-	
+
 	def _saveAndFlushMetadata(metadataRecords) {
 		_updateMetadataIndexing(metadataRecords)
 		_getSession().flush()
 	}
-	
+
 	def _errorMetadataRecords(metadataRecords) {
 		metadataRecords.each {
 			it.error = true
 		}
+	}
+
+	def _getJdbcInsertStatement(gmlBased) {
+		if (gmlBased) {
+			return "insert into feature_type (id, version, feature_type_id, feature_type_name, geonetwork_uuid, geometry) values (nextval('hibernate_sequence'), 0, ?, ?, ?, st_geomfromgml(?))"
+		}
+		return "insert into feature_type (id, version, feature_type_id, feature_type_name, geonetwork_uuid, geometry) values (nextval('hibernate_sequence'), 0, ?, ?, ?, st_geomfromtext(?, 4326))"
+	}
+
+	def _getJdbcUpdateStatement(gmlBased) {
+		if (gmlBased) {
+			return "update feature_type set version = version + 1, feature_type_id = ?, feature_type_name = ?, geonetwork_uuid = ?, geometry = st_geomfromgml(?) where id = ?"
+		}
+		return "update feature_type set version = version + 1, feature_type_id = ?, feature_type_name = ?, geonetwork_uuid = ?, geometry = st_geomfromtext(?, 4326) where id = ?"
 	}
 }

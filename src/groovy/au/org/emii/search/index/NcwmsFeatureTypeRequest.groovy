@@ -3,6 +3,8 @@ package au.org.emii.search.index
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+import au.org.emii.search.FeatureType;
+
 // Marker for ncWMS feature types / place holder for future ncWMS feature type request processing 
 
 class NcwmsFeatureTypeRequest extends FeatureTypeRequest {
@@ -10,8 +12,10 @@ class NcwmsFeatureTypeRequest extends FeatureTypeRequest {
 	static final Logger log = LoggerFactory.getLogger(NcwmsFeatureTypeRequest.class)
 	
 	def handleResponse(metadata, xml) {
-		log.info("No response expected when using NcwmsFeatureTypeRequest for " + metadata.featureTypeName)
-		return [] as Set
+		def feature = new FeatureType(metadata)
+		feature.featureTypeId = metadata.featureTypeName
+		feature.geometry = metadata.geoBox
+		return [feature] as Set
 	}
 
 	def requestFeatureType(metadata) {

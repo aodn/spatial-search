@@ -434,4 +434,8 @@ databaseChangeLog = {
 	changeSet(author: "tfotak", id: "1341974714000-3", failOnError: true) {
 		sql("update feature_type_request_class set constructor_args = replace(constructor_args, '@id', '@gml:id') where constructor_args like '@id%' and class_name = 'au.org.emii.search.index.DiskCachingFeatureTypeRequest'")
 	}
+	
+	changeSet(author: "tfotak", id: "1342073293000-1", failOnError: true) {
+		sql("SELECT AddGeometryColumn('geonetwork_metadata', 'geo_box', 4326, 'GEOMETRY', 2)")
+	}
 }
