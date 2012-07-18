@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.BatchPreparedStatementSetter
 import org.springframework.jdbc.core.JdbcTemplate
 
 import au.org.emii.search.FeatureType
+import org.slf4j.LoggerFactory
 
 class FeatureTypeRequestService {
 
@@ -156,7 +157,7 @@ class FeatureTypeRequestService {
 			try {
 				jdbcTemplate.batchUpdate(
 					_getJdbcInsertStatement(gmlBased),
-					_getFeaturesJdbcBatchInsertStatementSetter(featuresToInsert)
+					new FeatureTypeIndexJdbcBatchStatementSetter(featuresToInsert, false)
 				)
 			}
 			catch (DataAccessException e) {
@@ -175,7 +176,7 @@ class FeatureTypeRequestService {
 			try {
 				jdbcTemplate.batchUpdate(
 					_getJdbcUpdateStatement(gmlBased),
-					_getFeaturesJdbcBatchUpdateStatementSetter(featuresToUpdate)
+					new FeatureTypeIndexJdbcBatchStatementSetter(featuresToUpdate, true)
 				)
 			}
 			catch (DataAccessException e) {
@@ -185,45 +186,6 @@ class FeatureTypeRequestService {
 			catch (Exception e) {
 				log.error('', e)
 				throw e
-			}
-		}
-	}
-
-	def _getFeaturesJdbcBatchInsertStatementSetter(featuresToInsert) {
-		return new BatchPreparedStatementSetter() {
-			def inserts = featuresToInsert
-
-			int getBatchSize() {
-				return inserts.size()
-			}
-
-			void setValues(PreparedStatement ps, int i) {
-				def feature = inserts[i]
-				int j = 1
-				ps.setString(j++, feature.featureTypeId)
-				ps.setString(j++, feature.featureTypeName)
-				ps.setString(j++, feature.geonetworkUuid)
-				ps.setString(j++, feature.gml ?: feature.geometry.toText())
-			}
-		}
-	}
-
-	def _getFeaturesJdbcBatchUpdateStatementSetter(featuresToUpdate) {
-		return new BatchPreparedStatementSetter() {
-			def updates = featuresToUpdate
-
-			int getBatchSize() {
-				return updates.size()
-			}
-
-			void setValues(PreparedStatement ps, int i) {
-				def feature = updates[i]
-				int j = 1
-				ps.setString(j++, feature.featureTypeId)
-				ps.setString(j++, feature.featureTypeName)
-				ps.setString(j++, feature.geonetworkUuid)
-				ps.setString(j++, feature.gml ?: feature.geometry.toText())
-				ps.setLong(j++, feature.id)
 			}
 		}
 	}

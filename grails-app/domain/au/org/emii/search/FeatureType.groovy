@@ -41,6 +41,7 @@ class FeatureType {
 			.append("featureTypeName", featureTypeName)
 			.append("featureTypeId", featureTypeId)
 			.append("geometry", geometry?.geometryType)
+			.append("gml", gml)
 			.toString()
 	}
 	
