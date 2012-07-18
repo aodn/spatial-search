@@ -438,4 +438,46 @@ databaseChangeLog = {
 	changeSet(author: "tfotak", id: "1342073293000-1", failOnError: true) {
 		sql("SELECT AddGeometryColumn('geonetwork_metadata', 'geo_box', 4326, 'GEOMETRY', 2)")
 	}
+
+	changeSet(author: "tfotak", id: "1342575535000-1", failOnError: true) {
+		insert(tableName: "feature_type_request_class") {
+			column(name: "id", valueComputed: "nextval('hibernate_sequence')")
+			column(name: "version", valueNumeric: "0")
+			column(name: "feature_type_name", value: "waodn:RI_CoastalGeomorphology")
+			column(name: "class_name", value: "au.org.emii.search.index.FeatureTypeRequest")
+			column(name: "constructor_args", value: "@gml:id,the_geom")
+		}
+
+		insert(tableName: "feature_type_request_class") {
+			column(name: "id", valueComputed: "nextval('hibernate_sequence')")
+			column(name: "version", valueNumeric: "0")
+			column(name: "feature_type_name", value: "waodn:RI_Beaches")
+			column(name: "class_name", value: "au.org.emii.search.index.FeatureTypeRequest")
+			column(name: "constructor_args", value: "@gml:id,the_geom")
+		}
+
+		insert(tableName: "feature_type_request_class") {
+			column(name: "id", valueComputed: "nextval('hibernate_sequence')")
+			column(name: "version", valueNumeric: "0")
+			column(name: "feature_type_name", value: "waodn:L_to_K_Beaches")
+			column(name: "class_name", value: "au.org.emii.search.index.FeatureTypeRequest")
+			column(name: "constructor_args", value: "@gml:id,the_geom")
+		}
+
+		insert(tableName: "feature_type_request_class") {
+			column(name: "id", valueComputed: "nextval('hibernate_sequence')")
+			column(name: "version", valueNumeric: "0")
+			column(name: "feature_type_name", value: "waodn:L_to_K_CoastalGeomorphology")
+			column(name: "class_name", value: "au.org.emii.search.index.FeatureTypeRequest")
+			column(name: "constructor_args", value: "@gml:id,the_geom")
+		}
+
+		insert(tableName: "feature_type_request_class") {
+			column(name: "id", valueComputed: "nextval('hibernate_sequence')")
+			column(name: "version", valueNumeric: "0")
+			column(name: "feature_type_name", value: "waodn:L_to_K_AerialPhotographs")
+			column(name: "class_name", value: "au.org.emii.search.index.FeatureTypeRequest")
+			column(name: "constructor_args", value: "@gml:id,the_geom")
+		}
+	}
 }
