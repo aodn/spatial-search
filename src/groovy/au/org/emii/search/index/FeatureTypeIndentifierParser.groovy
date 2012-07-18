@@ -7,11 +7,8 @@ class FeatureTypeIndentifierParser {
 	}
 
 	def parseInlineAsCharacters(featureTypeIdElementName, chars, offset, length) {
-		def debug = new String(chars, offset, length)
 		if (!_idIsAttribute(featureTypeIdElementName)) {
 			return new String(chars, offset, length)
-		}
-		else {
 		}
 	}
 

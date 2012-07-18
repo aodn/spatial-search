@@ -59,9 +59,11 @@ class DiskCachingFeatureTypeParser extends DefaultHandler2 {
 
 	void endElement(String ns, String localName, String qname) {
 		if (qname =~ /$featureTypeElementName/) {
+			charactersHandler = null
 			_endFeatureType(ns, localName, qname)
 		}
 		if (qname =~ /$featureTypeGeometryElementName/) {
+			charactersHandler = null
 			_endGeometryElement(ns, localName, qname)
 		}
 		if (qname =~ /gml:([^featureMember]|[^boundedBy]|[^null])/) {
@@ -115,7 +117,12 @@ class DiskCachingFeatureTypeParser extends DefaultHandler2 {
 	def _endFeatureType(ns, localName, qname) {
 		if (featureCallback) {
 			try {
-				featureCallback(metadata, featureType)
+				if (featureType.gml) {
+					featureCallback(metadata, featureType)
+				}
+				else {
+					log.info("Feature type ${featureType} lacks GML")
+				}
 			}
 			catch (Exception e) {
 				metadata.error = true
