@@ -78,12 +78,12 @@ class GeometryHelperTests extends GrailsUnitTestCase {
 		def south = '-51.37'
 		def west = '97.84'
 
-		def bb = helper.toBoundingBox(north, east, south, west)
+		def bb = helper.toBoundingBox(west, south, east, north)
 		assertEquals 'com.vividsolutions.jts.geom.Polygon', bb.getClass().getName()
 
 		// If we cross the anti-meridian we expect a multipolygon
 		east = '-178'
-		bb = helper.toBoundingBox(north, east, south, west)
+		bb = helper.toBoundingBox(west, south, east, north)
 		assertEquals 'com.vividsolutions.jts.geom.MultiPolygon', bb.getClass().getName()
 	}
 

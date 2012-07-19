@@ -134,13 +134,8 @@ class GeoNetworkResponse {
 		def helper = new GeometryHelper()
 		def geoBoxes = []
 
-		metadataNode.geoBox.each{
-			def parts = it.text().split("\\|")
-
-			geoBoxes << [helper.orderCoordText(
-				[CoordinateFormat.WEST, CoordinateFormat.SOUTH, CoordinateFormat.EAST, CoordinateFormat.NORTH],
-				[CoordinateFormat.NORTH, CoordinateFormat.EAST, CoordinateFormat.SOUTH, CoordinateFormat.WEST],
-				parts.join(" "))]
+		metadataNode.geoBox.each {
+			geoBoxes << [it.text().replaceAll("\\|", " ")]
 		}
 
 		if (geoBoxes.size() > 1) {

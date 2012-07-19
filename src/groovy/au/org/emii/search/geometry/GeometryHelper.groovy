@@ -17,10 +17,10 @@ class GeometryHelper {
 	static final PrecisionModel PRECISION_MODEL = new PrecisionModel(PrecisionModel.FLOATING)
 
 	static enum CoordinateFormat {
-		NORTH,
+		WEST,
 		SOUTH,
 		EAST,
-		WEST
+		NORTH
 	}
 
 	/*
@@ -43,17 +43,18 @@ class GeometryHelper {
 		return toBoundingBox(orderedCoords[0], orderedCoords[1], orderedCoords[2], orderedCoords[3])
 	}
 
-	def toBoundingBox(north, east, south, west) {
-		def dNorth = _parseToDouble(north)
-		def dEast = _parseToDouble(east)
-		def dSouth = _parseToDouble(south)
+	def toBoundingBox(west, south, east, north) {
 		def dWest = _parseToDouble(west)
+		def dSouth = _parseToDouble(south)
+		def dEast = _parseToDouble(east)
+		def dNorth = _parseToDouble(north)
+
 
 		if (!(dNorth && dEast && dSouth && dWest)) {
-			throw new ParseException("Invalid bounding box parameters one of ${north} ${east} ${south} ${west} cannot be parsed to a java.lang.Double")
+			throw new ParseException("Invalid bounding box parameters one of ${west} ${south} ${east} ${north} cannot be parsed to a java.lang.Double")
 		}
 
-		def geom = (dEast < dWest) ? _toMultiPolygonBoundingBox(north, east, south, west) : _toPolygonBoundingBox(north, east, south, west)
+		def geom = (dEast < dWest) ? _toMultiPolygonBoundingBox(west, south, east, north) : _toPolygonBoundingBox(west, west, east, north)
 		return geom
 	}
 
@@ -189,14 +190,14 @@ class GeometryHelper {
 		return null
 	}
 
-	def _toPolygonBoundingBox(north, east, south, west) {
-		return toGeometryFromCoordinateText('Polygon', "${north} ${west} ${north} ${east} ${south} ${east} ${south} ${west} ${north} ${west}")
+	def _toPolygonBoundingBox(west, south, east, north) {
+		return toGeometryFromCoordinateText('Polygon', "${south} ${west} ${north} ${west} ${north} ${east} ${south} ${east} ${south} ${west}")
 	}
 
-	def _toMultiPolygonBoundingBox(north, east, south, west) {
+	def _toMultiPolygonBoundingBox(west, south, east, north) {
 		// We are likely doing a search near the anti-meridian so we need a multipolygon
-		def eastSide = ["${north} -180 ${north} ${east} ${south} ${east} ${south} -180 ${north} -180"]
-		def westSide = ["${north} ${west} ${north} 180 ${south} 180 ${south} ${west} ${north} ${west}"]
+		def eastSide = ["${south} -180 ${north} -180 ${north} ${east} ${south} ${east} ${south} -180"]
+		def westSide = ["${south} ${west} ${north} ${west} ${north} 180 ${south} 180 ${south} ${west}"]
 		def multiPolygonSequence = [eastSide, westSide]
 		return toGeometryFromCoordinateText('MultiPolygon', multiPolygonSequence)
 	}

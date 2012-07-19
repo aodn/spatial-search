@@ -152,13 +152,13 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 	}
 	
 	def _getGeometry(params) {
-		def north = params.northBL
-		def east = params.eastBL
-		def south = params.southBL
 		def west = params.westBL
-		
+		def south = params.southBL
+		def east = params.eastBL
+		def north = params.northBL
+
 		def helper = new GeometryHelper()
-		return helper.toBoundingBox(north, east, south, west)
+		return helper.toBoundingBox(south, west, north, east)
 	}
 	
 	def _pageForward(params, stopper) {
@@ -177,7 +177,7 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 	}
 	
 	def _isBoundingBoxSubmitted(params) {
-		return params.northBL && params.eastBL && params.southBL && params.westBL
+		return  params.westBL && params.southBL && params.eastBL && params.northBL
 	}
 	
 	def _isPaging(params) {
