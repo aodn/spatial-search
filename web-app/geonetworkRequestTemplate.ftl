@@ -1,3 +1,11 @@
+
+<#--
+
+ Copyright 2012 IMOS
+
+ The AODN/IMOS Portal is distributed under the terms of the GNU General Public License
+
+-->
 <?xml version="1.0" encoding="UTF-8"?>
 <request>
   <#if fast?has_content>

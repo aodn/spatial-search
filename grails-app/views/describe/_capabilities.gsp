@@ -1,3 +1,11 @@
+
+<%--
+
+ Copyright 2012 IMOS
+
+ The AODN/IMOS Portal is distributed under the terms of the GNU General Public License
+
+--%>
 <ul>
   <li class="heading">Provider</li>
   <li>${geoserver.provider}</li>

@@ -1,3 +1,10 @@
+
+/*
+ * Copyright 2012 IMOS
+ *
+ * The AODN/IMOS Portal is distributed under the terms of the GNU General Public License
+ *
+ */
 // Place your Spring DSL code here
 beans = {
 	geoNetworkRequest(au.org.emii.search.GeoNetworkRequest) {

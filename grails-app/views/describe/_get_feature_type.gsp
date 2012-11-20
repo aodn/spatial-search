@@ -1,3 +1,11 @@
+
+<%--
+
+ Copyright 2012 IMOS
+
+ The AODN/IMOS Portal is distributed under the terms of the GNU General Public License
+
+--%>
 <div id="get_feature_type_container">
 <g:form name="geoserver_get_feature_type_form" method="GET" url="[ controller: 'describe', action:'feature' ]" target="_blank">
 <g:hiddenField name="getLink" value="${operation?.getLink}" />
