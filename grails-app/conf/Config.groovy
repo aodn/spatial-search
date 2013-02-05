@@ -8,6 +8,8 @@
 import org.apache.log4j.rolling.RollingFileAppender
 import org.apache.log4j.rolling.TimeBasedRollingPolicy
 
+import javax.naming.InitialContext
+
 // locations to search for config files that get merged into the main config
 // config files can either be Java properties files or ConfigSlurper scripts
 
@@ -68,20 +70,20 @@ grails.plugin.databasemigration.updateOnStartFileNames = ['changelog.groovy']
 // set per-environment serverURL stem for creating absolute links
 environments {
     production {
-        grails.serverURL = "http://spatialsearchtest.emii.org.au"
-		geonetwork.search.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/eng/q"
-		geonetwork.index.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/eng/q"
-		geoserver.response.cache.dir = "/tmp"
-		feature.missing.email.to='developers@emii.org.au'
-		feature.missing.email.from='spatialsearch@emii.org.au'
-		feature.missing.email.subject='Spatial Search Index Action Required'
+	    grails.serverURL = "http://search.aodn.org.au"
+	    geonetwork.search.serverURL = "http://catalogue.aodn.org.au/geonetwork/srv/eng/q"
+	    geonetwork.index.serverURL = "http://catalogue.aodn.org.au/geonetwork/srv/eng/q"
+	    geoserver.response.cache.dir = "/tmp"
+	    feature.missing.email.to='info@example.com'
+	    feature.missing.email.from='aodnsearch@emii.org.au'
+	    feature.missing.email.subject='AODN Search Index Action Required'
     }
     development {
         grails.serverURL = "http://localhost:${grails.server.port.http}/${appName}"
 		geonetwork.search.serverURL = "http://catalogue.aodn.org.au/geonetwork/srv/eng/q"
 		geonetwork.index.serverURL = "http://catalogue.aodn.org.au/geonetwork/srv/eng/q"
 		geoserver.response.cache.dir = "/tmp"
-		feature.missing.email.to='fotakt@utas.edu.au'
+		feature.missing.email.to='info@example.com'
 		feature.missing.email.from='spatialsearch@emii.org.au'
 		feature.missing.email.subject='Spatial Search Index Action Required'
     }
@@ -90,7 +92,7 @@ environments {
 		geonetwork.search.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/eng/q"
 		geonetwork.index.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/eng/q"
 		geoserver.response.cache.dir = "/tmp"
-		feature.missing.email.to='fotakt@utas.edu.au'
+		feature.missing.email.to='info@example.com'
 		feature.missing.email.from='spatialsearch@emii.org.au'
 		feature.missing.email.subject='Spatial Search Index Action Required'
     }
@@ -178,12 +180,13 @@ grails.gorm.default.mapping = {
    'user-type'(type:org.hibernatespatial.GeometryUserType, class:com.vividsolutions.jts.geom.Polygonal)
 }
 
-if (System.properties["${appName}.config.location"]) {
-	grails.config.locations = ["file:" + System.properties["${appName}.config.location"]]
+if(!grails.config.locations || !(grails.config.locations instanceof List)) {
+	grails.config.locations = []
 }
-else {
-	def configInstance = System.properties["${appName}.instance"] ?: System.getenv("${appName}.instance")
-	if (configInstance) {
-		grails.config.locations = ["classpath:instances/${configInstance}Config.groovy", "file:./instances/${configInstance}Config.groovy"]
-	}
+
+try {
+	configurationPath = new InitialContext().lookup("java:comp/env/aodn.configuration")
+	grails.config.locations << "file:${configurationPath}"
+}
+catch (e) {
 }
