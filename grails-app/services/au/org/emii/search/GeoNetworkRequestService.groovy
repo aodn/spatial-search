@@ -115,7 +115,7 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 			def jdbcTemplate = new NamedParameterJdbcTemplate(dataSource)
 			try {
 				featureUuids = jdbcTemplate.queryForList(
-					"select geonetwork_uuid from feature_type where intersects(geometry, ST_GeomFromText(:wkt, :srid)) and geonetwork_uuid in (:uuids) group by geonetwork_uuid",
+					"select geonetwork_uuid from feature_type where st_intersects(geometry, ST_GeomFromText(:wkt, :srid)) and geonetwork_uuid in (:uuids) group by geonetwork_uuid",
 					_getSqlParamaterSourceMap(_getGeometry(params).toText(), GeometryHelper.SRID, uuids),
 					String.class
 				)
