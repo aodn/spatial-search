@@ -165,7 +165,7 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 		def north = params.northBL
 
 		def helper = new GeometryHelper()
-		return helper.toBoundingBox(south, west, north, east)
+		return helper.toBoundingBox(west, south, east, north)
 	}
 	
 	def _pageForward(params, stopper) {

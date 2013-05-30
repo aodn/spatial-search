@@ -40,6 +40,11 @@ class GeoNetworkResponseTests extends GrailsUnitTestCase {
 	}
 
 	def testParseGeoBox() {
+        def west = "150.8"
+        def south = "-24.2"
+        def east = "153.6"
+        def north = "-21.9"
+
 		def out = new StringWriter()
 		def builder = new MarkupBuilder(new PrintWriter(out))."response"(from: 1, to: 1, selected: 0) {
 			summary(count: 1, type: "local", hitsusedforsummary: 1) {
@@ -48,7 +53,7 @@ class GeoNetworkResponseTests extends GrailsUnitTestCase {
 				}
 			}
 			metadata {
-				geoBox ("150.8|-24.2|153.6|-21.9")
+				geoBox ("$west|$south|$east|$north")
 			}
 		}
 		println out
@@ -56,7 +61,7 @@ class GeoNetworkResponseTests extends GrailsUnitTestCase {
 		geoNetworkResponse = new GeoNetworkResponse(_mockConfig(), out.toString())
 		def metadata = geoNetworkResponse.tree.metadata
 
-		def expected = helper.toBoundingBox("-21.9", "153.6", "-24.2", "150.8")
+		def expected = helper.toBoundingBox(west, south, east, north)
 		assertEquals(expected, geoNetworkResponse._parseGeoBox(metadata))
 	}
 
@@ -89,22 +94,20 @@ class GeoNetworkResponseTests extends GrailsUnitTestCase {
 		geoNetworkResponse = new GeoNetworkResponse(_mockConfig(), out.toString())
 		def metadata = geoNetworkResponse.tree.metadata
 
-		//North, east, south, west
-
 		def expected = helper.toGeometryFromCoordinateText('MultiPoint', [
-			["-19.2084 146.8437 -19.2084 146.8437"],
-			["-18.6216 146.4825 -18.6216 146.4825"],
-			["-20.4464 148.9443 -20.4464 148.9443"],
-			["-23.1550 150.897 -23.1550 150.897"],
-			["-23.1548 150.8973 -23.1548 150.8973"],
-			["-23.0665 150.9546 -23.0665 150.9546"],
-			["-23.2058 150.9667 -23.2058 150.9667"],
-			["-23.1553 150.9244 -23.1553 150.9244"],
-			["-23.2110 150.9633 -23.2110 150.9633"],
-			["-21.7059 152.5566 -21.7059 152.5566"],
-			["-21.4785 152.5559 -21.4785 152.5559"],
-			["-20.3533 149.4081 -20.3533 149.4081"],
-			["-18.6156 146.4825 -18.6156 146.4825"]
+            ["146.8437 -19.2084 146.8437 -19.2084"],
+            ["146.4825 -18.6216 146.4825 -18.6216"],
+            ["148.9443 -20.4464 148.9443 -20.4464"],
+            ["150.897 -23.1550 150.897 -23.1550"],
+            ["150.8973 -23.1548 150.8973 -23.1548"],
+            ["150.9546 -23.0665 150.9546 -23.0665"],
+            ["150.9667 -23.2058 150.9667 -23.2058"],
+            ["150.9244 -23.1553 150.9244 -23.1553"],
+            ["150.9633 -23.2110 150.9633 -23.2110"],
+            ["152.5566 -21.7059 152.5566 -21.7059"],
+            ["152.5559 -21.4785 152.5559 -21.4785"],
+            ["149.4081 -20.3533 149.4081 -20.3533"],
+            ["146.4825 -18.6156 146.4825 -18.6156"]
 		])
 		assertEquals(expected, geoNetworkResponse._parseGeoBox(metadata))
 	}

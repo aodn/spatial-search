@@ -94,6 +94,16 @@ class GeometryHelperTests extends GrailsUnitTestCase {
 		assertEquals 'com.vividsolutions.jts.geom.MultiPolygon', bb.getClass().getName()
 	}
 
+    void testToBoundingBoxText() {
+        def west = '100.72'
+        def south = '-52.87'
+        def east = '169.28'
+        def north = '-0.13'
+
+        def bb = helper.toBoundingBox(west, south, east, north)
+        assertEquals 'POLYGON ((100.72 -52.87, 100.72 -0.13, 169.28 -0.13, 169.28 -52.87, 100.72 -52.87))', bb.toText()
+    }
+
 	void testGetMultiSurfaceCoordinateText() {
 		def gml = """<MultiSurface srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:4326">
   <surfaceMember>

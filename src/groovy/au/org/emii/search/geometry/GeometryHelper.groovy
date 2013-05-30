@@ -61,7 +61,7 @@ class GeometryHelper {
 			throw new ParseException("Invalid bounding box parameters one of ${west} ${south} ${east} ${north} cannot be parsed to a java.lang.Double")
 		}
 
-		def geom = (dEast < dWest) ? _toMultiPolygonBoundingBox(west, south, east, north) : _toPolygonBoundingBox(west, west, east, north)
+		def geom = (dEast < dWest) ? _toMultiPolygonBoundingBox(west, south, east, north) : _toPolygonBoundingBox(west, south, east, north)
 		return geom
 	}
 
