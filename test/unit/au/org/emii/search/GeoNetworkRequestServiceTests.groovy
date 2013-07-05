@@ -66,12 +66,22 @@ class GeoNetworkRequestServiceTests extends GrailsUnitTestCase {
 	void testIsBoundingBoxSubmitted() {
 		def params = [:]
 		assertFalse service._isBoundingBoxSubmitted(params)
-		params.northBL = '20'
-		params.eastBL = '20'
-		params.southBL = '10'
-		params.westBL = '10'
+        _mockBoundingBox(params)
 		assertTrue service._isBoundingBoxSubmitted(params)
 	}
+
+    void testIsSpatialSearchWithBoundingBox() {
+        assertTrue service._isSpatialSearch(_mockBoundingBox([:]))
+    }
+
+    void testIsSpatialSearchWithGeometry() {
+        assertTrue service._isSpatialSearch(_mockGeometry([:]))
+    }
+
+    void testReturnsGeometryWhenSpecified() {
+        def params = _mockGeometry(_mockBoundingBox([:]))
+        assertEquals params["geometry"], service._getGeometryText(params)
+    }
 	
 	void testGetPageEnd() {
 		def pageEnd = service.grailsApplication.config.geonetwork.search.page.size
@@ -88,6 +98,19 @@ class GeoNetworkRequestServiceTests extends GrailsUnitTestCase {
 		params.to = 599
 		assertEquals(599 + pageEnd, service._getPageEnd(params))
 	}
+
+    def _mockBoundingBox(params) {
+        params.northBL = '20'
+        params.eastBL = '20'
+        params.southBL = '10'
+        params.westBL = '10'
+        return params
+    }
+
+    def _mockGeometry(params) {
+        params["geometry"] = "POLYGON((140.44921875 -41.44140625,143.0859375 -46.01171875,154.86328125 -44.60546875,151.34765625 -39.15625,147.65625 -38.8046875,140.44921875 -41.44140625))"
+        return params
+    }
 	
 	def _mockConfig() {
 		mockConfig("geonetwork.feature.type.indentifier.regex = 'topp:'")
