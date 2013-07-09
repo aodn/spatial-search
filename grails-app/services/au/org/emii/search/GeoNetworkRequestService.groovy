@@ -54,7 +54,7 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 	
 	def search(params) {
 		log.info("Starting search with $params")
-		if (_isBoundingBoxSubmitted(params)) {
+		if (_isSpatialSearch(params)) {
             return _spatialSearch(params)
 		}
 		return _geoNetworkSearch(params)
@@ -82,12 +82,11 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 	
 	def _spatialSearch(params) {
 		if (params.protocol) {
-			params.relation = 'intersects'
+			params.relation = 'intersection'
 		}
 		
 		def numberOfResultsToReturn = _getPageSize(params)
-		def pageSize = numberOfResultsToReturn
-		
+
 		def spatialResponse = applicationContext.getBean('spatialSearchResponse')
 		spatialResponse.setup(params, numberOfResultsToReturn, executorService)
 		
@@ -116,7 +115,7 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 			try {
 				featureUuids = jdbcTemplate.queryForList(
 					"select geonetwork_uuid from feature_type where st_intersects(geometry, ST_GeomFromText(:wkt, :srid)) and geonetwork_uuid in (:uuids) group by geonetwork_uuid",
-					_getSqlParamaterSourceMap(_getGeometry(params).toText(), GeometryHelper.SRID, uuids),
+					_getSqlParamaterSourceMap(_getGeometryText(params), GeometryHelper.SRID, uuids),
 					String.class
 				)
 			}
@@ -157,6 +156,14 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 	def _getZeroedTimestamp() {
 		return new Timestamp(new Date(0).time)
 	}
+
+    def _getGeometryText(params) {
+        // The geometry is coming through in WKT already so we can just return that where it is used
+        if (params.geometry) {
+            return params.geometry
+        }
+        return _getGeometry(params).toText()
+    }
 	
 	def _getGeometry(params) {
 		def west = params.westBL
@@ -184,8 +191,16 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 	}
 	
 	def _isBoundingBoxSubmitted(params) {
-		return  params.westBL && params.southBL && params.eastBL && params.northBL
+		return params.westBL && params.southBL && params.eastBL && params.northBL
 	}
+
+    def _isGeometrySubmitted(params) {
+        return params.geometry
+    }
+
+    def _isSpatialSearch(params) {
+        return _isBoundingBoxSubmitted(params) || _isGeometrySubmitted(params)
+    }
 	
 	def _isPaging(params) {
 		return params.from && params.to
