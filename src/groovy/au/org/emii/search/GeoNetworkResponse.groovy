@@ -145,11 +145,22 @@ class GeoNetworkResponse {
 			geoBoxes << [it.text().replaceAll("\\|", " ")]
 		}
 
-		if (geoBoxes.size() > 1) {
-			def geometryType = helper.isMultiPoint() ? 'MultiPoint' : 'MultiPolygon'
-			return helper.toGeometryFromCoordinateText(geometryType, geoBoxes)
+        def geom
+        if (geoBoxes.size() > 1) {
+            if (helper.isMultiPoint(geoBoxes)) {
+                geom = helper.toGeometryFromCoordinateText('MultiPoint', geoBoxes)
+            }
+            else {
+                def boundingBoxes = []
+                geoBoxes.each { geoBox ->
+                    geoBox.each {
+                        boundingBoxes << helper.toBoundingBox(it.split(" "))
+                    }
+                }
+                geom = helper.toMultiPolygonFromBoundingBoxes(boundingBoxes)
+            }
+			return geom
 		}
-		return helper.toBoundingBox(geoBoxes[0][0].split(" "))
+        return helper.toBoundingBox(geoBoxes[0][0].split(" "))
 	}
-
 }
