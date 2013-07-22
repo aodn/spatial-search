@@ -231,25 +231,25 @@ class GeometryHelper {
 		return sequences
 	}
 
-	def isMultiPoint(coords){
-		def multiPoint = true
+	def isMultiPoint(coords) {
+        def multiPoint = true
 
-		coords.each{ coord ->
-			if (coord.size() > 1) {
-				multiPoint = false
-			}
-			else {
-				def text = coord[0]
-				def parts = text.split(" ")
-				def point1 = toGeometryFromCoordinateText('Point', "${parts[0]} ${parts[1]}")
-				def point2 = toGeometryFromCoordinateText('Point', "${parts[2]} ${parts[3]}")
-				if (point1 != point2) {
-					multiPoint = false
-				}
-			}
-		}
-		return multiPoint
-	}
+        coords.each{ coord ->
+            if (coord.size() > 1) {
+                multiPoint = false
+            }
+            else {
+                def text = coord[0]
+                def parts = text.split(" ")
+                def point1 = toGeometryFromCoordinateText('Point', "${parts[0]} ${parts[1]}")
+                def point2 = toGeometryFromCoordinateText('Point', "${parts[2]} ${parts[3]}")
+                if (point1 != point2) {
+                    multiPoint = false
+                }
+            }
+        }
+        return multiPoint
+    }
 
 	/**
 	 * Reorders space delimited coord string from inputFormat to outputFormat
@@ -272,4 +272,29 @@ class GeometryHelper {
 			parts[inputFormat.indexOf(outputFormat[2])] + " " +
 			parts[inputFormat.indexOf(outputFormat[3])]
 	}
+
+    def toMultiPolygonFromBoundingBoxes(boundingBoxes) {
+        def sequences = []
+        boundingBoxes.each { bbox ->
+            def bboxList = []
+            bbox.coordinates.each { coord ->
+                bboxList << "${coord.x}"
+                bboxList << "${coord.y}"
+            }
+            sequences << [bboxList.join(' ')]
+        }
+
+        return toGeometryFromCoordinateText('MultiPolygon', sequences)
+    }
+
+    def toMultiPolygonFromGeoNetworkGeoBoxes(geoBoxes) {
+        def boundingBoxes = []
+        geoBoxes.each { geoBox ->
+            geoBox.each {
+                boundingBoxes << toBoundingBox(it.split(" "))
+            }
+        }
+
+        return toMultiPolygonFromBoundingBoxes(boundingBoxes)
+    }
 }

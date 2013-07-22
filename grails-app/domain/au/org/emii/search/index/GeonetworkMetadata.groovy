@@ -91,4 +91,14 @@ class GeonetworkMetadata implements Comparable<GeonetworkMetadata> {
 	def unindexed() {
 		return lastIndexed == null || changeDate.after(lastIndexed)
 	}
+
+    def copyFrom(other) {
+        def now = new Timestamp(System.currentTimeMillis())
+        added = other.added ?: now
+        changeDate = other.changeDate
+        lastIndexed = now
+        featureTypeName = other.featureTypeName
+        geoserverEndPoint = other.geoserverEndPoint
+        geoBox = other.geoBox
+    }
 }

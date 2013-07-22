@@ -138,18 +138,29 @@ class GeoNetworkResponse {
 			return
 		}
 
-		def helper = new GeometryHelper()
-		def geoBoxes = []
-
-		metadataNode.geoBox.each {
-			geoBoxes << [it.text().replaceAll("\\|", " ")]
+        def helper = new GeometryHelper()
+		def geoBoxes = _toBoundingBoxStringArrays(metadataNode)
+        if (geoBoxes.size() > 1) {
+            return _parseGeoBoxes(geoBoxes, helper)
 		}
 
-		if (geoBoxes.size() > 1) {
-			def geometryType = helper.isMultiPoint() ? 'MultiPoint' : 'MultiPolygon'
-			return helper.toGeometryFromCoordinateText(geometryType, geoBoxes)
-		}
-		return helper.toBoundingBox(geoBoxes[0][0].split(" "))
+        return helper.toBoundingBox(geoBoxes[0][0].split(" "))
 	}
 
+    def _parseGeoBoxes(geoBoxes, geometryHelper) {
+        if (geometryHelper.isMultiPoint(geoBoxes)) {
+            return geometryHelper.toGeometryFromCoordinateText('MultiPoint', geoBoxes)
+        }
+
+        return geometryHelper.toMultiPolygonFromGeoNetworkGeoBoxes(geoBoxes)
+    }
+
+    def _toBoundingBoxStringArrays(metadataNode) {
+        def geoBoxes = []
+        metadataNode.geoBox.each {
+            geoBoxes << [it.text().replaceAll("\\|", " ")]
+        }
+
+        return geoBoxes
+    }
 }

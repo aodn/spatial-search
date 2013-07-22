@@ -138,18 +138,14 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 	}
 
 	def _saveGeonetworkMetadata(metadataCollection) {
-		def now = new Timestamp(System.currentTimeMillis())
 		def persistedMetadata = GeonetworkMetadata.list()
 		metadataCollection.each { metadata ->
 			def metadataToSave = persistedMetadata.find { 
 				it.geonetworkUuid == metadata.geonetworkUuid && it.featureTypeName == metadata.featureTypeName 
 			} ?: metadata
-			
-			metadataToSave.with {
-				changeDate = metadata.changeDate
-				added = added ?: now
-				save(failOnError: true)
-			}
+
+            metadataToSave.copyFrom(metadata)
+            metadataToSave.save(failOnError: true)
 		}
 	}
 	

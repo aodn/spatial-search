@@ -112,6 +112,31 @@ class GeoNetworkResponseTests extends GrailsUnitTestCase {
 		assertEquals(expected, geoNetworkResponse._parseGeoBox(metadata))
 	}
 
+    void testParseMultiPolygonOverAntiMeridian() {
+        def out = new StringWriter()
+        def builder = new MarkupBuilder(new PrintWriter(out))."response"(from: 1, to: 1, selected: 0) {
+            summary(count: 1, type: "local", hitsusedforsummary: 1) {
+                keywords {
+                    keyword(count: 1, name: "Cool keywords", indexKey: "keyword")
+                }
+            }
+            metadata {
+                geoBox("40.0|-80.0|180.0|-30.0")
+                geoBox("-180.0|-80.0|-130.0|-30.0")
+            }
+        }
+        println out
+
+        geoNetworkResponse = new GeoNetworkResponse(_mockConfig(), out.toString())
+        def metadata = geoNetworkResponse.tree.metadata
+
+        def expected = helper.toGeometryFromCoordinateText('MultiPolygon', [
+            ["40.0 -80.0 40.0 -30.0 180.0 -30.0 180.0 -80.0 40.0 -80.0"],
+            ["-180.0 -80.0 -180.0 -30.0 -130.0 -30.0 -130.0 -80.0 -180.0 -80.0"]
+        ])
+        assertEquals(expected, geoNetworkResponse._parseGeoBox(metadata))
+    }
+
 	def _getGliderFeature() {
 		mockDomain(FeatureType)
 		def featureType = new FeatureType()
