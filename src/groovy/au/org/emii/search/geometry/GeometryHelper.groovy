@@ -286,4 +286,15 @@ class GeometryHelper {
 
         return toGeometryFromCoordinateText('MultiPolygon', sequences)
     }
+
+    def toMultiPolygonFromGeoNetworkGeoBoxes(geoBoxes) {
+        def boundingBoxes = []
+        geoBoxes.each { geoBox ->
+            geoBox.each {
+                boundingBoxes << toBoundingBox(it.split(" "))
+            }
+        }
+
+        return toMultiPolygonFromBoundingBoxes(boundingBoxes)
+    }
 }

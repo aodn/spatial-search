@@ -449,40 +449,12 @@ class GeometryHelperTests extends GrailsUnitTestCase {
 	}
 
     void testIsMultiPoint() {
-        def coords = [
-                ["-19.2084 146.8437 -19.2084 146.8437"],
-                ["-18.6216 146.4825 -18.6216 146.4825"],
-                ["-20.4464 148.9443 -20.4464 148.9443"],
-                ["-23.1550 150.897 -23.1550 150.897"],
-                ["-23.1548 150.8973 -23.1548 150.8973"],
-                ["-23.0665 150.9546 -23.0665 150.9546"],
-                ["-23.2058 150.9667 -23.2058 150.9667"],
-                ["-23.1553 150.9244 -23.1553 150.9244"],
-                ["-23.2110 150.9633 -23.2110 150.9633"],
-                ["-21.7059 152.5566 -21.7059 152.5566"],
-                ["-21.4785 152.5559 -21.4785 152.5559"],
-                ["-20.3533 149.4081 -20.3533 149.4081"],
-                ["-18.6156 146.4825 -18.6156 146.4825"]
-        ]
+        def coords = [["-19.2084 146.8437 -19.2084 146.8437"]]
         assertTrue helper.isMultiPoint(coords)
     }
 
     void testIsNotMultiPoint() {
-        def coords = [
-                ["-19.2084 146.8437 -20 146.8437"],
-                ["-18.6216 146.4825 -18.6216 146.4825"],
-                ["-20.4464 148.9443 -20.4464 148.9443"],
-                ["-23.1550 150.897 -23.1550 150.897"],
-                ["-23.1548 150.8973 -23.1548 150.8973"],
-                ["-23.0665 150.9546 -23.0665 150.9546"],
-                ["-23.2058 150.9667 -23.2058 150.9667"],
-                ["-23.1553 150.9244 -23.1553 150.9244"],
-                ["-23.2110 150.9633 -23.2110 150.9633"],
-                ["-21.7059 152.5566 -21.7059 152.5566"],
-                ["-21.4785 152.5559 -21.4785 152.5559"],
-                ["-20.3533 149.4081 -20.3533 149.4081"],
-                ["-18.6156 146.4825 -18.6156 146.4825"]
-        ]
+        def coords = [["-19.2084 146.8437 -20 146.8437"]]
         assertFalse helper.isMultiPoint(coords)
     }
 
@@ -495,4 +467,14 @@ class GeometryHelperTests extends GrailsUnitTestCase {
 		assertEquals("-21.9 150.8 -24.2 153.6", helper.orderCoordText(inputFormat, [CoordinateFormat.NORTH, CoordinateFormat.WEST, CoordinateFormat.SOUTH, CoordinateFormat.EAST], input))
 		assertEquals("153.6 150.8 -24.2 -21.9", helper.orderCoordText(inputFormat, [CoordinateFormat.EAST, CoordinateFormat.WEST, CoordinateFormat.SOUTH, CoordinateFormat.NORTH], input))
 	}
+
+    void testToMultiPolygonFromGeoNetworkGeoBoxes() {
+        def geoBoxes = [
+            ['40.0 -80.0 180.0 -30.0'],
+            ['-180.0 -80.0 -130.0 -30.0']
+        ]
+
+        def mp = helper.toMultiPolygonFromGeoNetworkGeoBoxes(geoBoxes)
+        assertEquals 'com.vividsolutions.jts.geom.MultiPolygon', mp.getClass().getName()
+    }
 }
