@@ -118,6 +118,7 @@ class FeatureTypeRequestService {
 			def featureToPersist = persistedFeaturesMap[feature.featureTypeId]
 			if (featureToPersist) {
 				featureToPersist.gml = feature.gml
+				featureToPersist.geometry = feature.geometry
 			}
 			else {
 				featureToPersist = feature
@@ -360,7 +361,7 @@ Feature type quick link $url
 
 	def _updateMetadataIndexing(metadataRecords) {
 		def now = new Timestamp(System.currentTimeMillis())
-		metadataRecords.each {
+ 		metadataRecords.each {
 			if (!it.error) {
 				it.lastIndexed = now
 				_save(it)

@@ -96,7 +96,6 @@ class GeonetworkMetadata implements Comparable<GeonetworkMetadata> {
         def now = new Timestamp(System.currentTimeMillis())
         added = other.added ?: now
         changeDate = other.changeDate
-        lastIndexed = now
         featureTypeName = other.featureTypeName
         geoserverEndPoint = other.geoserverEndPoint
         geoBox = other.geoBox
