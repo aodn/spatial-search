@@ -118,7 +118,9 @@ class FeatureTypeRequestService {
 			def featureToPersist = persistedFeaturesMap[feature.featureTypeId]
 			if (featureToPersist) {
 				featureToPersist.gml = feature.gml
-				featureToPersist.geometry = feature.geometry
+                if (feature.geometry) {
+				    featureToPersist.geometry = feature.geometry
+                }
 			}
 			else {
 				featureToPersist = feature
