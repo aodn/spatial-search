@@ -5,7 +5,6 @@
  * The AODN/IMOS Portal is distributed under the terms of the GNU General Public License
  *
  */
-import liquibase.change.core.DropNotNullConstraintChange;
 
 databaseChangeLog = {
 
@@ -26,17 +25,17 @@ databaseChangeLog = {
 			column(name: "geonetwork_uuid", type: "varchar(255)") {
 				constraints(nullable: "false")
 			}
-			
+
 			column(name: "feature_type_id", type: "varchar(255)") {
 				constraints(nullable: "false")
 			}
 		}
-		
+
 		sql("SELECT AddGeometryColumn('feature_type', 'geometry', 4326, 'GEOMETRY', 2)")
 		sql("create index idx_ft_geometry on feature_type using gist (geometry)")
 		// The below might need to be run separately, it can't be run as part of a transaction apparently
 		//sql("vacuum analyze feature_type")
-		
+
 		createIndex(tableName: "feature_type", indexName: "idx_ft_feature_type") {
 			column(name: "feature_type_name")
 			column(name: "geonetwork_uuid")
@@ -61,7 +60,7 @@ databaseChangeLog = {
 			column(name: "feature_type_name", type: "varchar(255)") {
 				constraints(nullable: "false")
 			}
-			
+
 			column(name: "constructor_args", type: "varchar(255)")
 		}
 	}
@@ -77,7 +76,7 @@ databaseChangeLog = {
 			}
 
 			column(name: "documents", type: "int4")
-			
+
 			column(name: "failures", type: "int4")
 
 			column(name: "run_date", type: "timestamp") {
@@ -112,23 +111,23 @@ databaseChangeLog = {
 
 			column(name: "index_run_id", type: "int8")
 		}
-		
+
 		createIndex(tableName: "geonetwork_metadata", indexName: "idx_qd_feature_type") {
 			column(name: "feature_type_name")
 			column(name: "geonetwork_uuid")
 		}
-		
+
 		createIndex(tableName: "geonetwork_metadata", indexName: "idx_qd_index_run_id") {
 			column(name: "index_run_id")
 		}
-		
+
 		addForeignKeyConstraint(baseColumnNames: "index_run_id", baseTableName: "geonetwork_metadata", constraintName: "FKE5C5EA6741AAA315", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "id", referencedTableName: "index_run", referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "tfotak", id: "1318893850589-6", failOnError: true) {
 		createSequence(sequenceName: "hibernate_sequence")
 	}
-	
+
 	changeSet(author: "tfotak", id: "1319582037000-2", failOnError: true) {
 		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:anfog_glider', 'au.org.emii.search.index.FeatureTypeRequest', 'uuid,thepoint_lonlat'")
 		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:soop_asf', 'au.org.emii.search.index.DiskCachingFeatureTypeRequest', 'id,geometry'")
@@ -147,30 +146,30 @@ databaseChangeLog = {
 		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:sots', 'au.org.emii.search.index.FeatureTypeRequest', 'pkid,geom'")
 		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:auv', 'au.org.emii.search.index.IdAsAttributeFeatureTypeRequest', 'geom'")
 	}
-	
+
 	changeSet(author: "tfotak", id: "1320790055000-1", failOnError: true) {
 		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:soop_sst', 'au.org.emii.search.index.FeatureTypeRequest', 'id,geometry'")
 		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:soop_asf_recent', 'au.org.emii.search.index.FeatureTypeRequest', 'id,geometry'")
 	}
-	
+
 	changeSet(author: "tfotak", id: "1321934760000-1", failOnError: true) {
 		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:soop_tmv_recent', 'au.org.emii.search.index.FeatureTypeRequest', 'id,geometry'")
 	}
-	
+
 	changeSet(author: "tfotak", id: "1322547045000-1", failOnError: true) {
 		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:faimms_sensors', 'au.org.emii.search.index.NullFeatureTypeRequest', null")
 	}
-	
+
 	changeSet(author: "tfotak", id: "1322802892000-1", failOnError: true) {
 		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'aims:AIMS_TRIP_', 'au.org.emii.search.index.AimsFeatureTypeRequest', 'track_id,shape'")
 	}
-	
+
 	changeSet(author: "tfotak", id: "1323838488000-1", failOnError: true) {
 		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:soop_ba_mv', 'au.org.emii.search.index.FeatureTypeRequest', 'id,geometry'")
 		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:asfs', 'au.org.emii.search.index.FeatureTypeRequest', 'pkid,geom'")
 		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:faimms_vw', 'au.org.emii.search.index.IdAsAttributeFeatureTypeRequest', 'geom'")
 	}
-	
+
 	changeSet(author: "tfotak", id: "1324506034000-1", failOnError: true) {
 		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:deepwater_arrays', 'au.org.emii.search.index.FeatureTypeRequest', 'pkid,geom'")
 		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:zooview', 'au.org.emii.search.index.IdAsAttributeFeatureTypeRequest', 'position'")
@@ -180,16 +179,16 @@ databaseChangeLog = {
 		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:BioOptical_deployments', 'au.org.emii.search.index.IdAsAttributeFeatureTypeRequest', 'geom'")
 		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'aims:WeatherStation', 'au.org.emii.search.index.FeatureTypeRequest', 'OBJECTID,SHAPE'")
 	}
-	
+
 	changeSet(author: "tfotak", id: "1326755933000-1", failOnError: true) {
 		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'bioreg:CAAB', 'au.org.emii.search.index.CmarBioregFeatureTypeRequest', 'SPCODE,GEOMETRY'")
 	}
-	
+
 	changeSet(author: "tfotak", id: "1326930435000-1", failOnError: true) {
 		dropColumn(columnName: "documents", tableName: "index_run")
 		dropColumn(columnName: "failures", tableName: "index_run")
 	}
-	
+
 	changeSet(author: "tfotak", id: "1326930435000-2", failOnError: true) {
 		sql("update feature_type_request_class set class_name = 'au.org.emii.search.index.FeatureTypeRequest' where class_name = 'au.org.emii.search.index.AimsFeatureTypeRequest'")
 		sql("update feature_type_request_class set class_name = 'au.org.emii.search.index.FeatureTypeRequest' where class_name = 'au.org.emii.search.index.CmarBioregFeatureTypeRequest'")
@@ -198,37 +197,37 @@ databaseChangeLog = {
 		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'ea:Secchi-Secchi-m', 'au.org.emii.search.index.NullFeatureTypeRequest', null")
 		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'ea:Chlorophyll-Chlorophyll-micro_grams_per_litre', 'au.org.emii.search.index.NullFeatureTypeRequest', null")
 	}
-	
+
 	changeSet(author: "tfotak", id: "1326930435000-3", failOnError: true) {
 		addColumn(tableName: "feature_type_request_class") {
 			column(name: "feature_members_element_name", type: "varchar(255)")
 		}
 		sql("update feature_type_request_class set feature_members_element_name = 'featureMember' where feature_type_name = 'bioreg:CAAB'")
 	}
-	
+
 	changeSet(author: "tfotak", id: "1327357239000-3", failOnError: true) {
 		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'ran:xbt', 'au.org.emii.search.index.NullFeatureTypeRequest', null")
 		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'ran:secchi', 'au.org.emii.search.index.DiskCachingFeatureTypeRequest', '@id,SHAPE'")
 		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'ran:biolum', 'au.org.emii.search.index.DiskCachingFeatureTypeRequest', '@id,SHAPE'")
 		sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'ran:seabed', 'au.org.emii.search.index.DiskCachingFeatureTypeRequest', '@id,SHAPE'")
 		sql("update feature_type_request_class set class_name = 'au.org.emii.search.index.FeatureTypeRequest', constructor_args = '@id,' || constructor_args where class_name = 'au.org.emii.search.index.IdAsAttributeFeatureTypeRequest'")
-		
+
 	}
-	
+
 	changeSet(author: "tfotak", id: "1333080327000-1", failOnError: true) {
 		sql("insert into feature_type_request_class (id, version, class_name, feature_type_name, constructor_args, feature_members_element_name) select nextval('hibernate_sequence'), 0, class_name, 'imos'||substring(feature_type_name from position(':' in feature_type_name)), constructor_args, feature_members_element_name from feature_type_request_class where feature_type_name like 'topp:%'")
 	}
-    
+
     changeSet(author: "craigj", id: "1333080327000-2", failOnError: true) {
         sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'imos:argo_aggregation', 'au.org.emii.search.index.FeatureTypeRequest', 'uuid,geometry'")
         sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'imos:ANMN_SOOC', 'au.org.emii.search.index.FeatureTypeRequest', 'METADATA,the_geom'")
         sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'topp:anmn_nrs_realtime', 'au.org.emii.search.index.FeatureTypeRequest', 'metadata_uuid,geom'")
     }
-    
+
     changeSet(author: "craigj", id: "1333080327000-3", failOnError: true) {
         sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'imos:anmn_nrs_realtime', 'au.org.emii.search.index.FeatureTypeRequest', 'metadata_uuid,geom'")
     }
-    
+
     changeSet(author: "craigj", id: "1333080327000-4", failOnError: true) {
         sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, '2001_ABOM-L3P_GHRSST-SSTsubskin-AVHRR_MOSAIC_01km-AO_DAAC-v01-fv01_0', 'au.org.emii.search.index.NcwmsFeatureTypeRequest', null")
         sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, '2002_ABOM-L3P_GHRSST-SSTsubskin-AVHRR_MOSAIC_01km-AO_DAAC-v01-fv01_0', 'au.org.emii.search.index.NcwmsFeatureTypeRequest', null")
@@ -265,13 +264,13 @@ databaseChangeLog = {
         sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'shed.', 'au.org.emii.search.index.NcwmsFeatureTypeRequest', null")
         sql("insert into feature_type_request_class (id, version, feature_type_name, class_name, constructor_args) select nextval('hibernate_sequence'), 0, 'storm_', 'au.org.emii.search.index.NcwmsFeatureTypeRequest', null")
     }
-	
+
 	changeSet(author: "tfotak", id: "1338789394000-1", failOnError: true) {
 		addColumn(tableName: "feature_type_request_class") {
 			column(name: "output_format", type: "varchar(10)")
 		}
 	}
-	
+
 	changeSet(author: "tfotak", id: "1338789394000-2", failOnError: true) {
 		update(tableName: "feature_type_request_class") {
 			column(name: "output_format", value: "gml2")
@@ -279,45 +278,45 @@ databaseChangeLog = {
 			where("class_name = 'au.org.emii.search.index.Gml2FeatureTypeRequest'")
 		}
 	}
-	
+
 	changeSet(author: "tfotak", id: "1338864976000-1", failOnError: true) {
 		update(tableName: "feature_type_request_class") {
 			column(name: "output_format", value: "gml2")
 			where("feature_type_name like '%:soop_asf'")
 		}
 	}
-	
+
 	changeSet(author: "tfotak", id: "1338864976000-2", failOnError: true) {
 		update(tableName: "feature_type_request_class") {
 			column(name: "output_format", value: "gml2")
 			where("feature_type_name like '%:soop_sst'")
 		}
 	}
-	
+
 	changeSet(author: "tfotak", id: "1338864976000-3", failOnError: true) {
 		update(tableName: "feature_type_request_class") {
 			column(name: "output_format", value: "gml2")
 			where("feature_type_name like '%:ctd_profile_vw'")
 		}
 	}
-	
+
 	changeSet(author: "tfotak", id: "1338864976000-4", failOnError: true) {
 		update(tableName: "feature_type_request_class") {
 			column(name: "output_format", value: "gml2")
 			where("feature_type_name like '%:soop_co2'")
 		}
 	}
-	
+
 	changeSet(author: "tfotak", id: "1339040995000-1", failOnError: true) {
 		update(tableName: "feature_type_request_class") {
 			column(name: "output_format", value: "gml2")
 			where("feature_type_name like '%:soop_asf_recent'")
 		}
 	}
-	
+
 	// WA IVEC records
 	changeSet(author: "tfotak", id: "1340761212000-1", failOnError: true) {
-		
+
 		insert(tableName: "feature_type_request_class") {
 			column(name: "id", valueComputed: "nextval('hibernate_sequence')")
 			column(name: "version", valueNumeric: "0")
@@ -325,7 +324,7 @@ databaseChangeLog = {
 			column(name: "class_name", value: "au.org.emii.search.index.FeatureTypeRequest")
 			column(name: "constructor_args", value: "@id,the_geom")
 		}
-		
+
 		insert(tableName: "feature_type_request_class") {
 			column(name: "id", valueComputed: "nextval('hibernate_sequence')")
 			column(name: "version", valueNumeric: "0")
@@ -333,7 +332,7 @@ databaseChangeLog = {
 			column(name: "class_name", value: "au.org.emii.search.index.FeatureTypeRequest")
 			column(name: "constructor_args", value: "@id,the_geom")
 		}
-		
+
 		insert(tableName: "feature_type_request_class") {
 			column(name: "id", valueComputed: "nextval('hibernate_sequence')")
 			column(name: "version", valueNumeric: "0")
@@ -341,7 +340,7 @@ databaseChangeLog = {
 			column(name: "class_name", value: "au.org.emii.search.index.FeatureTypeRequest")
 			column(name: "constructor_args", value: "@id,the_geom")
 		}
-		
+
 		insert(tableName: "feature_type_request_class") {
 			column(name: "id", valueComputed: "nextval('hibernate_sequence')")
 			column(name: "version", valueNumeric: "0")
@@ -349,14 +348,14 @@ databaseChangeLog = {
 			column(name: "class_name", value: "au.org.emii.search.index.FeatureTypeRequest")
 			column(name: "constructor_args", value: "@id,the_geom")
 		}
-		
+
 		insert(tableName: "feature_type_request_class") {
 			column(name: "id", valueComputed: "nextval('hibernate_sequence')")
 			column(name: "version", valueNumeric: "0")
 			column(name: "feature_type_name", value: "waodn:Areas_under_Marine_and_Harbours_Act_1981")
 			column(name: "class_name", value: "au.org.emii.search.index.NullFeatureTypeRequest")
 		}
-		
+
 		insert(tableName: "feature_type_request_class") {
 			column(name: "id", valueComputed: "nextval('hibernate_sequence')")
 			column(name: "version", valueNumeric: "0")
@@ -364,7 +363,7 @@ databaseChangeLog = {
 			column(name: "class_name", value: "au.org.emii.search.index.FeatureTypeRequest")
 			column(name: "constructor_args", value: "@id,the_geom")
 		}
-		
+
 		insert(tableName: "feature_type_request_class") {
 			column(name: "id", valueComputed: "nextval('hibernate_sequence')")
 			column(name: "version", valueNumeric: "0")
@@ -372,7 +371,7 @@ databaseChangeLog = {
 			column(name: "class_name", value: "au.org.emii.search.index.FeatureTypeRequest")
 			column(name: "constructor_args", value: "@id,the_geom")
 		}
-		
+
 		insert(tableName: "feature_type_request_class") {
 			column(name: "id", valueComputed: "nextval('hibernate_sequence')")
 			column(name: "version", valueNumeric: "0")
@@ -380,7 +379,7 @@ databaseChangeLog = {
 			column(name: "class_name", value: "au.org.emii.search.index.DiskCachingFeatureTypeRequest")
 			column(name: "constructor_args", value: "@id,the_geom")
 		}
-		
+
 		insert(tableName: "feature_type_request_class") {
 			column(name: "id", valueComputed: "nextval('hibernate_sequence')")
 			column(name: "version", valueNumeric: "0")
@@ -388,7 +387,7 @@ databaseChangeLog = {
 			column(name: "class_name", value: "au.org.emii.search.index.FeatureTypeRequest")
 			column(name: "constructor_args", value: "@id,the_geom")
 		}
-		
+
 		insert(tableName: "feature_type_request_class") {
 			column(name: "id", valueComputed: "nextval('hibernate_sequence')")
 			column(name: "version", valueNumeric: "0")
@@ -397,51 +396,51 @@ databaseChangeLog = {
 			column(name: "constructor_args", value: "uuid,geometry")
 		}
 	}
-	
+
 	changeSet(author: "tfotak", id: "1341883299000-1", failOnError: true) {
 		addColumn(tableName: "geonetwork_metadata") {
 			column(name: "change_date", type: "timestamp")
 			column(name: "last_indexed", type: "timestamp")
 		}
 	}
-	
+
 	changeSet(author: "tfotak", id: "1341883299000-2", failOnError: true) {
 		dropColumn(columnName: "index_run_id", tableName: "geonetwork_metadata")
 		dropTable(tableName: "index_run")
 	}
-	
+
 	changeSet(author: "tfotak", id: "1341883299000-3", failOnError: true) {
 		update(tableName: "feature_type_request_class") {
 			column(name: "class_name", value: "au.org.emii.search.index.DiskCachingFeatureTypeRequest")
 			where("feature_type_name like '%:soop%'")
 		}
 	}
-	
+
 	changeSet(author: "tfotak", id: "1341883299000-4", failOnError: true) {
 		update(tableName: "geonetwork_metadata") {
 			column(name: "change_date", valueComputed: "to_date('01 Jan 1970', 'DD Mon YYYY')")
 		}
 	}
-	
+
 	changeSet(author: "tfotak", id: "1341883299000-5", failOnError: true) {
 		addNotNullConstraint(tableName: "geonetwork_metadata", columnName: "change_date")
 	}
-	
+
 	changeSet(author: "tfotak", id: "1341974714000-1", failOnError: true) {
 		update(tableName: "feature_type_request_class") {
 			column(name: "output_format", value: "gml2")
 			where("feature_type_name like 'waodn:%'")
 		}
 	}
-	
+
 	changeSet(author: "tfotak", id: "1341974714000-2", failOnError: true) {
 		sql("update feature_type_request_class set constructor_args = replace(constructor_args, '@id', '@fid') where feature_type_name like 'waodn:%'")
 	}
-	
+
 	changeSet(author: "tfotak", id: "1341974714000-3", failOnError: true) {
 		sql("update feature_type_request_class set constructor_args = replace(constructor_args, '@id', '@gml:id') where constructor_args like '@id%' and class_name = 'au.org.emii.search.index.DiskCachingFeatureTypeRequest'")
 	}
-	
+
 	changeSet(author: "tfotak", id: "1342073293000-1", failOnError: true) {
 		sql("SELECT AddGeometryColumn('geonetwork_metadata', 'geo_box', 4326, 'GEOMETRY', 2)")
 	}
@@ -485,6 +484,48 @@ databaseChangeLog = {
 			column(name: "feature_type_name", value: "waodn:L_to_K_AerialPhotographs")
 			column(name: "class_name", value: "au.org.emii.search.index.FeatureTypeRequest")
 			column(name: "constructor_args", value: "@gml:id,the_geom")
+		}
+	}
+
+	changeSet(author: "dnahodil", id: "1381297645000-1", failOnError: true) {
+		insert(tableName: "feature_type_request_class") {
+			column(name: "id", valueComputed: "nextval('hibernate_sequence')")
+			column(name: "version", valueNumeric: "0")
+			column(name: "feature_type_name", value: "imos:argo_profile_general")
+			column(name: "class_name", value: "au.org.emii.search.index.DiskCachingFeatureTypeRequest")
+			column(name: "constructor_args", value: "@gml:id,position")
+		}
+
+		insert(tableName: "feature_type_request_class") {
+			column(name: "id", valueComputed: "nextval('hibernate_sequence')")
+			column(name: "version", valueNumeric: "0")
+			column(name: "feature_type_name", value: "imos:aatams_sattag_nrt_trajectories")
+			column(name: "class_name", value: "au.org.emii.search.index.DiskCachingFeatureTypeRequest")
+			column(name: "constructor_args", value: "@gml:id,geom")
+		}
+
+		insert(tableName: "feature_type_request_class") {
+			column(name: "id", valueComputed: "nextval('hibernate_sequence')")
+			column(name: "version", valueNumeric: "0")
+			column(name: "feature_type_name", value: "SRS_SST_14subskin/sst_dtime")
+			column(name: "class_name", value: "au.org.emii.search.index.NcwmsFeatureTypeRequest")
+			column(name: "constructor_args", value: null)
+		}
+
+		insert(tableName: "feature_type_request_class") {
+			column(name: "id", valueComputed: "nextval('hibernate_sequence')")
+			column(name: "version", valueNumeric: "0")
+			column(name: "feature_type_name", value: "SRS_SST_14subskin/sea_surface_temperature")
+			column(name: "class_name", value: "au.org.emii.search.index.NcwmsFeatureTypeRequest")
+			column(name: "constructor_args", value: null)
+		}
+
+		insert(tableName: "feature_type_request_class") {
+			column(name: "id", valueComputed: "nextval('hibernate_sequence')")
+			column(name: "version", valueNumeric: "0")
+			column(name: "feature_type_name", value: "imos:csiro_harvest_zoop")
+			column(name: "class_name", value: "au.org.emii.search.index.DiskCachingFeatureTypeRequest")
+			column(name: "constructor_args", value: "@gml:id,position")
 		}
 	}
 }
