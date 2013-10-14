@@ -101,7 +101,7 @@ class DiskCachingFeatureTypeParser extends DefaultHandler2 {
 			return
 		}
 
-		featureTypeGmlBuilder.append("<").append(qname)
+		featureTypeGmlBuilder.append("<").append(_stripGmlNamespaceFromElements(qname))
 		for (def i = 0; i < atts.getLength(); i++) {
 			featureTypeGmlBuilder
 				.append(" ")
@@ -118,7 +118,7 @@ class DiskCachingFeatureTypeParser extends DefaultHandler2 {
 			return
 		}
 
-		featureTypeGmlBuilder.append("</").append(qname).append(">")
+		featureTypeGmlBuilder.append("</${_stripGmlNamespaceFromElements(qname)}>")
 	}
 
 	def _endFeatureType(ns, localName, qname) {
@@ -153,20 +153,12 @@ class DiskCachingFeatureTypeParser extends DefaultHandler2 {
 		featureType.gml = featureTypeGmlBuilder.toString()
 	}
 
-//	static void foo() {
-//		def metadata = new GeonetworkMetadata(geonetworkUuid: "AJKHDKAJSHDAHSDJKASHDJAKHDKJASHDKA", featureTypeName: "soop_asf")
-//
-//		def featureTypeRequest = new DiskCachingFeatureTypeRequest("id", "geometry")
-//		featureTypeRequest.featureTypeElementName = "soop_asf"
-//
-//		def handler = new DiskCachingFeatureTypeParser(metadata, featureTypeRequest)
-//		def reader = SAXParserFactory.newInstance().newSAXParser().XMLReader
-//		reader.setContentHandler(handler)
-//		def inputReader = new BufferedReader(new FileReader("/tmp/soop_asf.xml"))
-//		reader.parse(new InputSource(inputReader))
-//
-//		def rand = (int)(Math.random() * (handler.featureTypes.size() -1))
-//		println handler.featureTypes[rand].gml
-//	}
+	def _stripGmlNamespaceFromElements(gml) {
+		def stripped = gml
+		if (stripped) {
+			stripped = stripped.replaceAll('gml:', '')
+		}
+		return stripped
+	}
 
 }
