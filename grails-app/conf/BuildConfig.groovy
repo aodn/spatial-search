@@ -33,21 +33,21 @@ grails.project.dependency.resolution = {
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
 
-		compile 'log4j:apache-log4j-extras:1.0'
-		
+        compile 'log4j:apache-log4j-extras:1.0'
+
         // runtime 'mysql:mysql-connector-java:5.1.13'
-		runtime 'postgresql:postgresql:9.0-801.jdbc4'
-		
+        runtime 'postgresql:postgresql:9.0-801.jdbc4'
+
     }
 }
 grails.war.resources = {
     stagingDir ->
    
-	// The jars are being inserted by the hudson/tomcat build process, and
-	// are causing errors on startup for the app on tomcat6.
-	delete(file:"${stagingDir}/WEB-INF/lib/commons-collections-3.1.jar")
-	delete(file:"${stagingDir}/WEB-INF/lib/slf4j-api-1.5.2.jar")
+    // The jars are being inserted by the hudson/tomcat build process, and
+    // are causing errors on startup for the app on tomcat6.
+    delete(file:"${stagingDir}/WEB-INF/lib/commons-collections-3.1.jar")
+    delete(file:"${stagingDir}/WEB-INF/lib/slf4j-api-1.5.2.jar")
 
-	delete(file:"${stagingDir}/WEB-INF/lib/servlet-api-2.3.jar")
+    delete(file:"${stagingDir}/WEB-INF/lib/servlet-api-2.3.jar")
 
 }

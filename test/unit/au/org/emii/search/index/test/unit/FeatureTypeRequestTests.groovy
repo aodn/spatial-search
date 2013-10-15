@@ -20,9 +20,9 @@ class FeatureTypeRequestTests extends GrailsUnitTestCase {
     }
 
     void testTrimNamespace() {
-		def ftr = new FeatureTypeRequest()
-		assertEquals 'AIMS_TRIP_5310', ftr.trimNamespace('aims:AIMS_TRIP_5310')
-		assertEquals 'anfog_glider', ftr.trimNamespace('topp:anfog_glider')
-		assertEquals 'namespace', ftr.trimNamespace('really:long:delimited:thingy:foo:namespace')
+        def ftr = new FeatureTypeRequest()
+        assertEquals 'AIMS_TRIP_5310', ftr.trimNamespace('aims:AIMS_TRIP_5310')
+        assertEquals 'anfog_glider', ftr.trimNamespace('topp:anfog_glider')
+        assertEquals 'namespace', ftr.trimNamespace('really:long:delimited:thingy:foo:namespace')
     }
 }

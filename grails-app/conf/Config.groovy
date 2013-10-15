@@ -70,31 +70,31 @@ grails.plugin.databasemigration.updateOnStartFileNames = ['changelog.groovy']
 // set per-environment serverURL stem for creating absolute links
 environments {
     production {
-	    grails.serverURL = "http://search.aodn.org.au"
-	    geonetwork.search.serverURL = "http://catalogue.aodn.org.au/geonetwork/srv/eng/q"
-	    geonetwork.index.serverURL = "http://catalogue.aodn.org.au/geonetwork/srv/eng/q"
-	    geoserver.response.cache.dir = "/tmp"
-	    feature.missing.email.to='info@example.com'
-	    feature.missing.email.from='aodnsearch@emii.org.au'
-	    feature.missing.email.subject='AODN Search Index Action Required'
+        grails.serverURL = "http://search.aodn.org.au"
+        geonetwork.search.serverURL = "http://catalogue.aodn.org.au/geonetwork/srv/eng/q"
+        geonetwork.index.serverURL = "http://catalogue.aodn.org.au/geonetwork/srv/eng/q"
+        geoserver.response.cache.dir = "/tmp"
+        feature.missing.email.to='info@example.com'
+        feature.missing.email.from='aodnsearch@emii.org.au'
+        feature.missing.email.subject='AODN Search Index Action Required'
     }
     development {
         grails.serverURL = "http://localhost:${grails.server.port.http}/${appName}"
-		geonetwork.search.serverURL = "http://catalogue.aodn.org.au/geonetwork/srv/eng/q"
-		geonetwork.index.serverURL = "http://catalogue.aodn.org.au/geonetwork/srv/eng/q"
-		geoserver.response.cache.dir = "/tmp"
-		feature.missing.email.to='info@example.com'
-		feature.missing.email.from='spatialsearch@emii.org.au'
-		feature.missing.email.subject='Spatial Search Index Action Required'
+        geonetwork.search.serverURL = "http://catalogue.aodn.org.au/geonetwork/srv/eng/q"
+        geonetwork.index.serverURL = "http://catalogue.aodn.org.au/geonetwork/srv/eng/q"
+        geoserver.response.cache.dir = "/tmp"
+        feature.missing.email.to='info@example.com'
+        feature.missing.email.from='spatialsearch@emii.org.au'
+        feature.missing.email.subject='Spatial Search Index Action Required'
     }
     test {
         grails.serverURL = "http://localhost:${grails.server.port.http}/${appName}"
-		geonetwork.search.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/eng/q"
-		geonetwork.index.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/eng/q"
-		geoserver.response.cache.dir = "/tmp"
-		feature.missing.email.to='info@example.com'
-		feature.missing.email.from='spatialsearch@emii.org.au'
-		feature.missing.email.subject='Spatial Search Index Action Required'
+        geonetwork.search.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/eng/q"
+        geonetwork.index.serverURL = "http://mest-test.emii.org.au/geonetwork/srv/eng/q"
+        geoserver.response.cache.dir = "/tmp"
+        feature.missing.email.to='info@example.com'
+        feature.missing.email.from='spatialsearch@emii.org.au'
+        feature.missing.email.subject='Spatial Search Index Action Required'
     }
 
 }
@@ -108,17 +108,17 @@ log4j = {
     //    console name:'stdout', layout:pattern(conversionPattern: '%c{2} %m%n')
     //}
 
-	def rollingFile = new RollingFileAppender(name: 'file', layout: pattern(conversionPattern: '%d{ABSOLUTE}:%p:%c: %m%n'))
-	def rollingPolicy = new TimeBasedRollingPolicy(fileNamePattern: '/var/log/spatialsearch/spatialsearch.%d{yyyy-ww}.gz', activeFileName: '/var/log/spatialsearch/spatialsearch.log')
-	
-	rollingPolicy.activateOptions()
-	rollingFile.setRollingPolicy(rollingPolicy)
-	
-	appenders {
-		appender rollingFile
-		console name:'stdout', layout:pattern(conversionPattern: '%d{ABSOLUTE}:%p:%c: %m%n')
-	}
-	
+    def rollingFile = new RollingFileAppender(name: 'file', layout: pattern(conversionPattern: '%d{ABSOLUTE}:%p:%c: %m%n'))
+    def rollingPolicy = new TimeBasedRollingPolicy(fileNamePattern: '/var/log/spatialsearch/spatialsearch.%d{yyyy-ww}.gz', activeFileName: '/var/log/spatialsearch/spatialsearch.log')
+
+    rollingPolicy.activateOptions()
+    rollingFile.setRollingPolicy(rollingPolicy)
+
+    appenders {
+        appender rollingFile
+        console name:'stdout', layout:pattern(conversionPattern: '%d{ABSOLUTE}:%p:%c: %m%n')
+    }
+
     error  'org.codehaus.groovy.grails.web.servlet',  //  controllers
            'org.codehaus.groovy.grails.web.pages', //  GSP
            'org.codehaus.groovy.grails.web.sitemesh', //  layouts
@@ -132,30 +132,30 @@ log4j = {
            'net.sf.ehcache.hibernate'
 
     warn   'org.mortbay.log'
-	
-	environments {
-		development {
-			root {
-				error 'file', 'stdout'
-			}
-			debug 'grails.app', 'file'
-			debug 'au.org.emii', 'file'
-		}
-		test {
-			root {
-				error 'file', 'stdout'
-			}
-			info 'grails.app'
-			info 'au.org.emii'
-		}
-		production {
-			root {
-				error 'file', 'stdout'
-			}
-			info 'grails.app', 'file'
-			info 'au.org.emii', 'file'
-		}
-	}
+
+    environments {
+        development {
+            root {
+                error 'file', 'stdout'
+            }
+            debug 'grails.app', 'file'
+            debug 'au.org.emii', 'file'
+        }
+        test {
+            root {
+                error 'file', 'stdout'
+            }
+            info 'grails.app'
+            info 'au.org.emii'
+        }
+        production {
+            root {
+                error 'file', 'stdout'
+            }
+            info 'grails.app', 'file'
+            info 'au.org.emii', 'file'
+        }
+    }
 }
 
 // Custom configuration settings
@@ -181,12 +181,12 @@ grails.gorm.default.mapping = {
 }
 
 if(!grails.config.locations || !(grails.config.locations instanceof List)) {
-	grails.config.locations = []
+    grails.config.locations = []
 }
 
 try {
-	configurationPath = new InitialContext().lookup("java:comp/env/aodn.configuration")
-	grails.config.locations << "file:${configurationPath}"
+    configurationPath = new InitialContext().lookup("java:comp/env/aodn.configuration")
+    grails.config.locations << "file:${configurationPath}"
 }
 catch (e) {
 }
