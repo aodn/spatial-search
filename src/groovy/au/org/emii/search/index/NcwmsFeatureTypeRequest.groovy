@@ -16,17 +16,17 @@ import au.org.emii.search.FeatureType;
 
 class NcwmsFeatureTypeRequest extends FeatureTypeRequest {
 
-	static final Logger log = LoggerFactory.getLogger(NcwmsFeatureTypeRequest.class)
-	
-	def handleResponse(metadata, xml) {
-		def feature = new FeatureType(metadata)
-		feature.featureTypeId = metadata.featureTypeName
-		feature.geometry = metadata.geoBox
-		return [feature] as Set
-	}
+    static final Logger log = LoggerFactory.getLogger(NcwmsFeatureTypeRequest.class)
 
-	def requestFeatureType(metadata) {
-		log.info("No request sent when using NcwmsFeatureTypeRequest for " + metadata.featureTypeName)
-		return handleResponse(metadata, null)
-	}
+    def handleResponse(metadata, xml) {
+        def feature = new FeatureType(metadata)
+        feature.featureTypeId = metadata.featureTypeName
+        feature.geometry = metadata.geoBox
+        return [feature] as Set
+    }
+
+    def requestFeatureType(metadata) {
+        log.info("No request sent when using NcwmsFeatureTypeRequest for " + metadata.featureTypeName)
+        return handleResponse(metadata, null)
+    }
 }
