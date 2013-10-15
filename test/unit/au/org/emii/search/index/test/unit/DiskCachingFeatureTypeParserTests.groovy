@@ -122,9 +122,9 @@ class DiskCachingFeatureTypeParserTests extends GrailsUnitTestCase {
 
     def mockGmlElementAttributes() {
         return [
-                getLength: { -> 1 },
-                getLocalName: { i -> "srsDimension" },
-                getValue: { i -> "2" }
+            getLength: { -> 1 },
+            getLocalName: { i -> "srsDimension" },
+            getValue: { i -> "2" }
         ]
     }
 
