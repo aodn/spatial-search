@@ -7,6 +7,8 @@
  */
 package au.org.emii.search.index.test.unit
 
+import au.org.emii.search.index.FeatureTypeIndentifierParser
+
 import java.sql.Timestamp
 
 import javax.xml.parsers.SAXParserFactory
@@ -20,46 +22,116 @@ import grails.test.*
 import groovy.xml.MarkupBuilder
 
 class DiskCachingFeatureTypeParserTests extends GrailsUnitTestCase {
+
+	def featureTypeRequest
+	def metadata
+	def handler
+
+	def strippedGml = '<LineString srsDimension="2" srsName="http://www.opengis.net/gml/srs/epsg.xml#4326"><posList>85.4082 -66.2968 85.4082 -66.2968</posList></LineString>'
+
     protected void setUp() {
         super.setUp()
 		mockLogging(DiskCachingFeatureTypeRequest)
 		mockLogging(DiskCachingFeatureTypeParser)
-    }
 
-    protected void tearDown() {
-        super.tearDown()
-    }
-
-    void testSoopAsfParse() {
-		def featureTypeRequest = new DiskCachingFeatureTypeRequest('id', 'geometry')
+		featureTypeRequest = new DiskCachingFeatureTypeRequest('id', 'geometry')
 		featureTypeRequest.featureCallback = soopAsfFeatureCallback
 		featureTypeRequest.metadataCallback = soopAsfMetadataCallback
 
-		def metadata = new GeonetworkMetadata(
-			id: 1,
-			geonetworkUuid: "fd1b7df5-7b5b-4669-9f07-302804bae527",
-			featureTypeName: "imos:soop_asf",
-			geoserverEndPoint: "http://geoserver.imos.org.au/geoserver",
-			changeDate: new Timestamp(0)
+		metadata = new GeonetworkMetadata(
+				id: 1,
+				geonetworkUuid: "fd1b7df5-7b5b-4669-9f07-302804bae527",
+				featureTypeName: "imos:soop_asf",
+				geoserverEndPoint: "http://geoserver.imos.org.au/geoserver",
+				changeDate: new Timestamp(0)
 		)
 		featureTypeRequest.featureTypeElementName = metadata.featureTypeName
 
-		def handler = new DiskCachingFeatureTypeParser(metadata, featureTypeRequest)
+		handler = new DiskCachingFeatureTypeParser(metadata, featureTypeRequest)
+	}
+
+	protected void tearDown() {
+		super.tearDown()
+	}
+
+	void testSoopAsfParse() {
 		def reader = SAXParserFactory.newInstance().newSAXParser().XMLReader
 		reader.setContentHandler(handler)
 		def inputReader = new BufferedReader(new StringReader(_getSoopAsfXml()))
-		//def inputReader = new BufferedReader(new FileReader("/tmp/soop_asf.xml"))
 		reader.parse(new InputSource(inputReader))
-    }
+	}
+
+	void testStripGmlNamespaceFromStartElements() {
+		assertEquals(
+			strippedGml,
+			handler._stripGmlNamespaceFromElements('<gml:LineString srsDimension="2" srsName="http://www.opengis.net/gml/srs/epsg.xml#4326"><gml:posList>85.4082 -66.2968 85.4082 -66.2968</posList></LineString>')
+		)
+	}
+
+	void testStripGmlNamespaceFromEndElements() {
+		assertEquals(
+			strippedGml,
+			handler._stripGmlNamespaceFromElements('<LineString srsDimension="2" srsName="http://www.opengis.net/gml/srs/epsg.xml#4326"><posList>85.4082 -66.2968 85.4082 -66.2968</gml:posList></gml:LineString>')
+		)
+	}
+
+	void testStripGmlNamespaceFromAllElements() {
+		assertEquals(
+			strippedGml,
+			handler._stripGmlNamespaceFromElements('<gml:LineString srsDimension="2" srsName="http://www.opengis.net/gml/srs/epsg.xml#4326"><gml:posList>85.4082 -66.2968 85.4082 -66.2968</gml:posList></gml:LineString>')
+		)
+	}
+
+	void testPrintGmlStartTag() {
+		startFeatureTypeParse()
+		handler._printGmlStartTag('LineString', mockGmlElementAttributes())
+		assertEquals('<LineString srsDimension="2">', handler.featureTypeGmlBuilder.toString())
+	}
+
+	void testPrintGmlStartTagWithStripping() {
+		startFeatureTypeParse()
+		handler._printGmlStartTag('gml:LineString', mockGmlElementAttributes())
+		assertEquals('<LineString srsDimension="2">', handler.featureTypeGmlBuilder.toString())
+	}
+
+	void testPrintGmlEndTag() {
+		startFeatureTypeParse()
+		handler._printGmlEndTag('LineString')
+		assertEquals('</LineString>', handler.featureTypeGmlBuilder.toString())
+	}
+
+	void testPrintGmlEndTagWithStripping() {
+		startFeatureTypeParse()
+		handler._printGmlEndTag('gml:LineString')
+		assertEquals('</LineString>', handler.featureTypeGmlBuilder.toString())
+	}
 
 	def soopAsfFeatureCallback = { metadata, featureType ->
-		//println "$featureType.featureTypeId => $featureType.gml"
 		assertTrue featureType.featureTypeId && featureType.featureTypeId.trim().length() > 0
 		assertTrue featureType.gml && featureType.gml.trim().length() > 0
 	}
 
 	def soopAsfMetadataCallback = { metadata ->
 		assertTrue null == metadata.error
+	}
+
+	def startFeatureTypeParse() {
+		FeatureTypeIndentifierParser.metaClass.parseInlineAsAttribute = { "1" }
+		handler._startFeatureType('gml', 'id', '', '')
+		/*
+			_startFeatureType(ns, localName, qname, atts) {
+		featureType = new FeatureType(metadata)
+		featureType.featureTypeId = featureType.featureTypeId ?: idParser.parseInlineAsAttribute(featureTypeIdElementName, ns, localName, qname, atts)
+		featureTypeGmlBuilder = new StringBuilder()
+		 */
+	}
+
+	def mockGmlElementAttributes() {
+		return [
+				getLength: { -> 1 },
+				getLocalName: { i -> "srsDimension" },
+				getValue: { i -> "2" }
+		]
 	}
 
 	def _getSoopAsfXml() {
