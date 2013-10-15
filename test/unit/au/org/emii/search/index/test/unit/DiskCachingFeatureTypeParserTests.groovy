@@ -118,12 +118,6 @@ class DiskCachingFeatureTypeParserTests extends GrailsUnitTestCase {
     def startFeatureTypeParse() {
         FeatureTypeIndentifierParser.metaClass.parseInlineAsAttribute = { "1" }
         handler._startFeatureType('gml', 'id', '', '')
-        /*
-            _startFeatureType(ns, localName, qname, atts) {
-        featureType = new FeatureType(metadata)
-        featureType.featureTypeId = featureType.featureTypeId ?: idParser.parseInlineAsAttribute(featureTypeIdElementName, ns, localName, qname, atts)
-        featureTypeGmlBuilder = new StringBuilder()
-         */
     }
 
     def mockGmlElementAttributes() {
