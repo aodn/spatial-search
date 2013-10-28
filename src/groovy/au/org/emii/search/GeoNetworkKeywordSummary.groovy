@@ -29,6 +29,7 @@ class GeoNetworkKeywordSummary implements Serializable {
         "parameter": "longParamName",
         "organisation": "organisationName"
     ]
+    def keywordsInSummary = grailsApplication.config.geonetwork.keywords
 
 
     GeoNetworkKeywordSummary() {
