@@ -67,6 +67,11 @@ grails.exceptionresolver.params.exclude = ['password']
 grails.plugin.databasemigration.updateOnStart = true
 grails.plugin.databasemigration.updateOnStartFileNames = ['changelog.groovy']
 
+geonetwork.keywords = [
+    "parameter": "longParamName",
+    "organisation": "organisationName"
+]
+
 // set per-environment serverURL stem for creating absolute links
 environments {
     production {
