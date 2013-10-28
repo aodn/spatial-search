@@ -31,7 +31,7 @@ class GeoNetworkSearchSummaryService extends GeoNetworkRequestService {
         _updateNumericParam(paramsCopy, 'to', pageSize)
 
         def firstTime = true
-        def keywordSummary = new GeoNetworkKeywordSummary()
+        def keywordSummary = new GeoNetworkKeywordSummary(grailsApplication)
         while (_getNumericParam(paramsCopy, 'to') < limit || firstTime) {
             firstTime = false
             _fetchPage(paramsCopy, keywordSummary, searchRequestPageSize)

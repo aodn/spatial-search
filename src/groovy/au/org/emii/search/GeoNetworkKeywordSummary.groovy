@@ -19,34 +19,32 @@ class GeoNetworkKeywordSummary implements Serializable {
 
     static Logger log = LoggerFactory.getLogger(GeoNetworkKeywordSummary.class)
 
+    def grailsApplication
     def keywordsMap
     def hitsUsedForSummary
     def hitsUsedForCurrentPage
     def recordCounter
     def pages
 
-    def keywordsInSummary = [
-        "parameter": "longParamName",
-        "organisation": "organisationName"
-    ]
-    def keywordsInSummary = grailsApplication.config.geonetwork.keywords
+    def keywordsInSummary
 
-
-    GeoNetworkKeywordSummary() {
+    GeoNetworkKeywordSummary(grailsApplication) {
         keywordsMap = [:]
         hitsUsedForSummary = 0
         hitsUsedForCurrentPage = 0
         recordCounter = 0
         pages = []
+        this.grailsApplication = grailsApplication
+        keywordsInSummary = grailsApplication.config.geonetwork.keywords
     }
 
     def addNodeKeywords(metadataNode) {
-        for (e in keywordsInSummary) {
-            metadataNode."${e.key}".each { keywordElement ->
+        keywordsInSummary.each { keywordAttribute ->
+            metadataNode."${keywordAttribute.key}".each { keywordElement ->
                 def t = keywordElement.text()
                 def keyword = keywordsMap[t]
                 if (!keyword) {
-                    keyword = new GeoNetworkKeyword(name: t, indexKey: e.value)
+                    keyword = new GeoNetworkKeyword(name: t, indexKey: keywordAttribute.value)
                     _addKeyword(keyword)
                 }
                 keyword.increment()
