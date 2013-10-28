@@ -25,6 +25,12 @@ class GeoNetworkKeywordSummary implements Serializable {
     def recordCounter
     def pages
 
+    def keywordsInSummary = [
+        "parameter": "longParamName",
+        "organisation": "organisationName"
+    ]
+
+
     GeoNetworkKeywordSummary() {
         keywordsMap = [:]
         hitsUsedForSummary = 0
@@ -34,17 +40,20 @@ class GeoNetworkKeywordSummary implements Serializable {
     }
 
     def addNodeKeywords(metadataNode) {
-        metadataNode.keyword.each { keywordElement ->
-            def t = keywordElement.text()
-            def keyword = keywordsMap[t]
-            if (!keyword) {
-                keyword = new GeoNetworkKeyword(name: t, indexKey: 'keyword')
-                _addKeyword(keyword)
+        for (e in keywordsInSummary) {
+            metadataNode."${e.key}".each { keywordElement ->
+                def t = keywordElement.text()
+                def keyword = keywordsMap[t]
+                if (!keyword) {
+                    keyword = new GeoNetworkKeyword(name: t, indexKey: e.value)
+                    _addKeyword(keyword)
+                }
+                keyword.increment()
             }
-            keyword.increment()
+
+            hitsUsedForSummary++
+            hitsUsedForCurrentPage++
         }
-        hitsUsedForSummary++
-        hitsUsedForCurrentPage++
     }
 
     def buildSummaryXmlNode(builder) {
@@ -52,9 +61,17 @@ class GeoNetworkKeywordSummary implements Serializable {
         if (keywordSummariesToDisplay?.size() > 10) {
             keywordSummariesToDisplay = keywordSummariesToDisplay[0..9]
         }
+
+        // Builds XML as it should be returned from GeoNetwork
         builder.summary(count: hitsUsedForSummary, type: 'local', hitsusedforsummary: hitsUsedForSummary) {
-            keywordSummariesToDisplay.each { keyword ->
-                _buildSummaryKeywordNode(builder, keyword)
+            keywordsInSummary.each { keywordAttribute ->
+                builder."${keywordAttribute.value}s" {
+                    keywordSummariesToDisplay.each { keyword ->
+                        if (keyword.indexKey == keywordAttribute.value) {
+                            "${keyword.indexKey}"(count: keyword.count, name: keyword.name, indexKey: keyword.indexKey)
+                        }
+                    }
+                }
             }
         }
     }
@@ -77,10 +94,6 @@ class GeoNetworkKeywordSummary implements Serializable {
         catch (Exception e) {
             log.error("", e)
         }
-    }
-
-    def _buildSummaryKeywordNode(builder, keyword) {
-        builder.keyword(count: keyword.count, name: keyword.name, indexKey: keyword.indexKey)
     }
 
     def page(pageSize) {
