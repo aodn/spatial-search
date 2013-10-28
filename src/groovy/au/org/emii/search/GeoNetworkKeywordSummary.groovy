@@ -64,12 +64,16 @@ class GeoNetworkKeywordSummary implements Serializable {
         // Builds XML as it should be returned from GeoNetwork
         builder.summary(count: hitsUsedForSummary, type: 'local', hitsusedforsummary: hitsUsedForSummary) {
             keywordsInSummary.each { keywordAttribute ->
-                builder."${keywordAttribute.value}s" {
-                    keywordSummariesToDisplay.each { keyword ->
-                        if (keyword.indexKey == keywordAttribute.value) {
-                            "${keyword.indexKey}"(count: keyword.count, name: keyword.name, indexKey: keyword.indexKey)
-                        }
-                    }
+                buildTreeForKeyword(builder, keywordAttribute.value, keywordSummariesToDisplay)
+            }
+        }
+    }
+
+    def buildTreeForKeyword(builder, keyword, keywordSummariesToDisplay) {
+        builder."${keyword}s" {
+            keywordSummariesToDisplay.each { keywordElement ->
+                if (keywordElement.indexKey == keyword) {
+                    "${keywordElement.indexKey}"(count: keywordElement.count, name: keywordElement.name, indexKey: keywordElement.indexKey)
                 }
             }
         }
