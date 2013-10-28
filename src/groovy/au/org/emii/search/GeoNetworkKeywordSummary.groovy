@@ -35,7 +35,7 @@ class GeoNetworkKeywordSummary implements Serializable {
         recordCounter = 0
         pages = []
         this.grailsApplication = grailsApplication
-        keywordsInSummary = grailsApplication.config.geonetwork.keywords
+        keywordsInSummary = _getGrailsApplication().config.geonetwork.keywords
     }
 
     def addNodeKeywords(metadataNode) {
@@ -179,6 +179,10 @@ class GeoNetworkKeywordSummary implements Serializable {
 
     def _hasPages() {
         return CollectionUtils.isNotEmpty(pages)
+    }
+
+    def _getGrailsApplication() {
+        return grailsApplication
     }
 
     class GeoNetworkSpatialSearchPage implements Serializable {

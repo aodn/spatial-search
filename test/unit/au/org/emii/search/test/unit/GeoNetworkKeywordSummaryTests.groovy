@@ -7,6 +7,8 @@
  */
 package au.org.emii.search.test.unit
 
+import org.codehaus.groovy.grails.commons.ConfigurationHolder;
+
 import au.org.emii.search.GeoNetworkKeyword;
 import au.org.emii.search.GeoNetworkKeywordSummary;
 import grails.test.*
@@ -30,6 +32,10 @@ class GeoNetworkKeywordSummaryTests extends GrailsUnitTestCase {
     ]
 
     protected void setUp() {
+        def mockedConfig = new ConfigObject()
+        ConfigurationHolder.config = mockedConfig
+        GeoNetworkKeywordSummary.metaClass._getGrailsApplication = { -> [config: ConfigurationHolder.config]}
+
         super.setUp()
     }
 
@@ -71,7 +77,7 @@ class GeoNetworkKeywordSummaryTests extends GrailsUnitTestCase {
 
         int i = rev.size()
         rev.each { kw ->
-            s._addKeyword(new GeoNetworkKeyword(name: kw, count: i, indexKey: 'keyword'))
+            s._addKeyword(new GeoNetworkKeyword(name: kw, count: i, indexKey: 'someKeyword'))
             i -= 1
         }
 
@@ -84,7 +90,7 @@ class GeoNetworkKeywordSummaryTests extends GrailsUnitTestCase {
 
     def _addAllKeywords(s) {
         allKeywords.each {
-            s._addKeyword(new GeoNetworkKeyword(name: it, indexKey: 'keyword'))
+            s._addKeyword(new GeoNetworkKeyword(name: it, indexKey: 'someKeyword'))
         }
     }
 }
