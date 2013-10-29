@@ -19,32 +19,40 @@ class GeoNetworkKeywordSummary implements Serializable {
 
     static Logger log = LoggerFactory.getLogger(GeoNetworkKeywordSummary.class)
 
+    def grailsApplication
     def keywordsMap
     def hitsUsedForSummary
     def hitsUsedForCurrentPage
     def recordCounter
     def pages
 
-    GeoNetworkKeywordSummary() {
+    def keywordsInSummary
+
+    GeoNetworkKeywordSummary(grailsApplication) {
         keywordsMap = [:]
         hitsUsedForSummary = 0
         hitsUsedForCurrentPage = 0
         recordCounter = 0
         pages = []
+        this.grailsApplication = grailsApplication
+        keywordsInSummary = _getGrailsApplication().config.geonetwork.keywords
     }
 
     def addNodeKeywords(metadataNode) {
-        metadataNode.keyword.each { keywordElement ->
-            def t = keywordElement.text()
-            def keyword = keywordsMap[t]
-            if (!keyword) {
-                keyword = new GeoNetworkKeyword(name: t, indexKey: 'keyword')
-                _addKeyword(keyword)
+        keywordsInSummary.each { keywordAttribute ->
+            metadataNode."${keywordAttribute.key}".each { keywordElement ->
+                def t = keywordElement.text()
+                def keyword = keywordsMap[t]
+                if (!keyword) {
+                    keyword = new GeoNetworkKeyword(name: t, indexKey: keywordAttribute.value)
+                    _addKeyword(keyword)
+                }
+                keyword.increment()
             }
-            keyword.increment()
+
+            hitsUsedForSummary++
+            hitsUsedForCurrentPage++
         }
-        hitsUsedForSummary++
-        hitsUsedForCurrentPage++
     }
 
     def buildSummaryXmlNode(builder) {
@@ -52,9 +60,21 @@ class GeoNetworkKeywordSummary implements Serializable {
         if (keywordSummariesToDisplay?.size() > 10) {
             keywordSummariesToDisplay = keywordSummariesToDisplay[0..9]
         }
+
+        // Builds XML as it should be returned from GeoNetwork
         builder.summary(count: hitsUsedForSummary, type: 'local', hitsusedforsummary: hitsUsedForSummary) {
-            keywordSummariesToDisplay.each { keyword ->
-                _buildSummaryKeywordNode(builder, keyword)
+            keywordsInSummary.each { keywordAttribute ->
+                buildTreeForKeyword(builder, keywordAttribute.value, keywordSummariesToDisplay)
+            }
+        }
+    }
+
+    def buildTreeForKeyword(builder, keyword, keywordSummariesToDisplay) {
+        builder."${keyword}s" {
+            keywordSummariesToDisplay.each { keywordElement ->
+                if (keywordElement.indexKey == keyword) {
+                    "${keywordElement.indexKey}"(count: keywordElement.count, name: keywordElement.name, indexKey: keywordElement.indexKey)
+                }
             }
         }
     }
@@ -77,10 +97,6 @@ class GeoNetworkKeywordSummary implements Serializable {
         catch (Exception e) {
             log.error("", e)
         }
-    }
-
-    def _buildSummaryKeywordNode(builder, keyword) {
-        builder.keyword(count: keyword.count, name: keyword.name, indexKey: keyword.indexKey)
     }
 
     def page(pageSize) {
@@ -163,6 +179,10 @@ class GeoNetworkKeywordSummary implements Serializable {
 
     def _hasPages() {
         return CollectionUtils.isNotEmpty(pages)
+    }
+
+    def _getGrailsApplication() {
+        return grailsApplication
     }
 
     class GeoNetworkSpatialSearchPage implements Serializable {

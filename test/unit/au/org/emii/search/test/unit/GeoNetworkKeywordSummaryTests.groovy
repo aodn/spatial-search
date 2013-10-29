@@ -7,6 +7,10 @@
  */
 package au.org.emii.search.test.unit
 
+import org.codehaus.groovy.grails.commons.ConfigurationHolder;
+import org.codehaus.groovy.grails.commons.DefaultGrailsApplication;
+import org.codehaus.groovy.grails.commons.GrailsApplication;
+
 import au.org.emii.search.GeoNetworkKeyword;
 import au.org.emii.search.GeoNetworkKeywordSummary;
 import grails.test.*
@@ -29,6 +33,8 @@ class GeoNetworkKeywordSummaryTests extends GrailsUnitTestCase {
         phytoPlankton
     ]
 
+    def grailsApplication = new DefaultGrailsApplication()
+
     protected void setUp() {
         super.setUp()
     }
@@ -38,31 +44,31 @@ class GeoNetworkKeywordSummaryTests extends GrailsUnitTestCase {
     }
 
     void testInitialisation() {
-        def s = new GeoNetworkKeywordSummary()
+        def s = new GeoNetworkKeywordSummary(grailsApplication)
         assertNotNull(s.keywordsMap)
     }
 
     void testAddKeyword() {
-        def s = new GeoNetworkKeywordSummary()
+        def s = new GeoNetworkKeywordSummary(grailsApplication)
         _addAllKeywords(s)
         assertEquals(allKeywords.size(), s.keywordsMap.size())
     }
 
     void testGetKeywords() {
-        def s = new GeoNetworkKeywordSummary()
+        def s = new GeoNetworkKeywordSummary(grailsApplication)
         _addAllKeywords(s)
         assertEquals(allKeywords.size(), s.getKeywords().size())
     }
 
     void testDuplicateKeywords() {
-        def s = new GeoNetworkKeywordSummary()
+        def s = new GeoNetworkKeywordSummary(grailsApplication)
         _addAllKeywords(s)
         _addAllKeywords(s)
         assertEquals(allKeywords.size(), s.getKeywords().size())
     }
 
     void testGetKeywordsIsSorted() {
-        def s = new GeoNetworkKeywordSummary()
+        def s = new GeoNetworkKeywordSummary(grailsApplication)
         _addAllKeywords(s)
 
         def rev = []
@@ -71,7 +77,7 @@ class GeoNetworkKeywordSummaryTests extends GrailsUnitTestCase {
 
         int i = rev.size()
         rev.each { kw ->
-            s._addKeyword(new GeoNetworkKeyword(name: kw, count: i, indexKey: 'keyword'))
+            s._addKeyword(new GeoNetworkKeyword(name: kw, count: i, indexKey: 'someKeyword'))
             i -= 1
         }
 
@@ -84,7 +90,7 @@ class GeoNetworkKeywordSummaryTests extends GrailsUnitTestCase {
 
     def _addAllKeywords(s) {
         allKeywords.each {
-            s._addKeyword(new GeoNetworkKeyword(name: it, indexKey: 'keyword'))
+            s._addKeyword(new GeoNetworkKeyword(name: it, indexKey: 'someKeyword'))
         }
     }
 }
