@@ -28,7 +28,7 @@ Queueing started at Wed Oct 30 12:09:05 EST 2013<br>943 metadata documents queue
 ```
 
 ## Index
-An index will index each of the queued metadata records.
+An index will index each of the queued metadata records.  Indexing is the function whereby geoserver instances are hit via WFS and the responses parsed into geometries.
 
 To index:
 
