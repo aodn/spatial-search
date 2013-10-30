@@ -18,7 +18,7 @@ $ curl http://localhost:8080/spatialsearch/index/harvest
 Queueing started at Wed Oct 30 12:12:08 EST 2013<br>943 metadata documents queued finishing at Wed Oct 30 12:12:15 EST 2013<br>Indexing started at Wed Oct 30 12:12:15 EST 2013<br>```
 
 ## Queue
-A queue will query the configured GeoNetwork for all of it's records containing a WMS layer.
+A queue will query the configured GeoNetwork for all of its records containing a WMS layer.
 
 To queue:
 
