@@ -15,7 +15,7 @@ To harvest:
 
 ```bash
 $ curl http://localhost:8080/spatialsearch/index/harvest
-Queueing started at Wed Oct 30 12:12:08 EST 2013<br>943 metadata documents queued finishing at Wed Oct 30 12:12:15 EST 2013<br>Indexing started at Wed Oct 30 12:12:15 EST 2013<br>```
+Queueing started at Wed Oct 30 12:12:08 EST 2013<br>943 metadata documents queued finishing at Wed Oct 30 12:12:15 EST 2013<br>Indexing started at Wed Oct 30 12:12:15 EST 2013<br>
 ```
 
 ## Queue
