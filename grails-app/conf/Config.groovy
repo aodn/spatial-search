@@ -69,7 +69,8 @@ grails.plugin.databasemigration.updateOnStartFileNames = ['changelog.groovy']
 
 geonetwork.keywords = [
     "parameter": "longParamName",
-    "organisation": "organisationName"
+    "organisation": "organisationName",
+    "platform": "platformName"
 ]
 
 // set per-environment serverURL stem for creating absolute links
