@@ -528,4 +528,46 @@ databaseChangeLog = {
             column(name: "constructor_args", value: "@gml:id,position")
         }
     }
+
+    changeSet(author: "tfotak", id: "1385350630000-1", failOnError: true) {
+        insert(tableName: "feature_type_request_class") {
+            column(name: "id", valueComputed: "nextval('hibernate_sequence')")
+            column(name: "version", valueNumeric: "0")
+            column(name: "feature_type_name", value: "imos:csiro_harvest_pci")
+            column(name: "class_name", value: "au.org.emii.search.index.DiskCachingFeatureTypeRequest")
+            column(name: "constructor_args", value: "@gml:id,position")
+        }
+
+        insert(tableName: "feature_type_request_class") {
+            column(name: "id", valueComputed: "nextval('hibernate_sequence')")
+            column(name: "version", valueNumeric: "0")
+            column(name: "feature_type_name", value: "imos:xbt_realtime_recent")
+            column(name: "class_name", value: "au.org.emii.search.index.DiskCachingFeatureTypeRequest")
+            column(name: "constructor_args", value: "uuid,geom")
+        }
+
+        insert(tableName: "feature_type_request_class") {
+            column(name: "id", valueComputed: "nextval('hibernate_sequence')")
+            column(name: "version", valueNumeric: "0")
+            column(name: "feature_type_name", value: "imos:xbt_realtime")
+            column(name: "class_name", value: "au.org.emii.search.index.DiskCachingFeatureTypeRequest")
+            column(name: "constructor_args", value: "@gml:id,geom")
+        }
+
+        insert(tableName: "feature_type_request_class") {
+            column(name: "id", valueComputed: "nextval('hibernate_sequence')")
+            column(name: "version", valueNumeric: "0")
+            column(name: "feature_type_name", value: "imos:csiro_harvest_phyto")
+            column(name: "class_name", value: "au.org.emii.search.index.DiskCachingFeatureTypeRequest")
+            column(name: "constructor_args", value: "@gml:id,position")
+        }
+
+        insert(tableName: "feature_type_request_class") {
+            column(name: "id", valueComputed: "nextval('hibernate_sequence')")
+            column(name: "version", valueNumeric: "0")
+            column(name: "feature_type_name", value: "ACORN_ROT_QC/sea_water_velocity")
+            column(name: "class_name", value: "au.org.emii.search.index.NcwmsFeatureTypeRequest")
+            column(name: "constructor_args", value: null)
+        }
+    }
 }
