@@ -19,6 +19,7 @@ grails.project.dependency.resolution = {
         grailsPlugins()
         grailsHome()
         grailsCentral()
+        mavenCentral()
     }
     dependencies {
         compile 'log4j:apache-log4j-extras:1.0'
