@@ -44,13 +44,13 @@ Indexing started at Wed Oct 30 12:13:09 EST 2013<br>
 To view a single record as it would be returned from GeoNetwork to spatial search for queuing use:
 
 ```bash 
-$ curl http://catalogue123.aodn.org.au/geonetwork/srv/eng/q?uuid=c1344e70-480e-0993-e044-00144f7bc0f4&fast=index
+$ curl http://catalogue-123.aodn.org.au/geonetwork/srv/eng/q?uuid=c1344e70-480e-0993-e044-00144f7bc0f4&fast=index
 ```
 
 To view the entire list of records that spatial search queues use:
 
 ```bash
-$ curl http://catalogue123.aodn.org.au/geonetwork/srv/eng/q?from=1&to=15&protocol=OGC:WMS-1.1.1-http-get-map%20or%20OGC:WMS-1.3.0-http-get-map&fast=index
+$ curl http://catalogue-123.aodn.org.au/geonetwork/srv/eng/q?from=1&to=15&protocol=OGC:WMS-1.1.1-http-get-map%20or%20OGC:WMS-1.3.0-http-get-map&fast=index
 ```
 
 changing `from` and `to` parameters to paginate.
