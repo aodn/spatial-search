@@ -7,6 +7,8 @@
  */
 package au.org.emii.search.index
 
+import org.xml.sax.SAXParseException
+
 import javax.xml.parsers.SAXParserFactory;
 
 import org.apache.commons.io.FileUtils;
@@ -58,6 +60,9 @@ class DiskCachingFeatureTypeRequest extends FeatureTypeRequest implements Respon
                 inputReader = new BufferedReader(new FileReader(filePath))
                 reader.parse(new InputSource(inputReader))
                 delete = true
+            }
+            catch (SAXParseException spe) {
+                log.error("Could not parse cached xml response from ${filePath}", spe)
             }
             catch (IOException ioe) {
                 log.error("Could not read cached xml response from ${filePath}", ioe)
