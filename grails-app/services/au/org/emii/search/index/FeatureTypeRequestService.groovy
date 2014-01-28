@@ -111,6 +111,7 @@ class FeatureTypeRequestService {
 
         def persistedFeatures = fetchFeatureTypes(metadata.featureTypeName, uuids, featureTypeIds)
         def persistedFeaturesMap = _mapFeatureByFeatureTypeId(persistedFeatures)
+
         features.each() { feature ->
             def featureToPersist = persistedFeaturesMap[feature.featureTypeId]
             if (featureToPersist) {
@@ -123,6 +124,7 @@ class FeatureTypeRequestService {
             }
             featuresToPersist << featureToPersist
         }
+
         _jdbcBatchSaveFeatures(featuresToPersist)
     }
 
