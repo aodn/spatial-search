@@ -86,8 +86,8 @@ environments {
     }
     development {
         grails.serverURL = "http://localhost:${grails.server.port.http}/${appName}"
-        geonetwork.search.serverURL = "http://catalogue-123.aodn.org.au/geonetwork/srv/eng/q"
-        geonetwork.index.serverURL = "http://catalogue-123.aodn.org.au/geonetwork/srv/eng/q"
+        geonetwork.search.serverURL = "http://catalogue-rc.aodn.org.au/geonetwork/srv/eng/q"
+        geonetwork.index.serverURL = "http://catalogue-rc.aodn.org.au/geonetwork/srv/eng/q"
         geoserver.response.cache.dir = "/tmp"
         feature.missing.email.to='info@example.com'
         feature.missing.email.from='spatialsearch@emii.org.au'
