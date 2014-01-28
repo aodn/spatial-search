@@ -570,4 +570,103 @@ databaseChangeLog = {
             column(name: "constructor_args", value: null)
         }
     }
+
+    changeSet(author: "dnahodil", id: "1390448364000-1", failOnError: true) {
+
+        insert(tableName: "feature_type_request_class") {
+            column(name: "id", valueComputed: "nextval('hibernate_sequence')")
+            column(name: "version", valueNumeric: "0")
+            column(name: "feature_type_name", value: "imos:argo_profile_layer_map")
+            column(name: "class_name", value: "au.org.emii.search.index.DiskCachingFeatureTypeRequest")
+            column(name: "constructor_args", value: "@gml:id,position")
+        }
+
+        insert(tableName: "feature_type_request_class") {
+            column(name: "id", valueComputed: "nextval('hibernate_sequence')")
+            column(name: "version", valueNumeric: "0")
+            column(name: "feature_type_name", value: "imos:anmn_burst_avg_timeseries_map")
+            column(name: "class_name", value: "au.org.emii.search.index.DiskCachingFeatureTypeRequest")
+            column(name: "constructor_args", value: "@gml:t_id,geom")
+        }
+
+        insert(tableName: "feature_type_request_class") {
+            column(name: "id", valueComputed: "nextval('hibernate_sequence')")
+            column(name: "version", valueNumeric: "0")
+            column(name: "feature_type_name", value: "imos:abos_sofs_surfaceprop_rt_map")
+            column(name: "class_name", value: "au.org.emii.search.index.DiskCachingFeatureTypeRequest")
+            column(name: "constructor_args", value: "@gml:file_id,geom")
+        }
+
+        insert(tableName: "feature_type_request_class") {
+            column(name: "id", valueComputed: "nextval('hibernate_sequence')")
+            column(name: "version", valueNumeric: "0")
+            column(name: "feature_type_name", value: "imos:aatams_sattag_nrt_map")
+            column(name: "class_name", value: "au.org.emii.search.index.DiskCachingFeatureTypeRequest")
+            column(name: "constructor_args", value: "@gml:profile_id,geom")
+        }
+
+        insert(tableName: "feature_type_request_class") {
+            column(name: "id", valueComputed: "nextval('hibernate_sequence')")
+            column(name: "version", valueNumeric: "0")
+            column(name: "feature_type_name", value: "imos:abos_sofs_surfaceprop_dm_map")
+            column(name: "class_name", value: "au.org.emii.search.index.DiskCachingFeatureTypeRequest")
+            column(name: "constructor_args", value: "@gml:file_id,geom")
+        }
+
+        insert(tableName: "feature_type_request_class") {
+            column(name: "id", valueComputed: "nextval('hibernate_sequence')")
+            column(name: "version", valueNumeric: "0")
+            column(name: "feature_type_name", value: "imos:aatams_biologging_shearwater_map")
+            column(name: "class_name", value: "au.org.emii.search.index.DiskCachingFeatureTypeRequest")
+            column(name: "constructor_args", value: "@gml:ref,geom")
+        }
+
+        insert(tableName: "feature_type_request_class") {
+            column(name: "id", valueComputed: "nextval('hibernate_sequence')")
+            column(name: "version", valueNumeric: "0")
+            column(name: "feature_type_name", value: "imos:anmn_velocity_timeseries_map")
+            column(name: "class_name", value: "au.org.emii.search.index.DiskCachingFeatureTypeRequest")
+            column(name: "constructor_args", value: "@gml:timeseries_id,geom")
+        }
+
+        insert(tableName: "feature_type_request_class") {
+            column(name: "id", valueComputed: "nextval('hibernate_sequence')")
+            column(name: "version", valueNumeric: "0")
+            column(name: "feature_type_name", value: "imos:anmn_ts_timeseries_map")
+            column(name: "class_name", value: "au.org.emii.search.index.DiskCachingFeatureTypeRequest")
+            column(name: "constructor_args", value: "@gml:timeseries_id,geom")
+        }
+
+        insert(tableName: "feature_type_request_class") {
+            column(name: "id", valueComputed: "nextval('hibernate_sequence')")
+            column(name: "version", valueNumeric: "0")
+            column(name: "feature_type_name", value: "imos:aatams_biologging_penguin_map")
+            column(name: "class_name", value: "au.org.emii.search.index.DiskCachingFeatureTypeRequest")
+            column(name: "constructor_args", value: "@gml:pttid,geom")
+        }
+
+        insert(tableName: "feature_type_request_class") {
+            column(name: "id", valueComputed: "nextval('hibernate_sequence')")
+            column(name: "version", valueNumeric: "0")
+            column(name: "feature_type_name", value: "imos:installation_summary")
+            column(name: "class_name", value: "au.org.emii.search.index.DiskCachingFeatureTypeRequest")
+            column(name: "constructor_args", value: "@gml:installation_id,location")
+        }
+
+        insert(tableName: "feature_type_request_class") {
+            column(name: "id", valueComputed: "nextval('hibernate_sequence')")
+            column(name: "version", valueNumeric: "0")
+            column(name: "feature_type_name", value: "imos:faimms_timeseries_map")
+            column(name: "class_name", value: "au.org.emii.search.index.DiskCachingFeatureTypeRequest")
+            column(name: "constructor_args", value: "@gml:channel_id,geom")
+        }
+
+        insert(tableName: "feature_type_request_class") {
+            column(name: "id", valueComputed: "nextval('hibernate_sequence')")
+            column(name: "version", valueNumeric: "0")
+            column(name: "feature_type_name", value: "imos:soop_ba_trajectory_map")
+            column(name: "class_name", value: "au.org.emii.search.index.DiskCachingFeatureTypeRequest")
+            column(name: "constructor_args", value: "@gml:file_id,geom")
+        }
+    }
 }
