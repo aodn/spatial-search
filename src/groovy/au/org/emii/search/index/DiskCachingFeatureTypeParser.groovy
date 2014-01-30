@@ -7,14 +7,12 @@
  */
 package au.org.emii.search.index
 
-
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.xml.sax.Attributes
 import org.xml.sax.ext.DefaultHandler2
 
 import au.org.emii.search.FeatureType
-
 
 class DiskCachingFeatureTypeParser extends DefaultHandler2 {
 
@@ -155,5 +153,4 @@ class DiskCachingFeatureTypeParser extends DefaultHandler2 {
     def _stripGmlNamespaceFromElements(gml) {
         return gml?.replaceAll('gml:', '')
     }
-
 }
