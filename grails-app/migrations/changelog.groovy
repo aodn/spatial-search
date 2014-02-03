@@ -689,4 +689,12 @@ databaseChangeLog = {
             )
         }
     }
+
+    changeSet(author: "dnahodil", id: "1391053813000-2", failOnError: true) {
+
+        update(tableName: "feature_type_request_class") {
+            column(name: "class_name", value: "au.org.emii.search.index.DiskCachingFeatureTypeRequest")
+            where("class_name LIKE 'au.org.emii.search.index.FeatureTypeRequest'")
+        }
+    }
 }

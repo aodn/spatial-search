@@ -56,7 +56,7 @@ class DiskCachingFeatureTypeParser extends DefaultHandler2 {
         if (qname =~ /$featureTypeGeometryElementName/) {
             charactersHandler = _parseGeometryElement
         }
-        if (qname =~ /gml:([^featureMember]|[^boundedBy]|[^null])/) {
+        if (_includeTag(qname)) {
             _printGmlStartTag(qname, atts)
         }
     }
@@ -70,7 +70,7 @@ class DiskCachingFeatureTypeParser extends DefaultHandler2 {
             charactersHandler = null
             _endGeometryElement(ns, localName, qname)
         }
-        if (qname =~ /gml:([^featureMember]|[^boundedBy]|[^null])/) {
+        if (_includeTag(qname)) {
             _printGmlEndTag(qname)
         }
     }
@@ -152,5 +152,20 @@ class DiskCachingFeatureTypeParser extends DefaultHandler2 {
 
     def _stripGmlNamespaceFromElements(gml) {
         return gml?.replaceAll('gml:', '')
+    }
+
+    def _includeTag(elementName) {
+
+        def excludedNames = [
+            'gml:featureMember',
+            'gml:boundedBy',
+            'gml:null',
+            'gml:location',
+            'gml:Envelope',
+            'gml:lowerCorner',
+            'gml:upperCorner'
+        ]
+
+        return elementName.startsWith('gml:') && !excludedNames.contains(elementName)
     }
 }
