@@ -47,7 +47,7 @@ class GeoNetworkRequest implements ApplicationContextAware {
 
             def out
             try {
-                out = new OutputStreamWriter(outstream, "UTF-8");
+                out = new OutputStreamWriter(outstream, "UTF-8")
                 template.process(params, out)
             }
             finally {
@@ -61,7 +61,7 @@ class GeoNetworkRequest implements ApplicationContextAware {
     def _request(searchUrl, contentProducer) {
         def httpClient = new DefaultHttpClient()
         def httpPost = _setupHttpPost(searchUrl, contentProducer)
-        def responseHandler = new BasicResponseHandler();
+        def responseHandler = new BasicResponseHandler()
         def httpResponse = httpClient.execute(httpPost, responseHandler)
         httpClient.getConnectionManager().shutdown()
         return httpResponse
@@ -75,5 +75,4 @@ class GeoNetworkRequest implements ApplicationContextAware {
         httpPost.addHeader("Accept", "text/xml,application/xml;q=0.9")
         return httpPost
     }
-
 }

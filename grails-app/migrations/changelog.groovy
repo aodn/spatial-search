@@ -669,4 +669,6 @@ databaseChangeLog = {
             column(name: "constructor_args", value: "@gml:file_id,geom")
         }
     }
+
+    include file: '20140402-FixMisconfiguredFeatureTypeRequestClasses.groovy'
 }

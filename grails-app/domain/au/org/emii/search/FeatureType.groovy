@@ -7,9 +7,9 @@
  */
 package au.org.emii.search
 
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringBuilder
 
-import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Geometry
 
 class FeatureType {
 
@@ -62,7 +62,6 @@ class FeatureType {
             else {
                 gmlSrid = _getSridFromGmlHttp(geomGml.@srsName)
             }
-
         }
         // Default to the most common case on failure on the chance it will probably work for us
         return gmlSrid ?: "4326"

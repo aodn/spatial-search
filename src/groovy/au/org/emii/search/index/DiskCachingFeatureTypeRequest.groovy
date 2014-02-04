@@ -9,15 +9,15 @@ package au.org.emii.search.index
 
 import org.xml.sax.SAXParseException
 
-import javax.xml.parsers.SAXParserFactory;
+import javax.xml.parsers.SAXParserFactory
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ResponseHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.xml.sax.InputSource;
+import org.apache.commons.io.FileUtils
+import org.apache.commons.io.IOUtils
+import org.apache.http.HttpResponse
+import org.apache.http.client.ResponseHandler
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.xml.sax.InputSource
 
 class DiskCachingFeatureTypeRequest extends FeatureTypeRequest implements ResponseHandler<String> {
 

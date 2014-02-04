@@ -7,14 +7,12 @@
  */
 package au.org.emii.search.index
 
-
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.xml.sax.Attributes
 import org.xml.sax.ext.DefaultHandler2
 
 import au.org.emii.search.FeatureType
-
 
 class DiskCachingFeatureTypeParser extends DefaultHandler2 {
 
@@ -58,7 +56,7 @@ class DiskCachingFeatureTypeParser extends DefaultHandler2 {
         if (qname =~ /$featureTypeGeometryElementName/) {
             charactersHandler = _parseGeometryElement
         }
-        if (qname =~ /gml:([^featureMember]|[^boundedBy]|[^null])/) {
+        if (_includeTag(qname)) {
             _printGmlStartTag(qname, atts)
         }
     }
@@ -72,7 +70,7 @@ class DiskCachingFeatureTypeParser extends DefaultHandler2 {
             charactersHandler = null
             _endGeometryElement(ns, localName, qname)
         }
-        if (qname =~ /gml:([^featureMember]|[^boundedBy]|[^null])/) {
+        if (_includeTag(qname)) {
             _printGmlEndTag(qname)
         }
     }
@@ -156,4 +154,18 @@ class DiskCachingFeatureTypeParser extends DefaultHandler2 {
         return gml?.replaceAll('gml:', '')
     }
 
+    def _includeTag(elementName) {
+
+        def excludedNames = [
+            'gml:featureMember',
+            'gml:boundedBy',
+            'gml:null',
+            'gml:location',
+            'gml:Envelope',
+            'gml:lowerCorner',
+            'gml:upperCorner'
+        ]
+
+        return elementName.startsWith('gml:') && !excludedNames.contains(elementName)
+    }
 }

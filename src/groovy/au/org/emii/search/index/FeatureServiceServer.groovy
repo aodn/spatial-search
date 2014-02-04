@@ -7,8 +7,6 @@
  */
 package au.org.emii.search.index
 
-import au.org.emii.search.FeatureType;
-
 class FeatureServiceServer {
 
     def url

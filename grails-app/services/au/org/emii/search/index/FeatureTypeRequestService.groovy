@@ -161,13 +161,9 @@ class FeatureTypeRequestService {
         if (!featuresToInsert.isEmpty()) {
             try {
                 jdbcTemplate.batchUpdate(
-                        _getJdbcInsertStatement(gmlBased),
-                        new FeatureTypeIndexJdbcBatchStatementSetter(featuresToInsert, false)
+                    _getJdbcInsertStatement(gmlBased),
+                    new FeatureTypeIndexJdbcBatchStatementSetter(featuresToInsert, false)
                 )
-            }
-            catch (DataAccessException e) {
-                log.error('', e)
-                throw e
             }
             catch (Exception e) {
                 log.error('', e)
@@ -180,13 +176,9 @@ class FeatureTypeRequestService {
         if (!featuresToUpdate.isEmpty()) {
             try {
                 jdbcTemplate.batchUpdate(
-                        _getJdbcUpdateStatement(gmlBased),
-                        new FeatureTypeIndexJdbcBatchStatementSetter(featuresToUpdate, true)
+                    _getJdbcUpdateStatement(gmlBased),
+                    new FeatureTypeIndexJdbcBatchStatementSetter(featuresToUpdate, true)
                 )
-            }
-            catch (DataAccessException e) {
-                log.error('', e)
-                throw e
             }
             catch (Exception e) {
                 log.error('', e)
