@@ -119,9 +119,6 @@ class GeoNetworkRequestService implements ApplicationContextAware {
                     String.class
                 )
             }
-            catch (DataAccessException e) {
-                log.error('', e)
-            }
             catch (Exception e) {
                 log.error('', e)
             }

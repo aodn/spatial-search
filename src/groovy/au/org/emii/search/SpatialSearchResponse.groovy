@@ -7,16 +7,12 @@
  */
 package au.org.emii.search
 
-import groovy.xml.MarkupBuilder;
+import groovy.xml.MarkupBuilder
 
-import java.io.StringWriter;
-import java.util.concurrent.Callable;
+import java.util.concurrent.Callable
 
-import org.apache.commons.collections.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 class SpatialSearchResponse {
 

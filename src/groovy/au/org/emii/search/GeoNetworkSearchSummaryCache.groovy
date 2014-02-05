@@ -8,10 +8,10 @@
 package au.org.emii.search
 
 import org.slf4j.Logger
-import org.slf4j.LoggerFactory;
+import org.slf4j.LoggerFactory
 
-import net.sf.ehcache.CacheManager;
-import net.sf.ehcache.Element;
+import net.sf.ehcache.CacheManager
+import net.sf.ehcache.Element
 
 class GeoNetworkSearchSummaryCache {
 
