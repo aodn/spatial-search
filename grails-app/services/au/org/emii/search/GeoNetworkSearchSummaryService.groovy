@@ -7,8 +7,8 @@
  */
 package au.org.emii.search
 
-import org.apache.commons.collections.CollectionUtils;
-import org.slf4j.Logger;
+import org.apache.commons.collections.CollectionUtils
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 class GeoNetworkSearchSummaryService extends GeoNetworkRequestService {

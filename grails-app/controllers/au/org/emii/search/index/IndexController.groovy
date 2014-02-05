@@ -9,8 +9,13 @@ package au.org.emii.search.index
 
 class IndexController {
 
+    def grailsApplication
     def geoNetworkRequestService
     def featureTypeRequestService
+
+    def about = {
+        render "AODN Spatial Search v${grailsApplication.metadata['app.version']}"
+    }
 
     def queue = {
         render _queue(params)
