@@ -49,10 +49,10 @@ class GeoNetworkKeywordSummary implements Serializable {
                 }
                 keyword.increment()
             }
-
-            hitsUsedForSummary++
-            hitsUsedForCurrentPage++
         }
+
+        hitsUsedForSummary++
+        hitsUsedForCurrentPage++
     }
 
     def buildSummaryXmlNode(builder) {
