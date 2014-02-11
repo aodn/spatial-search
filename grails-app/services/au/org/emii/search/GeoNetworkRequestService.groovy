@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2012 IMOS
  *
@@ -9,12 +8,10 @@ package au.org.emii.search
 
 
 import java.sql.Timestamp
-import java.sql.Types;
 import java.text.SimpleDateFormat;
 
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.dao.DataAccessException;
+import org.springframework.context.ApplicationContextAware
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 
@@ -75,9 +72,22 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 
     def _geoNetworkSearch(params) {
         def url = grailsApplication.config.geonetwork.search.serverURL
-        _addFastIndexParams(params)
-        log.info("Searching geonetwork instance at $url with $params")
-        return geoNetworkRequest.request(url, params)
+        def mestRequest =  url + "?" + urlEncodeCleanMap(params)
+        log.debug("Requesting ${mestRequest.decodeURL()}" )
+        return mestRequest.toURL().text
+    }
+
+    def urlEncodeCleanMap( aMap ) {
+        def encode = { URLEncoder.encode( "$it".toString(), "UTF-8" ) }
+        def unwantedParameters = ['controller','relation','pageSize']
+        def params = aMap.collect {
+            def thisParam = it
+            if (unwantedParameters.indexOf(thisParam.key) == -1) {
+                encode(thisParam.key) + '=' + encode(thisParam.value)
+            }
+        }
+        params.removeAll([null])
+        return params.join('&')
     }
 
     def _spatialSearch(params) {
@@ -91,7 +101,6 @@ class GeoNetworkRequestService implements ApplicationContextAware {
         spatialResponse.setup(params, numberOfResultsToReturn, executorService)
 
         while (_addSpatialResponse(params, spatialResponse)) {}
-
         return spatialResponse.getResponse()
     }
 
