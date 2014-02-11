@@ -8,7 +8,6 @@
 // Place your Spring DSL code here
 beans = {
 
-
     geoNetworkSearchSummaryCache(au.org.emii.search.GeoNetworkSearchSummaryCache)
 
     geoNetworkSearchShaBuilder(au.org.emii.search.GeoNetworkSearchShaBuilder) {

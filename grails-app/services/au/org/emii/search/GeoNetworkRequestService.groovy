@@ -19,7 +19,6 @@ import au.org.emii.search.index.GeonetworkMetadata
 import au.org.emii.search.geometry.GeometryHelper
 
 class GeoNetworkRequestService implements ApplicationContextAware {
-
     ApplicationContext applicationContext
 
     def grailsApplication
@@ -72,23 +71,23 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 
     def _geoNetworkSearch(params) {
         def url = grailsApplication.config.geonetwork.search.serverURL
-        def mestRequest =  url + "?" + urlEncodeCleanMap(params)
-        log.debug("Requesting ${mestRequest.decodeURL()}" )
+        def mestRequest = "${url}?${urlEncodeCleanMap(params)}"
+        log.debug("Requesting ${mestRequest.decodeURL()}")
         return mestRequest.toURL().text
     }
 
-    def urlEncodeCleanMap( aMap ) {
-        def encode = { URLEncoder.encode( "$it".toString(), "UTF-8" ) }
-        def unwantedParameters = ['controller','relation','pageSize']
-        def params = aMap.collect {
-            def thisParam = it
-            if (unwantedParameters.indexOf(thisParam.key) == -1) {
-                encode(thisParam.key) + '=' + encode(thisParam.value)
-            }
+    def urlEncodeCleanMap(aMap) {
+        def encode = { URLEncoder.encode("$it", "UTF-8") }
+        ['controller', 'relation', 'pageSize'].each {
+            aMap.remove(it)
         }
-        params.removeAll([null])
-        return params.join('&')
+        def parameters = aMap.collect { thisParam ->
+            "${encode(thisParam.key)}=${encode(thisParam.value)}"
+        }
+        return parameters.join('&')
     }
+
+
 
     def _spatialSearch(params) {
         if (params.protocol) {
@@ -123,9 +122,9 @@ class GeoNetworkRequestService implements ApplicationContextAware {
             def jdbcTemplate = new NamedParameterJdbcTemplate(dataSource)
             try {
                 featureUuids = jdbcTemplate.queryForList(
-                    "select geonetwork_uuid from feature_type where st_intersects(geometry, ST_GeomFromText(:wkt, :srid)) and geonetwork_uuid in (:uuids) group by geonetwork_uuid",
-                    _getSqlParamaterSourceMap(_getGeometryText(params), GeometryHelper.SRID, uuids),
-                    String.class
+                        "select geonetwork_uuid from feature_type where st_intersects(geometry, ST_GeomFromText(:wkt, :srid)) and geonetwork_uuid in (:uuids) group by geonetwork_uuid",
+                        _getSqlParamaterSourceMap(_getGeometryText(params), GeometryHelper.SRID, uuids),
+                        String.class
                 )
             }
             catch (Exception e) {
@@ -138,9 +137,9 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 
     def _getSqlParamaterSourceMap(geometryWkt, srid, uuids) {
         return new MapSqlParameterSource()
-            .addValue('wkt', geometryWkt)
-            .addValue('srid', srid)
-            .addValue('uuids', uuids)
+                .addValue('wkt', geometryWkt)
+                .addValue('srid', srid)
+                .addValue('uuids', uuids)
     }
 
     def _saveGeonetworkMetadata(metadataCollection) {
