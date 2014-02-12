@@ -1,4 +1,6 @@
-.idea
+# Include code style settings for IntelliJ IDEA projects
+.idea/*
+!.idea/codeStyleSettings.xml
 *.iml
 target
 .DS_Store

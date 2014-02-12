@@ -99,7 +99,7 @@ class GeoNetworkRequestService implements ApplicationContextAware {
         def spatialResponse = applicationContext.getBean('spatialSearchResponse')
         spatialResponse.setup(params, numberOfResultsToReturn, executorService)
 
-        while (_addSpatialResponse(params, spatialResponse)) {}
+        while (_addSpatialResponse(params, spatialResponse)) { }
         return spatialResponse.getResponse()
     }
 
@@ -122,9 +122,9 @@ class GeoNetworkRequestService implements ApplicationContextAware {
             def jdbcTemplate = new NamedParameterJdbcTemplate(dataSource)
             try {
                 featureUuids = jdbcTemplate.queryForList(
-                        "select geonetwork_uuid from feature_type where st_intersects(geometry, ST_GeomFromText(:wkt, :srid)) and geonetwork_uuid in (:uuids) group by geonetwork_uuid",
-                        _getSqlParamaterSourceMap(_getGeometryText(params), GeometryHelper.SRID, uuids),
-                        String.class
+                    "select geonetwork_uuid from feature_type where st_intersects(geometry, ST_GeomFromText(:wkt, :srid)) and geonetwork_uuid in (:uuids) group by geonetwork_uuid",
+                    _getSqlParamaterSourceMap(_getGeometryText(params), GeometryHelper.SRID, uuids),
+                    String.class
                 )
             }
             catch (Exception e) {
@@ -137,9 +137,9 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 
     def _getSqlParamaterSourceMap(geometryWkt, srid, uuids) {
         return new MapSqlParameterSource()
-                .addValue('wkt', geometryWkt)
-                .addValue('srid', srid)
-                .addValue('uuids', uuids)
+            .addValue('wkt', geometryWkt)
+            .addValue('srid', srid)
+            .addValue('uuids', uuids)
     }
 
     def _saveGeonetworkMetadata(metadataCollection) {
