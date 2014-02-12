@@ -78,7 +78,7 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 
     def urlEncodeCleanMap(aMap) {
         def encode = { URLEncoder.encode("$it", "UTF-8") }
-        ['controller', 'relation', 'pageSize'].each {
+        ['controller', 'relation', 'pageSize', 'action'].each {
             aMap.remove(it)
         }
         def parameters = aMap.collect { thisParam ->
