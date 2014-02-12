@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2012 IMOS
  *
@@ -72,6 +71,8 @@ geonetwork.keywords = [
     "organisation": "organisationName",
     "platform": "platformName"
 ]
+
+grails.server.port.http="8088"
 
 // set per-environment serverURL stem for creating absolute links
 environments {
@@ -165,7 +166,6 @@ log4j = {
 }
 
 // Custom configuration settings
-geonetwork.request.template.file = "geonetworkRequestTemplate.ftl"
 geonetwork.request.protocol = "OGC:WMS-1.1.1-http-get-map or OGC:WMS-1.3.0-http-get-map"
 geonetwork.link.protocol.regex = 'OGC:WMS-1\\.(1\\.1|3\\.0)-http-get-map'
 geonetwork.search.page.size = 200
