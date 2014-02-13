@@ -72,8 +72,6 @@ geonetwork.keywords = [
     "platform": "platformName"
 ]
 
-grails.server.port.http="8088"
-
 // set per-environment serverURL stem for creating absolute links
 environments {
     production {
