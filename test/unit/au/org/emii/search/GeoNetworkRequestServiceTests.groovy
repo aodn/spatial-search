@@ -84,7 +84,7 @@ class GeoNetworkRequestServiceTests extends GrailsUnitTestCase {
     }
 
     void testIsUrlEncodeCleanMap() {
-        def encodedUrl = service.urlEncodeCleanMap(['from' : '1', 'to' : '10'])
+        def encodedUrl = service.urlEncodeCleanMap(['from' : '1', 'to' : '10', 'pageSize': '3'])
         assertEquals encodedUrl, "from=1&to=10"
 
     }
