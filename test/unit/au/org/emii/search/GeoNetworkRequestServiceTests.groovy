@@ -83,6 +83,12 @@ class GeoNetworkRequestServiceTests extends GrailsUnitTestCase {
         assertEquals params["geometry"], service._getGeometryText(params)
     }
 
+    void testIsUrlEncodeCleanMap() {
+        def encodedUrl = service.urlEncodeCleanMap(['from' : '1', 'to' : '10'])
+        assertEquals encodedUrl, "from=1&to=10"
+
+    }
+
     void testGetPageEnd() {
         def pageEnd = service.grailsApplication.config.geonetwork.search.page.size
         def params = [:]
