@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2012 IMOS
  *
@@ -30,7 +29,6 @@ class GeoNetworkSearchSummaryCache {
     }
 
     def add(sha, summary) {
-        log.debug("Caching summary ${summary.toString()} for sha $sha")
         _getCache().put(new Element(sha, summary));
     }
 
@@ -39,13 +37,11 @@ class GeoNetworkSearchSummaryCache {
         def element = _getCache().get(sha)
         if (element) {
             summary = element.getValue()
-            log.debug("Found summary ${summary.toString()} for sha $sha")
         }
         return summary
     }
 
     def clear() {
-        log.debug("Clearing cache")
         _getCache().removeAll()
     }
 

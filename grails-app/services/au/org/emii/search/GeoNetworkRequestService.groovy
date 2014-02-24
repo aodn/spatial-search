@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2012 IMOS
  *
@@ -9,12 +8,10 @@ package au.org.emii.search
 
 
 import java.sql.Timestamp
-import java.sql.Types;
 import java.text.SimpleDateFormat;
 
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.dao.DataAccessException;
+import org.springframework.context.ApplicationContextAware
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 
@@ -22,7 +19,6 @@ import au.org.emii.search.index.GeonetworkMetadata
 import au.org.emii.search.geometry.GeometryHelper
 
 class GeoNetworkRequestService implements ApplicationContextAware {
-
     ApplicationContext applicationContext
 
     def grailsApplication
@@ -75,10 +71,23 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 
     def _geoNetworkSearch(params) {
         def url = grailsApplication.config.geonetwork.search.serverURL
-        _addFastIndexParams(params)
-        log.info("Searching geonetwork instance at $url with $params")
-        return geoNetworkRequest.request(url, params)
+        def mestRequest = "${url}?${urlEncodeCleanMap(params)}"
+        log.debug("Requesting ${mestRequest.decodeURL()}")
+        return mestRequest.toURL().text
     }
+
+    def urlEncodeCleanMap(aMap) {
+        def encode = { URLEncoder.encode("$it", "UTF-8") }
+        ['controller', 'pageSize', 'action'].each {
+            aMap.remove(it)
+        }
+        def parameters = aMap.collect { thisParam ->
+            "${encode(thisParam.key)}=${encode(thisParam.value)}"
+        }
+        return parameters.join('&')
+    }
+
+
 
     def _spatialSearch(params) {
         if (params.protocol) {
@@ -90,8 +99,7 @@ class GeoNetworkRequestService implements ApplicationContextAware {
         def spatialResponse = applicationContext.getBean('spatialSearchResponse')
         spatialResponse.setup(params, numberOfResultsToReturn, executorService)
 
-        while (_addSpatialResponse(params, spatialResponse)) {}
-
+        while (_addSpatialResponse(params, spatialResponse)) { }
         return spatialResponse.getResponse()
     }
 
