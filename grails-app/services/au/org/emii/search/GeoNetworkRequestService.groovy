@@ -22,7 +22,6 @@ class GeoNetworkRequestService implements ApplicationContextAware {
     ApplicationContext applicationContext
 
     def grailsApplication
-    def geoNetworkRequest
     def executorService
     def searchSummaryService
     def dataSource
@@ -62,7 +61,10 @@ class GeoNetworkRequestService implements ApplicationContextAware {
         _addCommonQueueParams(params)
 
         def url = grailsApplication.config.geonetwork.index.serverURL
-        def xml = geoNetworkRequest.request(url, params)
+        def mestRequest = "${url}?${urlEncodeCleanMap(params)}"
+        log.debug("Requesting ${mestRequest.decodeURL()}")
+        def xml =  mestRequest.toURL().text
+
         def geoNetworkResponse = new GeoNetworkResponse(grailsApplication, xml)
         def pageMetadata = geoNetworkResponse.getGeonetworkMetadataObjects()
         _saveGeonetworkMetadata(pageMetadata)
@@ -248,7 +250,11 @@ class GeoNetworkRequestService implements ApplicationContextAware {
 
         def url = grailsApplication.config.geonetwork.index.serverURL
         log.info("Using geonetwork instance at $url indexing changes between $params.dateFrom and $params.dateTo")
-        def xml = geoNetworkRequest.request(url, params)
+
+        def mestRequest = "${url}?${urlEncodeCleanMap(params)}"
+        log.debug("Requesting ${mestRequest.decodeURL()}")
+        def xml =  mestRequest.toURL().text
+
         def geoNetworkResponse = new GeoNetworkResponse(grailsApplication, xml)
         return geoNetworkResponse.count
     }
