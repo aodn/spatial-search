@@ -5,6 +5,9 @@ Applies fine grained spatial searches to GeoNetwork metadata based on linked Geo
 # Configuration
 Ensure that spatial search is configured to index the desired GeoNetwork instance.  See `geonetwork.search.serverURL` and `geonetwork.index.serverURL` in [Config.groovy](grails-app/conf/Config.groovy)
 
+## Indexing New Layers
+For a layer to be indexed Spatial Search needs to know a little about it. [Read this](https://github.com/aodn/spatial-search/wiki/Tips) to see how to do that and [read this](https://github.com/aodn/spatial-search/wiki/History,-or-Why-Do-I-Need-To-Add-A-Migration%3F) to know the history behind this need.
+
 # Usage
 The API consists of the following functions with corresponding URLs.
 
