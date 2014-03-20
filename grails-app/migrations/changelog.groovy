@@ -671,4 +671,5 @@ databaseChangeLog = {
     }
 
     include file: '20140402-FixMisconfiguredFeatureTypeRequestClasses.groovy'
+    include file: '20140317142600-AddNewFeatureTypeRequestClasses.groovy'
 }
