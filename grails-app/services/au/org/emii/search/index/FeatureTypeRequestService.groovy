@@ -198,20 +198,9 @@ class FeatureTypeRequestService {
 
     def _getFeatureTypeRequestImplementation(geonetworkMetadata, messages) {
         def featureTypeName = geonetworkMetadata.featureTypeName
-        def featureTypeRequestClasses = FeatureTypeRequestClass.findAll("from FeatureTypeRequestClass as f where '${featureTypeName}' like f.featureTypeName || '%'")
+        def featureTypeRequestClasses = FeatureTypeRequestClass.findAll("from FeatureTypeRequestClass as f where '${featureTypeName}' like f.featureTypeName || '%' order by length(f.featureTypeName) desc")
         if (featureTypeRequestClasses) {
-            def bestMatch
-            featureTypeRequestClasses.each { featureTypeRequestClass ->
-                if (featureTypeRequestClass.featureTypeName == featureTypeName) {
-                    bestMatch = featureTypeRequestClass
-                    // Jump out of closure and let bestMatch return this implementation
-                    return
-                } else if (!bestMatch || featureTypeRequestClass.featureTypeName.length() < bestMatch.featureTypeName.length()) {
-                    bestMatch = featureTypeRequestClass
-                    log.info("Best match for feature type currently ${bestMatch.featureTypeName}")
-                }
-            }
-            def instance = bestMatch.featureTypeRequest
+            def instance = featureTypeRequestClasses[0].featureTypeRequest
 
             if (instance instanceof DiskCachingFeatureTypeRequest) {
                 // Add a call back to persist features one by one for large WFS responses
